@@ -5,208 +5,372 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Météo L'Étang-Salé – Nullyxx</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Google Sans', system-ui, -apple-system, sans-serif; }
-    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-      padding: 16px;
-      color: #1b5e20;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #87CEEB, #1E90FF);
+      color: white;
       min-height: 100vh;
+      padding: 0;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
     }
 
-    /* 🌍 Fond carte La Réunion (subtil, vert) */
+    /* 🌍 CONTOUR LA RÉUNION */
     body::before {
       content: "";
-      position: fixed;
+      position: absolute;
+      top: 30%; left: 10%;
+      width: 200px; height: 160px;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160"><path d="M30,60 Q50,40 70,60 T110,60 Q130,80 120,100 T80,120 Q60,130 40,120 T10,100 Q0,80 30,60" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/></svg>');
+      opacity: 0.6;
+      z-index: 0;
+    }
+
+    /* ☁️ NUAGES ANIMÉS */
+    .sky {
+      position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><path d="M100,120 Q140,80 180,120 T260,120 Q300,160 280,200 T200,240 Q160,260 120,240 T60,200 Q40,160 100,120" fill="%234caf50" fill-opacity="0.04" stroke="%234caf50" stroke-opacity="0.15" stroke-width="1"/></svg>');
-      background-size: 320px;
-      background-repeat: no-repeat;
-      background-position: center 100px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100"><circle cx="30" cy="30" r="10" fill="white" opacity="0.4"/><circle cx="150" cy="70" r="15" fill="white" opacity="0.3"/></svg>') repeat;
+      animation: drift 60s linear infinite;
       z-index: -1;
     }
+    @keyframes drift { to { background-position: 1000px 0; } }
 
-    h1 {
-      text-align: center;
-      margin: 16px 0 20px;
-      font-size: 24px;
-      font-weight: 700;
-      color: #2e7d32;
+    .container {
+      position: relative;
+      z-index: 2;
+      padding: 24px 16px 40px;
+      max-width: 100%;
     }
 
-    .section {
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .location {
+      font-size: 28px;
+      font-weight: 700;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      margin-bottom: 8px;
+    }
+    .last-update {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    /* BUTTON EN SAVOIR PLUS */
+    .learn-more {
+      background: rgba(255, 255, 255, 0.9);
+      color: #1a237e;
+      border: none;
+      border-radius: 50px;
+      padding: 8px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 16px auto;
+      cursor: pointer;
+      display: block;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: transform 0.3s;
+    }
+    .learn-more:hover {
+      transform: translateY(-2px);
+    }
+
+    .main-weather {
+      background: rgba(255, 255, 255, 0.92);
+      color: #1a237e;
+      border-radius: 24px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+    }
+    .current {
+      text-align: center;
+      font-size: 80px;
+      font-weight: 300;
+      line-height: 1;
+      margin: 10px 0;
+    }
+    .condition {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
     }
 
     .section-title {
       font-size: 18px;
       font-weight: 700;
-      margin-bottom: 18px;
-      color: #1b5e20;
+      margin: 24px 0 16px;
+      color: white;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
     }
 
-    /* ⚡ EXPRESS */
-    .scroll-hint {
-      background: #f1f8e9;
-      padding: 8px 12px;
-      border-radius: 12px;
-      margin-bottom: 16px;
-      font-size: 13px;
-      color: #33691e;
-      font-weight: 600;
-      text-align: center;
-    }
-
-    .express-widget {
+    .hourly {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
       padding: 8px 0;
+      -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
-    .express-widget::-webkit-scrollbar { display: none; }
+    .hourly::-webkit-scrollbar { display: none; }
 
     .hour-card {
-      min-width: 60px;
-      background: #f9fdf9;
-      border-radius: 14px;
-      padding: 14px 8px;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 18px;
+      padding: 16px 12px;
+      min-width: 70px;
       text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      border: 1px solid #e8f5e8;
-      font-size: 12px;
-      font-weight: 600;
-      color: #1b5e20;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .hour-card .time { font-weight: 700; color: #2e7d32; }
-    .hour-card .content { height: 36px; display: flex; flex-direction: column; justify-content: center; }
+    .hour-card .time { font-size: 13px; font-weight: 600; color: #1a237e; }
+    .hour-card .emoji { 
+      font-size: 24px; 
+      margin: 6px 0; 
+      cursor: pointer;
+      display: inline-block;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .hour-card .emoji:active {
+      transform: scale(1.4);
+    }
+    .hour-card .temp { font-size: 16px; font-weight: 700; color: #1a237e; }
 
-    /* 📅 3 JOURS */
-    .forecast-3j .day {
+    .forecast-3j {
+      display: grid;
+      gap: 14px;
+    }
+    .day-card {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 18px;
+      padding: 16px;
       display: flex;
       justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid #f0f0f0;
+      align-items: center;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .forecast-3j .day:last-child { border: none; }
-    .forecast-3j .date { 
+    .day-label { font-weight: 700; color: #1a237e; font-size: 16px; }
+    .day-detail { 
+      font-size: 16px; 
       font-weight: 600; 
-      color: #2e7d32; 
-      min-width: 70px; 
-      font-size: 14px;
+      color: #1a237e;
+      cursor: pointer;
+      display: inline-block;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .forecast-3j .period { 
-      text-align: right; 
-      min-width: 140px; 
-      font-size: 13px; 
-      font-weight: 600; 
-      color: #1b5e20;
-      padding: 4px 0;
+    .day-detail:active {
+      transform: scale(1.3);
     }
 
-    /* © */
+    /* 📚 SECTION ÉDUCATIVE */
+    #meteo-details {
+      background: rgba(13, 71, 161, 0.92);
+      border-radius: 24px;
+      padding: 28px;
+      margin-top: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      color: white;
+    }
+    .detail-section {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    .detail-section:last-child {
+      border: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .detail-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #bbdefb;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .detail-content {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #e3f2fd;
+    }
+    .detail-content p { margin-bottom: 12px; }
+    .highlight {
+      color: #4fc3f7;
+      font-weight: 600;
+    }
+
     .footer {
       text-align: center;
       margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid #c8e6c9;
-      font-size: 12px;
-      color: #558b2f;
-      font-weight: 600;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 600px) {
+      .current { font-size: 60px; }
+      .location { font-size: 24px; }
+      #meteo-details { padding: 20px; }
+      .detail-title { font-size: 19px; }
     }
   </style>
 </head>
 <body>
 
-  <h1>🌦️ Météo L'Étang-Salé</h1>
+  <div class="sky"></div>
+  <div class="container">
 
-  <!-- ⚡ PRÉVISION EXPRESS – 00h à 23h -->
-  <div class="section">
-    <div class="section-title">⚡ Prévision Express – L'Étang-Salé</div>
-    <div class="scroll-hint">➡️ Balayez vers la droite (00h à 23h)</div>
-    <div class="express-widget" id="express-widget"></div>
-  </div>
+    <div class="header">
+      <div class="location">L'Étang-Salé</div>
+      <div class="last-update">Mise à jour : 23 déc 2025 à 16h30</div>
+      <button class="learn-more" onclick="scrollToDetails()">📚 En savoir plus sur la météo</button>
+    </div>
 
-  <!-- 📅 3 JOURS -->
-  <div class="section">
-    <div class="section-title">📅 Prévision 3 jours</div>
+    <div class="main-weather">
+      <div class="current">27°</div>
+      <div class="condition">Ensoleillé</div>
+    </div>
+
+    <div class="section-title">Prévision dans les prochaines heures</div>
+    <div class="hourly" id="hourly"></div>
+
+    <div class="section-title">Prévision 3 jours</div>
     <div class="forecast-3j" id="forecast-3j"></div>
-  </div>
 
-  <!-- © -->
-  <div class="footer">© Nullyxx</div>
+    <!-- 📚 SECTION DÉTAILLÉE EN BAS -->
+    <div id="meteo-details">
+      <h2 class="detail-title">📖 Comprendre la météo à La Réunion</h2>
+
+      <div class="detail-section">
+        <h3 class="detail-title">🌩️ Comment se forment les orages ?</h3>
+        <div class="detail-content">
+          <p>Un orage se forme quand <span class="highlight">l'air chaud et humide</span> monte rapidement dans l'atmosphère. À La Réunion, cela arrive souvent :</p>
+          <p>• L'après-midi, le soleil chauffe les pentes → l'air monte le long des reliefs<br>
+          • En bord de mer, l'humidité marine rencontre l'air chaud<br>
+          • Quand l'air atteint les hauteurs, il se refroidit → condensation → nuages d'orage (cumulonimbus)</p>
+          <p>⚡ <span class="highlight">Éclairs et tonnerre</span> : causés par des décharges électriques entre les charges positives et négatives dans le nuage.</p>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-title">🌀 Cyclones : trajectoire et impact</h3>
+        <div class="detail-content">
+          <p>Un cyclone tropical se forme au-dessus de l'<span class="highlight">océan Indien chaud</span> (>26,5°C). Sa trajectoire dépend des vents dominants :</p>
+          <p>• <span class="highlight">Anticyclone des Mascareignes</span> : situé à l'est, il "pousse" les cyclones vers l'ouest<br>
+          • <span class="highlight">Courant-jet</span> : en altitude, il peut dévier la trajectoire vers le sud</p>
+          <p>🎯 <span class="highlight">Pourquoi certains cyclones touchent La Réunion et d'autres non ?</span><br>
+          La trajectoire précise dépend de l'interaction entre ces systèmes. Si le cyclone passe à moins de 200 km, l'île ressent ses effets (vents, pluie).</p>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-title">⛰️ Reliefs de La Réunion et climat</h3>
+        <div class="detail-content">
+          <p>La Réunion a <span class="highlight">3 massifs volcaniques</span> (Piton des Neiges, Piton de la Fournaise, rempart) qui façonnent le climat :</p>
+          <p>• <span class="highlight">Au vent (est)</span> : les alizés chargés d'humidité rencontrent les reliefs → <span class="highlight">pluies abondantes</span> (jusqu'à 10m/an !)<br>
+          • <span class="highlight">Sous le vent (ouest)</span> : l'air descend, se réchauffe et s'assèche → <span class="highlight">climat sec et ensoleillé</span> (comme à L'Étang-Salé)</p>
+          <p>🌡️ <span class="highlight">Effet de foehn</span> : quand l'air humide traverse les montagnes, il perd son humidité et devient sec et chaud en redescendant (c'est pourquoi l'ouest est sec).</p>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-title">❄️ Fronts froids vs fronts chauds</h3>
+        <div class="detail-content">
+          <p>Un <span class="highlight">front</span> est la zone de contact entre deux masses d'air de températures différentes :</p>
+          <p>• <span class="highlight">Front froid</span> : masse d'air froid remplace de l'air chaud → orages violents, puis temps frais et sec<br>
+          • <span class="highlight">Front chaud</span> : air chaud remonte sur de l'air froid → pluie continue, puis temps doux et humide</p>
+          <p>🌀 À La Réunion, les fronts sont <span class="highlight">rares en été</span> (décembre-avril) mais plus fréquents en hiver (mai-novembre), surtout dans les hauts.</p>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-title">🌊 Anticyclone et vents dominants</h3>
+        <div class="detail-content">
+          <p>L'<span class="highlight">anticyclone des Mascareignes</span> est un système de haute pression permanent dans l'océan Indien sud :</p>
+          <p>• Il génère les <span class="highlight">alizés</span> (vents d'est) qui soufflent toute l'année à La Réunion<br>
+          • Ces vents apportent humidité sur la côte est et s'assèchent en traversant l'île<br>
+          • L'anticyclone "protège" aussi La Réunion en déviant certains cyclones vers le sud</p>
+          <p>🌬️ Quand l'anticyclone s'affaiblit (été austral), les cyclones ont plus de chances d'approcher l'île.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">© Nullyxx</div>
+
+  </div>
 
   <script>
-    // ====== ⚡ PRÉVISION HEURE PAR HEURE – MÉTÉO-FRANCE (23/12/2025) ======
-    const hours24 = [
-      { hour: "00h", emoji: "🌧️", temp: "22°", label: "Pluie faible" },
-      { hour: "01h", emoji: "🌧️", temp: "22°", label: "Pluie faible" },
-      { hour: "02h", emoji: "🌧️", temp: "21°", label: "Pluie faible" },
-      { hour: "03h", emoji: "🌧️", temp: "21°", label: "Pluie faible" },
-      { hour: "04h", emoji: "🌧️", temp: "21°", label: "Pluie faible" },
-      { hour: "05h", emoji: "🌦️", temp: "21°", label: "Averses faibles" },
-      { hour: "06h", emoji: "🌦️", temp: "22°", label: "Averses faibles" },
-      { hour: "07h", emoji: "🌦️", temp: "22°", label: "Averses faibles" },
-      { hour: "08h", emoji: "🌧️", temp: "23°", label: "Pluie faible" },
-      { hour: "09h", emoji: "🌧️", temp: "24°", label: "Pluie faible" },
-      { hour: "10h", emoji: "🌦️", temp: "25°", label: "Averses faibles" },
-      { hour: "11h", emoji: "⛅", temp: "26°", label: "Éclaircies" },
-      { hour: "12h", emoji: "🌤️", temp: "26°", label: "Peu nuageux" },
-      { hour: "13h", emoji: "🌤️", temp: "27°", label: "Peu nuageux" },
-      { hour: "14h", emoji: "☀️", temp: "28°", label: "Ensoleillé" },
-      { hour: "15h", emoji: "☀️", temp: "28°", label: "Ensoleillé" },
-      { hour: "16h", emoji: "🌤️", temp: "27°", label: "Peu nuageux" },
-      { hour: "17h", emoji: "⛅", temp: "26°", label: "Éclaircies" },
-      { hour: "18h", emoji: "☁️", temp: "25°", label: "Très nuageux / Couvert" },
-      { hour: "19h", emoji: "☁️", temp: "24°", label: "Très nuageux / Couvert" },
-      { hour: "20h", emoji: "🌧️", temp: "24°", label: "Pluie faible" },
-      { hour: "21h", emoji: "🌧️", temp: "23°", label: "Pluie faible" },
-      { hour: "22h", emoji: "🌧️", temp: "23°", label: "Pluie faible" },
-      { hour: "23h", emoji: "🌧️", temp: "23°", label: "Pluie faible" }
+    // ====== DÉFILEMENT FLUIDE VERS LES DETAILS ======
+    function scrollToDetails() {
+      document.getElementById('meteo-details').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ====== DONNÉES MÉTÉO-FRANCE – L'ÉTANG-SALÉ (23/12/2025) ======
+    const hourlyData = [
+      { hour: "00h", emoji: "🌧️", temp: "22°" },
+      { hour: "01h", emoji: "🌧️", temp: "22°" },
+      { hour: "02h", emoji: "🌧️", temp: "21°" },
+      { hour: "03h", emoji: "🌧️", temp: "21°" },
+      { hour: "04h", emoji: "🌧️", temp: "21°" },
+      { hour: "05h", emoji: "🌦️", temp: "21°" },
+      { hour: "06h", emoji: "🌦️", temp: "22°" },
+      { hour: "07h", emoji: "🌦️", temp: "22°" },
+      { hour: "08h", emoji: "🌧️", temp: "23°" },
+      { hour: "09h", emoji: "🌧️", temp: "24°" },
+      { hour: "10h", emoji: "🌦️", temp: "25°" },
+      { hour: "11h", emoji: "⛅", temp: "26°" },
+      { hour: "12h", emoji: "🌤️", temp: "26°" },
+      { hour: "13h", emoji: "🌤️", temp: "27°" },
+      { hour: "14h", emoji: "☀️", temp: "28°" },
+      { hour: "15h", emoji: "☀️", temp: "28°" },
+      { hour: "16h", emoji: "🌤️", temp: "27°" },
+      { hour: "17h", emoji: "⛅", temp: "26°" },
+      { hour: "18h", emoji: "☁️", temp: "25°" },
+      { hour: "19h", emoji: "☁️", temp: "24°" },
+      { hour: "20h", emoji: "🌧️", temp: "24°" },
+      { hour: "21h", emoji: "🌧️", temp: "23°" },
+      { hour: "22h", emoji: "🌧️", temp: "23°" },
+      { hour: "23h", emoji: "🌧️", temp: "23°" }
     ];
 
-    // ====== 📅 3 JOURS – TEL QUE TU L’AS REMPLI ======
     const forecast3j = [
-      { date: "Aujourd'hui", detail: "Risque de pluie faible 🌧️" },
-      { date: "Demain", detail: "Averses 🌧️" },
-      { date: "Après-demain", detail: "Pluie modérée 🌧️" }
+      { day: "Aujourd'hui", detail: "Pluie faible 🌧️" },
+      { day: "Demain", detail: "Averses 🌧️" },
+      { day: "Après-demain", detail: "Pluie modérée 🌧️" }
     ];
 
     // ====== GÉNÉRATION ======
-    const expressWidget = document.getElementById("express-widget");
-    hours24.forEach(item => {
+    const hourlyEl = document.getElementById("hourly");
+    hourlyData.forEach(item => {
       const card = document.createElement("div");
       card.className = "hour-card";
       card.innerHTML = `
         <div class="time">${item.hour}</div>
-        <div class="content">
-          <div class="emoji">${item.emoji}</div>
-          <div class="temp">${item.temp}</div>
-          <div class="label">${item.label}</div>
-        </div>
+        <div class="emoji">${item.emoji}</div>
+        <div class="temp">${item.temp}</div>
       `;
-      expressWidget.appendChild(card);
+      hourlyEl.appendChild(card);
     });
 
-    const forecast3jEl = document.getElementById("forecast-3j");
-    forecast3j.forEach(day => {
-      const div = document.createElement("div");
-      div.className = "day";
-      div.innerHTML = `
-        <div class="date">${day.date}</div>
-        <div class="period">${day.detail}</div>
+    const forecastEl = document.getElementById("forecast-3j");
+    forecast3j.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "day-card";
+      card.innerHTML = `
+        <div class="day-label">${item.day}</div>
+        <div class="day-detail">${item.detail}</div>
       `;
-      forecast3jEl.appendChild(div);
+      forecastEl.appendChild(card);
     });
   </script>
 
 </body>
-    </html>
+</html>
