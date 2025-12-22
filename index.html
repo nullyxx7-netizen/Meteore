@@ -1,38 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Météo Réunion</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background: white; color: #222; }
-    h1 { color: #00695c; text-align: center; }
-    .period { margin: 20px 0; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-    .period:last-child { border-bottom: none; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: white;
+      color: #263238;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 560px;
+      margin: auto;
+      padding: 28px 24px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .header h1 {
+      font-weight: 600;
+      font-size: 26px;
+      margin: 0;
+      color: #00695c;
+    }
+    .header .date {
+      font-size: 16px;
+      color: #78909c;
+      margin-top: 6px;
+    }
+
+    /* Vigilance optionnelle */
+    .vigilance {
+      text-align: center;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 14px;
+      margin: 0 auto 28px;
+      display: inline-block;
+    }
+    .jaune { background: #fff8e1; color: #ff8f00; }
+    .orange { background: #ffe0b2; color: #f57c00; }
+    .rouge { background: #ffcdd2; color: #d32f2f; }
+    .violet { background: #e1bee7; color: #7b1fa2; }
+
+    .period {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+    .period:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .emoji {
+      font-size: 32px;
+      margin-right: 16px;
+      flex-shrink: 0;
+    }
+    .info h2 {
+      margin: 0 0 6px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #37474f;
+    }
+    .info p {
+      margin: 0;
+      font-size: 16px;
+      color: #546e7a;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #90a4ae;
+      margin-top: 24px;
+    }
   </style>
 </head>
 <body>
+  <div class="container">
+    <div class="header">
+      <h1>Prévision Météo — La Réunion</h1>
+      <div class="date">Mardi 23 décembre 2025</div>
+    </div>
 
-  <h1>Prévision Météo — La Réunion</h1>
-  <div style="text-align:center; color:#777;">Mardi 23 décembre 2025</div>
+    <!-- ⚠️ DÉCOMMENTE la ligne en dessous si tu veux une vigilance -->
+    <!-- <div class="vigilance jaune">⚠️ Vigilance Jaune – Vents forts</div> -->
 
-  <div class="period">
-    <h2>🌅 Matin</h2>
-    <p>Averses sur l’Est. 22–24°C.</p>
+    <div class="period">
+      <div class="emoji">🌥️</div>
+      <div class="info">
+        <h2>Matin</h2>
+        <p>Éclaircies</p>
+      </div>
+    </div>
+
+    <div class="period">
+      <div class="emoji">🌥️</div>
+      <div class="info">
+        <h2>Après-midi</h2>
+        <p>Éclaircies</p>
+      </div>
+    </div>
+
+    <div class="period">
+      <div class="emoji">🌥️</div>
+      <div class="info">
+        <h2>Soirée</h2>
+        <p>Éclaircies</p>
+      </div>
+    </div>
+
+    <div class="period">
+      <div class="emoji">🌙</div>
+      <div class="info">
+        <h2>Nuit</h2>
+        <p>Nuit clair</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      Version de l'application : 1.0
+      Réalisé par Nullyyx
+    </div>
   </div>
-
-  <div class="period">
-    <h2>☀️ Après-midi</h2>
-    <p>Éclaircies à l’Ouest. Orages sur le volcan.</p>
-  </div>
-
-  <div class="period">
-    <h2>🌆 Soirée</h2>
-    <p>Vents forts en altitude.</p>
-  </div>
-
-  <div class="period">
-    <h2>🌙 Nuit</h2>
-    <p>Calme sur la côte.</p>
-  </div>
-
 </body>
+</html></body>
 </html>
