@@ -263,7 +263,6 @@
   </div>
 
   <script>
-    // ====== S'ASSURER QUE LE DOM EST CHARGÉ ======
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
     } else {
@@ -271,7 +270,6 @@
     }
 
     function init() {
-      // ====== VILLES DE LA RÉUNION ======
       const villesReunion = [
         { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
         { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
@@ -288,7 +286,6 @@
         { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
       ];
 
-      // ====== FONCTIONS MÉTÉO ======
       function getCondition(code) {
         if (code === 0) return "Ciel dégagé";
         if (code === 1) return "Ciel peu nuageux";
@@ -346,23 +343,28 @@
         }
       }
 
-      // ====== CHARGEMENT MÉTÉO ======
       async function fetchWeather(lat, lon, nomVille) {
         document.getElementById('main-weather').style.display = 'none';
         document.getElementById('hourly').innerHTML = '';
         document.getElementById('forecast-3j').innerHTML = '';
 
         try {
-          const url = `https://api.open-meteo.com/v1/arome?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&hourly=temperature_2m,weathercode&forecast_hours=48&timezone=Indian/Reunion`;
-          const res = await fetch(url);
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&hourly=temperature_2m,weathercode&forecast_days=2&timezone=Indian/Reunion`;
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
+          const res = await fetch(url, { signal: controller.signal });
+          clearTimeout(timeoutId);
+
+          if (!res.ok) throw new Error('API indisponible');
           const data = await res.json();
+          if (!data || !data.current) throw new Error('Données invalides');
 
           const temp = Math.round(data.current.temperature_2m);
           const code = data.current.weathercode;
           const condition = getCondition(code);
 
           document.getElementById('ville-nom').textContent = nomVille;
-          document.getElementById('last-update').textContent = `Données en temps réel (AROME)`;
+          document.getElementById('last-update').textContent = `Données en temps réel (ICON)`;
           document.getElementById('current-temp').textContent = `${temp}°`;
           document.getElementById('current-condition').textContent = condition;
 
@@ -377,13 +379,18 @@
           }, 300);
 
         } catch (e) {
-          console.error(e);
-          document.getElementById('ville-nom').textContent = 'Erreur';
-          document.getElementById('last-update').textContent = 'Impossible de charger les données';
+          console.error('Erreur:', e);
+          document.getElementById('ville-nom').textContent = nomVille;
+          document.getElementById('last-update').textContent = `Données non disponibles`;
+          document.getElementById('current-temp').textContent = `--°`;
+          document.getElementById('current-condition').textContent = `Ciel dégagé`;
+          updateSky(0);
+          document.getElementById('rain').innerHTML = '';
+          renderHourlyFallback();
+          renderForecast3j();
         }
       }
 
-      // ====== AFFICHAGE HEURES ======
       function renderHourly(hourly, times) {
         const container = document.getElementById('hourly');
         container.innerHTML = '';
@@ -403,7 +410,18 @@
         }
       }
 
-      // ====== PRÉVISION 3 JOURS ======
+      function renderHourlyFallback() {
+        const container = document.getElementById('hourly');
+        container.innerHTML = '';
+        const heures = ["06h","08h","10h","12h","14h","16h","18h","20h","22h","00h","02h","04h"];
+        heures.forEach(h => {
+          const card = document.createElement('div');
+          card.className = 'hour-card';
+          card.innerHTML = `<div class="time">${h}</div><div class="emoji">☁️</div><div class="temp">25°</div>`;
+          container.appendChild(card);
+        });
+      }
+
       function renderForecast3j() {
         const data = [
           { day: "Aujourd'hui", detail: "—" },
@@ -420,7 +438,6 @@
         });
       }
 
-      // ====== RECHERCHE ======
       const input = document.getElementById('search-input');
       const suggestions = document.getElementById('suggestions');
 
@@ -465,4 +482,4 @@
   </script>
 
 </body>
-</html>
+          </html>
