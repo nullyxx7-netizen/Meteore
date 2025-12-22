@@ -14,6 +14,7 @@
       overflow-x: hidden;
       scroll-behavior: smooth;
       transition: background 0.8s ease;
+      background: linear-gradient(135deg, #87CEEB, #1E90FF);
     }
 
     #sky { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: -2; }
@@ -202,8 +203,8 @@
 
     <!-- 📚 SECTION ÉDUCATIVE -->
     <div id="meteo-details">
-      <!-- (contenu inchangé – trop long à répéter) -->
       <h2 class="detail-title">📖 Comprendre la météo à La Réunion</h2>
+      
       <div class="detail-section">
         <h3 class="detail-title">🌩️ Comment se forment les orages ?</h3>
         <div class="detail-content">
@@ -214,190 +215,253 @@
           <p>⚡ <span class="highlight">Éclairs et tonnerre</span> : causés par des décharges électriques entre les charges positives et négatives dans le nuage.</p>
         </div>
       </div>
-      <!-- ... (tu gardes tout le reste tel quel) ... -->
+
+      <div class="detail-section">
+        <h3 class="detail-title">🌀 Cyclones : trajectoire et impact</h3>
+        <div class="detail-content">
+          <p>Un cyclone tropical se forme au-dessus de l'<span class="highlight">océan Indien chaud</span> (>26,5°C). Sa trajectoire dépend des vents dominants :</p>
+          <p>• <span class="highlight">Anticyclone des Mascareignes</span> : situé à l'est, il "pousse" les cyclones vers l'ouest<br>
+          • <span class="highlight">Courant-jet</span> : en altitude, il peut dévier la trajectoire vers le sud</p>
+          <p>🎯 <span class="highlight">Pourquoi certains cyclones touchent La Réunion et d'autres non ?</span><br>
+          La trajectoire précise dépend de l'interaction entre ces systèmes. Si le cyclone passe à moins de 200 km, l'île ressent ses effets (vents, pluie).</p>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-title">⛰️ Reliefs de La Réunion et climat</h3>
+        <div class="detail-content">
+          <p>La Réunion a <span class="highlight">3 massifs volcaniques</span> (Piton des Neiges, Piton de la Fournaise, rempart) qui façonnent le climat :</p>
+          <p>• <span class="highlight">Au vent (est)</span> : les alizés chargés d'humidité rencontrent les reliefs → <span class="highlight">pluies abondantes</span> (jusqu'à 10m/an !)<br>
+          • <span class="highlight">Sous le vent (ouest)</span> : l'air descend, se réchauffe et s'assèche → <span class="highlight">climat sec et ensoleillé</span> (comme à L'Étang-Salé)</p>
+          <p>🌡️ <span class="highlight">Effet de foehn</span> : quand l'air humide traverse les montagnes, il perd son humidité et devient sec et chaud en redescendant (c'est pourquoi l'ouest est sec).</p>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-title">❄️ Fronts froids vs fronts chauds</h3>
+        <div class="detail-content">
+          <p>Un <span class="highlight">front</span> est la zone de contact entre deux masses d'air de températures différentes :</p>
+          <p>• <span class="highlight">Front froid</span> : masse d'air froid remplace de l'air chaud → orages violents, puis temps frais et sec<br>
+          • <span class="highlight">Front chaud</span> : air chaud remonte sur de l'air froid → pluie continue, puis temps doux et humide</p>
+          <p>🌀 À La Réunion, les fronts sont <span class="highlight">rares en été</span> (décembre-avril) mais plus fréquents en hiver (mai-novembre), surtout dans les hauts.</p>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3 class="detail-title">🌊 Anticyclone et vents dominants</h3>
+        <div class="detail-content">
+          <p>L'<span class="highlight">anticyclone des Mascareignes</span> est un système de haute pression permanent dans l'océan Indien sud :</p>
+          <p>• Il génère les <span class="highlight">alizés</span> (vents d'est) qui soufflent toute l'année à La Réunion<br>
+          • Ces vents apportent humidité sur la côte est et s'assèchent en traversant l'île<br>
+          • L'anticyclone "protège" aussi La Réunion en déviant certains cyclones vers le sud</p>
+          <p>🌬️ Quand l'anticyclone s'affaiblit (été austral), les cyclones ont plus de chances d'approcher l'île.</p>
+        </div>
+      </div>
     </div>
 
     <div class="footer">© Nullyxx</div>
   </div>
 
   <script>
-    // ====== VILLES DE LA RÉUNION (Open-Meteo AROME) ======
-    const villesReunion = [
-      { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
-      { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
-      { nom: "L'Étang-Salé", lat: -21.150, lon: 55.433 },
-      { nom: "Le Tampon", lat: -21.267, lon: 55.517 },
-      { nom: "Saint-Benoît", lat: -21.033, lon: 55.717 },
-      { nom: "Saint-André", lat: -20.933, lon: 55.617 },
-      { nom: "Le Port", lat: -20.933, lon: 55.283 },
-      { nom: "Saint-Louis", lat: -21.21, lon: 55.4 },
-      { nom: "Saint-Joseph", lat: -21.383, lon: 55.6 },
-      { nom: "La Possession", lat: -20.9, lon: 55.317 },
-      { nom: "Cilaos", lat: -21.15, lon: 55.483 },
-      { nom: "Salazie", lat: -21.017, lon: 55.533 },
-      { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
-    ];
-
-    let currentVille = null;
-
-    // ====== CORRESPONDANCE EMOJI/LIBELLÉ (gardée telle quelle) ======
-    function getCondition(code) {
-      if (code === 0) return "Ciel dégagé";
-      if (code === 1) return "Ciel peu nuageux";
-      if (code === 2) return "Ciel partiellement nuageux";
-      if (code === 3) return "Ciel couvert";
-      if ([45, 48].includes(code)) return "Brouillard";
-      if ([51, 53, 55].includes(code)) return "Bruine";
-      if ([61].includes(code)) return "Pluie faible";
-      if ([63].includes(code)) return "Pluie modérée";
-      if ([65].includes(code)) return "Pluie forte";
-      if ([80].includes(code)) return "Averses faibles";
-      if ([81].includes(code)) return "Averses modérées";
-      if ([82].includes(code)) return "Averses fortes";
-      if ([95].includes(code)) return "Orages";
-      if ([96, 99].includes(code)) return "Orages violents";
-      return "Ciel variable";
+    // ====== S'ASSURER QUE LE DOM EST CHARGÉ ======
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
     }
 
-    function getEmoji(code) {
-      if (code === 0) return "☀️";
-      if (code === 1) return "🌤️";
-      if (code === 2) return "⛅";
-      if (code === 3) return "☁️";
-      if ([45, 48].includes(code)) return "🌫️";
-      if ([51, 53, 55, 61, 80].includes(code)) return "🌦️";
-      if ([63, 65, 81, 82].includes(code)) return "🌧️";
-      if ([95, 96, 99].includes(code)) return "⛈️";
-      return "☁️";
-    }
-
-    function isRaining(code) {
-      return [51,53,55,61,63,65,80,81,82,95,96,99].includes(code);
-    }
-
-    function updateSky(code) {
-      const sky = document.getElementById('sky');
-      if (code === 0 || code === 1) {
-        sky.style.background = 'linear-gradient(135deg, #87CEEB, #1E90FF)';
-      } else if (code === 2 || code === 3) {
-        sky.style.background = 'linear-gradient(160deg, #607d8b, #455a64)';
-      } else if (isRaining(code)) {
-        sky.style.background = 'linear-gradient(160deg, #2c3e50, #1a1a2e)';
-      }
-    }
-
-    function createRain() {
-      const rain = document.getElementById('rain');
-      rain.innerHTML = '';
-      for (let i = 0; i < 80; i++) {
-        const drop = document.createElement('div');
-        drop.className = 'raindrop';
-        drop.style.left = Math.random() * 100 + 'vw';
-        drop.style.animationDuration = (0.4 + Math.random() * 0.6) + 's';
-        rain.appendChild(drop);
-      }
-    }
-
-    async function fetchWeather(lat, lon, nomVille) {
-      document.getElementById('main-weather').style.display = 'none';
-      document.getElementById('hourly').innerHTML = '';
-      document.getElementById('forecast-3j').innerHTML = '';
-
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&hourly=temperature_2m,weathercode&forecast_days=2&timezone=Indian/Reunion`;
-        const res = await fetch(url);
-        const data = await res.json();
-
-        const temp = Math.round(data.current.temperature_2m);
-        const code = data.current.weathercode;
-        const condition = getCondition(code);
-
-        document.getElementById('ville-nom').textContent = nomVille;
-        document.getElementById('last-update').textContent = `Données en temps réel`;
-        document.getElementById('current-temp').textContent = `${temp}°`;
-        document.getElementById('current-condition').textContent = condition;
-
-        updateSky(code);
-        document.getElementById('rain').innerHTML = '';
-        if (isRaining(code)) createRain();
-
-        // Afficher avec animation
-        setTimeout(() => {
-          document.getElementById('main-weather').style.display = 'block';
-          renderHourly(data.hourly, data.hourly.time);
-          renderForecast3j();
-        }, 300);
-
-      } catch (e) {
-        console.error(e);
-        document.getElementById('ville-nom').textContent = 'Erreur';
-        document.getElementById('last-update').textContent = 'Impossible de charger les données';
-      }
-    }
-
-    function renderHourly(hourly, times) {
-      const container = document.getElementById('hourly');
-      container.innerHTML = '';
-      const now = new Date();
-      let count = 0;
-      for (let i = 0; i < times.length && count < 12; i++) {
-        const time = new Date(times[i]);
-        if (time < now) continue;
-        const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
-        const temp = Math.round(hourly.temperature_2m[i]) + '°';
-        const emoji = getEmoji(hourly.weathercode[i]);
-        const card = document.createElement('div');
-        card.className = 'hour-card';
-        card.innerHTML = `<div class="time">${hourStr}</div><div class="emoji">${emoji}</div><div class="temp">${temp}</div>`;
-        container.appendChild(card);
-        count++;
-      }
-    }
-
-    function renderForecast3j() {
-      const data = [
-        { day: "Aujourd'hui", detail: "—" },
-        { day: "Demain", detail: "—" },
-        { day: "Après-demain", detail: "—" }
+    function init() {
+      // ====== VILLES DE LA RÉUNION ======
+      const villesReunion = [
+        { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
+        { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
+        { nom: "L'Étang-Salé", lat: -21.150, lon: 55.433 },
+        { nom: "Le Tampon", lat: -21.267, lon: 55.517 },
+        { nom: "Saint-Benoît", lat: -21.033, lon: 55.717 },
+        { nom: "Saint-André", lat: -20.933, lon: 55.617 },
+        { nom: "Le Port", lat: -20.933, lon: 55.283 },
+        { nom: "Saint-Louis", lat: -21.21, lon: 55.4 },
+        { nom: "Saint-Joseph", lat: -21.383, lon: 55.6 },
+        { nom: "La Possession", lat: -20.9, lon: 55.317 },
+        { nom: "Cilaos", lat: -21.15, lon: 55.483 },
+        { nom: "Salazie", lat: -21.017, lon: 55.533 },
+        { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
       ];
-      const container = document.getElementById('forecast-3j');
-      container.innerHTML = '';
-      data.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'day-card';
-        card.innerHTML = `<div class="day-label">${item.day}</div><div class="day-detail">${item.detail}</div>`;
-        container.appendChild(card);
+
+      // ====== FONCTIONS MÉTÉO ======
+      function getCondition(code) {
+        if (code === 0) return "Ciel dégagé";
+        if (code === 1) return "Ciel peu nuageux";
+        if (code === 2) return "Ciel partiellement nuageux";
+        if (code === 3) return "Ciel couvert";
+        if ([45, 48].includes(code)) return "Brouillard";
+        if ([51, 53, 55].includes(code)) return "Bruine";
+        if ([61].includes(code)) return "Pluie faible";
+        if ([63].includes(code)) return "Pluie modérée";
+        if ([65].includes(code)) return "Pluie forte";
+        if ([80].includes(code)) return "Averses faibles";
+        if ([81].includes(code)) return "Averses modérées";
+        if ([82].includes(code)) return "Averses fortes";
+        if ([95].includes(code)) return "Orages";
+        if ([96, 99].includes(code)) return "Orages violents";
+        return "Ciel variable";
+      }
+
+      function getEmoji(code) {
+        if (code === 0) return "☀️";
+        if (code === 1) return "🌤️";
+        if (code === 2) return "⛅";
+        if (code === 3) return "☁️";
+        if ([45, 48].includes(code)) return "🌫️";
+        if ([51, 53, 55, 61, 80].includes(code)) return "🌦️";
+        if ([63, 65, 81, 82].includes(code)) return "🌧️";
+        if ([95, 96, 99].includes(code)) return "⛈️";
+        return "☁️";
+      }
+
+      function isRaining(code) {
+        return [51,53,55,61,63,65,80,81,82,95,96,99].includes(code);
+      }
+
+      function updateSky(code) {
+        const sky = document.getElementById('sky');
+        if (code === 0 || code === 1) {
+          sky.style.background = 'linear-gradient(135deg, #87CEEB, #1E90FF)';
+        } else if (code === 2 || code === 3) {
+          sky.style.background = 'linear-gradient(160deg, #607d8b, #455a64)';
+        } else if (isRaining(code)) {
+          sky.style.background = 'linear-gradient(160deg, #2c3e50, #1a1a2e)';
+        }
+      }
+
+      function createRain() {
+        const rain = document.getElementById('rain');
+        rain.innerHTML = '';
+        for (let i = 0; i < 80; i++) {
+          const drop = document.createElement('div');
+          drop.className = 'raindrop';
+          drop.style.left = Math.random() * 100 + 'vw';
+          drop.style.animationDuration = (0.4 + Math.random() * 0.6) + 's';
+          rain.appendChild(drop);
+        }
+      }
+
+      // ====== CHARGEMENT MÉTÉO ======
+      async function fetchWeather(lat, lon, nomVille) {
+        document.getElementById('main-weather').style.display = 'none';
+        document.getElementById('hourly').innerHTML = '';
+        document.getElementById('forecast-3j').innerHTML = '';
+
+        try {
+          const url = `https://api.open-meteo.com/v1/arome?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&hourly=temperature_2m,weathercode&forecast_hours=48&timezone=Indian/Reunion`;
+          const res = await fetch(url);
+          const data = await res.json();
+
+          const temp = Math.round(data.current.temperature_2m);
+          const code = data.current.weathercode;
+          const condition = getCondition(code);
+
+          document.getElementById('ville-nom').textContent = nomVille;
+          document.getElementById('last-update').textContent = `Données en temps réel (AROME)`;
+          document.getElementById('current-temp').textContent = `${temp}°`;
+          document.getElementById('current-condition').textContent = condition;
+
+          updateSky(code);
+          document.getElementById('rain').innerHTML = '';
+          if (isRaining(code)) createRain();
+
+          setTimeout(() => {
+            document.getElementById('main-weather').style.display = 'block';
+            renderHourly(data.hourly, data.hourly.time);
+            renderForecast3j();
+          }, 300);
+
+        } catch (e) {
+          console.error(e);
+          document.getElementById('ville-nom').textContent = 'Erreur';
+          document.getElementById('last-update').textContent = 'Impossible de charger les données';
+        }
+      }
+
+      // ====== AFFICHAGE HEURES ======
+      function renderHourly(hourly, times) {
+        const container = document.getElementById('hourly');
+        container.innerHTML = '';
+        const now = new Date();
+        let count = 0;
+        for (let i = 0; i < times.length && count < 12; i++) {
+          const time = new Date(times[i]);
+          if (time < now) continue;
+          const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
+          const temp = Math.round(hourly.temperature_2m[i]) + '°';
+          const emoji = getEmoji(hourly.weathercode[i]);
+          const card = document.createElement('div');
+          card.className = 'hour-card';
+          card.innerHTML = `<div class="time">${hourStr}</div><div class="emoji">${emoji}</div><div class="temp">${temp}</div>`;
+          container.appendChild(card);
+          count++;
+        }
+      }
+
+      // ====== PRÉVISION 3 JOURS ======
+      function renderForecast3j() {
+        const data = [
+          { day: "Aujourd'hui", detail: "—" },
+          { day: "Demain", detail: "—" },
+          { day: "Après-demain", detail: "—" }
+        ];
+        const container = document.getElementById('forecast-3j');
+        container.innerHTML = '';
+        data.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'day-card';
+          card.innerHTML = `<div class="day-label">${item.day}</div><div class="day-detail">${item.detail}</div>`;
+          container.appendChild(card);
+        });
+      }
+
+      // ====== RECHERCHE ======
+      const input = document.getElementById('search-input');
+      const suggestions = document.getElementById('suggestions');
+
+      input.addEventListener('focus', () => {
+        showAllVilles();
       });
+
+      input.addEventListener('input', () => {
+        const term = input.value.toLowerCase().trim();
+        if (term === '') {
+          showAllVilles();
+        } else {
+          const matches = villesReunion
+            .filter(v => v.nom.toLowerCase().includes(term))
+            .slice(0, 8);
+          showVilles(matches);
+        }
+      });
+
+      function showAllVilles() {
+        showVilles(villesReunion);
+      }
+
+      function showVilles(list) {
+        suggestions.innerHTML = '';
+        list.forEach(v => {
+          const el = document.createElement('div');
+          el.className = 'suggestion';
+          el.textContent = v.nom;
+          el.onclick = () => {
+            input.value = v.nom;
+            suggestions.innerHTML = '';
+            fetchWeather(v.lat, v.lon, v.nom);
+            input.blur();
+          };
+          suggestions.appendChild(el);
+        });
+      }
+
+      input.focus();
     }
-
-    // ====== RECHERCHE ======
-    const input = document.getElementById('search-input');
-    const suggestions = document.getElementById('suggestions');
-
-    input.addEventListener('input', () => {
-      const term = input.value.toLowerCase();
-      suggestions.innerHTML = '';
-      if (term.length < 2) return;
-
-      const matches = villesReunion.filter(v => 
-        v.nom.toLowerCase().includes(term)
-      ).slice(0, 6);
-
-      matches.forEach(v => {
-        const el = document.createElement('div');
-        el.className = 'suggestion';
-        el.textContent = v.nom;
-        el.onclick = () => {
-          input.value = v.nom;
-          suggestions.innerHTML = '';
-          fetchWeather(v.lat, v.lon, v.nom);
-        };
-        suggestions.appendChild(el);
-      });
-    });
-
-    // Au chargement, focus sur la recherche
-    input.focus();
   </script>
 
 </body>
