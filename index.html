@@ -639,22 +639,17 @@
         // Syntaxe : if (hourStr === "14h") { condition = "..."; emoji = "..."; }
         // Exemples déjà inclus :
         if (villeNom === "L'Étang-Salé") {
-          if (hourStr === "14h") {
+          if (hourStr === "15h") {
             condition = "Partiellement nuageux";
             emoji = "⛅";
           }
           if (hourStr === "16h") {
-            condition = "Partiellement nuageux";
-            emoji = "⛅";
+            condition = "Risque d'Averses";
+            emoji = "🌧️";
           }
           if (hourStr === "17h") {
-            condition = "Pluie possible";
-            emoji = "🌧️";
-             
-            if (hourStr === "15h") {
-            condition = "Partiellement nuageux";
-            emoji = "⛅";
-            
+            condition = "Peu nuageux";
+            emoji = "🌤️";
           }
           // 👇 AJOUTE TES PROPRES LIGNES ICI 👇
           // if (hourStr === "10h") { condition = "Brouillard"; emoji = "🌫️"; }
