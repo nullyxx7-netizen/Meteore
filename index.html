@@ -424,6 +424,18 @@
   </div>
 
   <script>
+    // === 🔧 PERSONNALISATION FACILE DES LABELS MÉTÉO ===
+    // Remplace ici ce que tu veux ! Ex: "Très nuageux" => "Nuageux dense"
+    const customLabels = {
+      "Très nuageux": "Nuageux",
+      // Ajoute d'autres remplacements si besoin
+    };
+
+    // Fonction utilitaire pour appliquer les labels personnalisés
+    function applyCustomLabel(label) {
+      return customLabels[label] || label;
+    }
+
     const villesReunion = [
       { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
       { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
@@ -518,7 +530,24 @@
     };
 
     function getWeatherData(code) {
-      return weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/8EIg3fq.png' };
+      const data = weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/8EIg3fq.png' };
+      return {
+        label: applyCustomLabel(data.label),
+        icon: data.icon
+      };
+    }
+
+    // === FORMAT DE DATE PERSONNALISÉ ===
+    const moisNoms = ["jan", "fév", "mar", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
+
+    function formatDateForHourly(date) {
+      const jour = date.getDate();
+      const moisIndex = date.getMonth();
+      const mois = moisNoms[moisIndex];
+      // Si le mois a 3 lettres exactes (ex: "mai"), on garde tel quel
+      // Sinon, on met la première lettre en majuscule
+      const moisAffiche = mois.length === 3 ? mois : mois.charAt(0).toUpperCase() + mois.slice(1);
+      return `${jour} ${moisAffiche}`;
     }
 
     async function fetchWeather(lat, lon, nomVille) {
@@ -551,16 +580,15 @@
       const container = document.getElementById('hourly');
       container.innerHTML = '';
       const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      let count = 0;
 
+      let count = 0;
       for (let i = 0; i < times.length && count < 48; i++) {
         const time = new Date(times[i]);
         if (time < now) continue;
 
         const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
-        const timeDate = new Date(time.getFullYear(), time.getMonth(), time.getDate());
-        const isTomorrow = timeDate.getTime() === (today.getTime() + 86400000);
+        const isToday = time.toDateString() === now.toDateString();
+        const isTomorrow = time.toDateString() === new Date(now.getTime() + 86400000).toDateString();
 
         let key = hourStr;
         if (isTomorrow) key = hourStr + '_j2';
@@ -569,20 +597,29 @@
         let weatherData = getWeatherData(hourly.weather_code[i]);
 
         if (previsionsManuelles[villeNom] && (key in previsionsManuelles[villeNom])) {
-          weatherData = previsionsManuelles[villeNom][key];
+          const manual = previsionsManuelles[villeNom][key];
+          weatherData = {
+            label: applyCustomLabel(manual.label),
+            icon: manual.icon
+          };
         }
-
-        const displayHour = isTomorrow
-          ? `${time.getDate()} ${hourStr}`
-          : hourStr;
 
         const card = document.createElement('div');
         card.className = 'hour-card';
+
+        let hourTop = hourStr;
+        let dateBottom = "";
+
+        if (!isToday) {
+          dateBottom = formatDateForHourly(time);
+        }
+
         card.innerHTML = `
-          <div style="font-size:13px; font-weight:600;">${displayHour}</div>
+          <div style="font-size:13px; font-weight:600;">${hourTop}</div>
           <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:28px;height:28px;margin:6px 0;">
           <div style="font-weight:700;">${temp}°</div>
           <div style="font-size:11px; opacity:0.85; margin-top:6px;">${weatherData.label}</div>
+          ${dateBottom ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${dateBottom}</div>` : ''}
         `;
         container.appendChild(card);
         count++;
