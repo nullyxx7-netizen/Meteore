@@ -152,6 +152,7 @@
       padding: 8px 12px;
       border: 1px solid rgba(13,71,161,0.1);
       width: 200px;
+      position: relative;
     }
     #search-input-top {
       width: 100%;
@@ -161,6 +162,31 @@
       background: transparent;
       color: inherit;
       cursor: pointer;
+    }
+
+    .suggestions-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background: white;
+      border: 1px solid rgba(13,71,161,0.1);
+      border-radius: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 999;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      display: none;
+    }
+    .suggestion-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .suggestion-item:hover {
+      background: #e3f2fd;
     }
 
     .actions {
@@ -395,7 +421,8 @@
     </div>
     <div class="search-top">
       <div class="search-box-top">
-        <input type="text" id="search-input-top" placeholder="Cliquez pour défiler les villes..." readonly>
+        <input type="text" id="search-input-top" placeholder="Choisissez une ville..." readonly>
+        <div id="suggestions-dropdown" class="suggestions-dropdown"></div>
       </div>
       <button class="youtube-btn" style="background:#ff0000;color:white;padding:6px 12px;border:none;border-radius:8px;font-weight:600;font-size:12px;">▶️ Retrouve-moi sur YouTube</button>
       <div class="actions">
@@ -642,36 +669,33 @@
       }
     }
 
-    // ===== DÉFILEMENT DES VILLES =====
-    let autoScrollInterval = null;
+    // ===== RECHERCHE DÉROULANTE =====
     const searchInput = document.getElementById('search-input-top');
+    const suggestionsDropdown = document.getElementById('suggestions-dropdown');
 
-    function startAutoScroll() {
-      clearInterval(autoScrollInterval);
-      let index = 0;
-      autoScrollInterval = setInterval(() => {
-        const ville = villesReunion[index];
-        searchInput.value = ville.nom;
-        fetchWeather(ville.lat, ville.lon, ville.nom);
-        index = (index + 1) % villesReunion.length;
-      }, 1200); // change toutes les 1.2 secondes
+    function showSuggestions() {
+      suggestionsDropdown.innerHTML = '';
+      suggestionsDropdown.style.display = 'block';
+
+      villesReunion.forEach(v => {
+        const el = document.createElement('div');
+        el.className = 'suggestion-item';
+        el.textContent = v.nom;
+        el.onclick = () => {
+          searchInput.value = v.nom;
+          suggestionsDropdown.style.display = 'none';
+          fetchWeather(v.lat, v.lon, v.nom);
+        };
+        suggestionsDropdown.appendChild(el);
+      });
     }
 
-    function stopAutoScroll() {
-      clearInterval(autoScrollInterval);
-    }
+    searchInput.addEventListener('click', showSuggestions);
 
-    // Clic sur la barre → défile
-    searchInput.addEventListener('click', () => {
-      if (!autoScrollInterval) {
-        startAutoScroll();
-      }
-    });
-
-    // Clic ailleurs → arrête
+    // Clic ailleurs → ferme la liste
     document.addEventListener('click', (e) => {
-      if (!searchInput.contains(e.target)) {
-        stopAutoScroll();
+      if (!searchInput.contains(e.target) && !suggestionsDropdown.contains(e.target)) {
+        suggestionsDropdown.style.display = 'none';
       }
     });
 
