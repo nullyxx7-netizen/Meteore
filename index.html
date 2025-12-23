@@ -13,22 +13,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    /* ===== VIGILANCE BANNER (EN HAUT À GAUCHE) ===== */
-    #vigilance-banner {
+    /* ===== VIGILANCE STATIQUE (MANUELLE) ===== */
+    #vigilance-static {
       position: fixed;
       top: 12px;
       left: 12px;
-      padding: 6px 12px;
-      border-radius: 8px;
+      background: #FF9800; /* 🔴 MODIFIE ICI LA COULEUR : 
+        - Vert (pas de vigilance) : #4CAF50
+        - Jaune : #FFC107
+        - Orange : #FF9800
+        - Rouge : #F44336
+      */
+      color: #000;
       font-weight: 700;
-      font-size: 13px;
-      color: white;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 4px;
       z-index: 2000;
-      max-width: 220px;
-      text-align: center;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-      display: none;
-      cursor: pointer;
+      pointer-events: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
     /* ===== FOND ANIMÉ (soleil + nuages) ===== */
@@ -145,7 +148,7 @@
       margin-top: -2px;
     }
 
-    .youtube-btn, .edit-btn, .vigilance-btn {
+    .youtube-btn, .edit-btn {
       background: #ff0000;
       color: white;
       padding: 6px 14px;
@@ -155,15 +158,11 @@
       font-size: 13px;
       cursor: pointer;
       box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-      margin-left: 8px;
     }
     .edit-btn {
       background: var(--accent);
     }
-    .vigilance-btn {
-      background: #FF9800;
-    }
-    .youtube-btn:hover, .edit-btn:hover, .vigilance-btn:hover {
+    .youtube-btn:hover, .edit-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 5px 12px rgba(0,0,0,0.2);
     }
@@ -351,7 +350,7 @@
       color: var(--accent);
     }
 
-    #edit-modal, #vigilance-modal {
+    #edit-modal {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -372,17 +371,13 @@
       margin-bottom: 16px;
       color: var(--accent);
     }
-    .modal-content input, select, textarea {
+    .modal-content input, select {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
       border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 15px;
-    }
-    textarea {
-      height: 80px;
-      resize: vertical;
     }
     .modal-btns {
       display: flex;
@@ -399,7 +394,6 @@
     }
     .btn-save { background: var(--accent); color: white; }
     .btn-cancel { background: #f5f5f5; color: #333; }
-    .btn-disable { background: #9e9e9e; color: white; }
 
     #settings-modal {
       display: none;
@@ -435,8 +429,8 @@
 </head>
 <body>
 
-  <!-- BANNER VIGILANCE -->
-  <div id="vigilance-banner" onclick="openVigilanceEdit()"></div>
+  <!-- 🔴 BLOC VIGILANCE STATIQUE – MODIFIE ICI LE TEXTE ET LA COULEUR DANS LE CSS -->
+  <div id="vigilance-static">Vigilance – Forte pluie</div>
 
   <div id="intro">
     <img id="intro-logo" src="https://i.imgur.com/KsA0dbG.jpeg" alt="Logo MeteoRe">
@@ -446,10 +440,9 @@
   <div class="top-bar">
     <div class="logo-with-version">
       <div class="logo">MeteoRe</div>
-      <div class="version">version 1.12</div>
+      <div class="version">version 1.13</div>
     </div>
     <div>
-      <button class="vigilance-btn" onclick="openVigilanceEdit()">⚠️ Vigilance</button>
       <button class="edit-btn" id="edit-toggle">✏️ Modifier</button>
       <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
     </div>
@@ -502,30 +495,6 @@
     <div id="suggestions-dropdown" class="suggestions-dropdown"></div>
   </div>
 
-  <!-- Modal Vigilance -->
-  <div id="vigilance-modal">
-    <div class="modal-content">
-      <h3>Modifier la vigilance</h3>
-      <select id="vigilance-phenomenon">
-        <option value="">Aucun</option>
-        <option value="vents">Vents forts</option>
-        <option value="pluie">Forte pluie / Orages</option>
-        <option value="vagues">Vagues / Submersion</option>
-      </select>
-      <select id="vigilance-level">
-        <option value="jaune">Jaune</option>
-        <option value="orange">Orange</option>
-        <option value="rouge">Rouge</option>
-      </select>
-      <textarea id="vigilance-message" placeholder="Ex: « Fortes pluies attendues cet après-midi sur le sud... »"></textarea>
-      <div class="modal-btns">
-        <button class="modal-btn btn-save" onclick="saveVigilance()">Sauvegarder</button>
-        <button class="modal-btn btn-disable" onclick="disableVigilance()">Désactiver</button>
-        <button class="modal-btn btn-cancel" onclick="closeVigilanceModal()">Annuler</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Modal édition 7j -->
   <div id="edit-modal">
     <div class="modal-content">
@@ -561,87 +530,10 @@
   </div>
 
   <script>
-    // === VIGILANCE ===
-    let vigilanceData = JSON.parse(localStorage.getItem('meteore_vigilance') || 'null');
+    // === CONFIG MANUELLE JOURNALIÈRE (POUR LES 7 JOURS) ===
+    const getManualDailyKey = (ville, dateStr) => `${ville}::${dateStr}`;
+    let manualDailyOverrides = JSON.parse(localStorage.getItem('manualDailyOverrides') || '{}');
 
-    function updateVigilanceDisplay() {
-      const banner = document.getElementById('vigilance-banner');
-      if (!vigilanceData || !vigilanceData.phenomenon) {
-        banner.style.display = 'none';
-        return;
-      }
-
-      const { phenomenon, level, message } = vigilanceData;
-      let text = '';
-      let bgColor = '';
-
-      const labels = {
-        vents: 'Vents forts',
-        pluie: 'Pluie/Orages',
-        vagues: 'Vagues/Submersion'
-      };
-
-      text = labels[phenomenon] || 'Vigilance';
-      if (level === 'jaune') {
-        bgColor = '#FBC02D';
-      } else if (level === 'orange') {
-        bgColor = '#FB8C00';
-      } else if (level === 'rouge') {
-        bgColor = '#D32F2F';
-      }
-
-      banner.textContent = text;
-      banner.style.backgroundColor = bgColor;
-      banner.title = message || '';
-      banner.style.display = 'block';
-    }
-
-    function openVigilanceEdit() {
-      const modal = document.getElementById('vigilance-modal');
-      const pheno = document.getElementById('vigilance-phenomenon');
-      const level = document.getElementById('vigilance-level');
-      const msg = document.getElementById('vigilance-message');
-
-      if (vigilanceData) {
-        pheno.value = vigilanceData.phenomenon || '';
-        level.value = vigilanceData.level || 'jaune';
-        msg.value = vigilanceData.message || '';
-      } else {
-        pheno.value = '';
-        level.value = 'jaune';
-        msg.value = '';
-      }
-      modal.style.display = 'flex';
-    }
-
-    function saveVigilance() {
-      const phenomenon = document.getElementById('vigilance-phenomenon').value;
-      const level = document.getElementById('vigilance-level').value;
-      const message = document.getElementById('vigilance-message').value.trim();
-
-      if (!phenomenon) {
-        disableVigilance();
-        return;
-      }
-
-      vigilanceData = { phenomenon, level, message };
-      localStorage.setItem('meteore_vigilance', JSON.stringify(vigilanceData));
-      updateVigilanceDisplay();
-      closeVigilanceModal();
-    }
-
-    function disableVigilance() {
-      vigilanceData = null;
-      localStorage.removeItem('meteore_vigilance');
-      updateVigilanceDisplay();
-      closeVigilanceModal();
-    }
-
-    function closeVigilanceModal() {
-      document.getElementById('vigilance-modal').style.display = 'none';
-    }
-
-    // === RESTE DU CODE (inchangé, sauf ajout updateVigilanceDisplay au démarrage) ===
     let editMode = false;
     document.getElementById('edit-toggle').addEventListener('click', () => {
       editMode = !editMode;
@@ -651,9 +543,6 @@
       });
     });
 
-    // ... [toutes les autres fonctions restent identiques : villesReunion, previsionsManuelles, weatherCodeMap, fetchWeather, etc.]
-
-    // --- ICI, on colle tout le reste du script (inchangé) ---
     const villesReunion = [
       { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
       { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
@@ -758,9 +647,6 @@
       const moisAffiche = mois.length === 3 ? mois : mois.charAt(0).toUpperCase() + mois.slice(1);
       return `${jour} ${moisAffiche}`;
     }
-
-    const getManualDailyKey = (ville, dateStr) => `${ville}::${dateStr}`;
-    let manualDailyOverrides = JSON.parse(localStorage.getItem('manualDailyOverrides') || '{}');
 
     function applyManualDailyOverride(ville, dateStr, data) {
       const key = getManualDailyKey(ville, dateStr);
@@ -992,13 +878,12 @@
     }
 
     window.addEventListener('click', (e) => {
-      if (e.target === document.getElementById('edit-modal') || e.target === document.getElementById('vigilance-modal')) {
-        e.target.style.display = 'none';
+      if (e.target === document.getElementById('edit-modal')) {
+        document.getElementById('edit-modal').style.display = 'none';
       }
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-      updateVigilanceDisplay(); // ⭐ Afficher la vigilance au démarrage
       setTimeout(() => {
         document.getElementById('intro').classList.add('hidden');
         const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
