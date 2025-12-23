@@ -16,17 +16,14 @@
     /* ===== VIGILANCE STATIQUE (MANUELLE) ===== */
     #vigilance-static {
       position: fixed;
-      top: 12px;
-      left: 12px;
-      background: #FF9800; /* 🔴 MODIFIE ICI LA COULEUR : 
-        - Vert (pas de vigilance) : #4CAF50
-        - Jaune : #FFC107
-        - Orange : #FF9800
-        - Rouge : #F44336
-      */
+      top: 16px;
+      left: 16px;
+      background: #4CAF50; /* Vert = Pas de vigilance */
       color: #000;
       font-weight: 700;
       font-size: 12px;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.3px;
       padding: 4px 10px;
       border-radius: 4px;
       z-index: 2000;
@@ -148,7 +145,7 @@
       margin-top: -2px;
     }
 
-    .youtube-btn, .edit-btn {
+    .youtube-btn {
       background: #ff0000;
       color: white;
       padding: 6px 14px;
@@ -159,10 +156,7 @@
       cursor: pointer;
       box-shadow: 0 3px 8px rgba(0,0,0,0.15);
     }
-    .edit-btn {
-      background: var(--accent);
-    }
-    .youtube-btn:hover, .edit-btn:hover {
+    .youtube-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 5px 12px rgba(0,0,0,0.2);
     }
@@ -260,7 +254,6 @@
       align-items: center;
       border: 1px solid rgba(2, 136, 209, 0.1);
       transition: all 0.2s;
-      cursor: pointer;
     }
     .day-card.editable:hover {
       background: #e3f2fd;
@@ -393,7 +386,7 @@
       cursor: pointer;
     }
     .btn-save { background: var(--accent); color: white; }
-    .btn-cancel { background: #4CAF50; color: #333; }
+    .btn-cancel { background: #f5f5f5; color: #333; }
 
     #settings-modal {
       display: none;
@@ -429,7 +422,7 @@
 </head>
 <body>
 
-  <!-- 🔴 BLOC VIGILANCE STATIQUE – MODIFIE ICI LE TEXTE ET LA COULEUR DANS LE CSS -->
+  <!-- 🔴 BLOC VIGILANCE STATIQUE – MODIFIABLE MANUELLEMENT -->
   <div id="vigilance-static">Vigilance – Pas de vigilance</div>
 
   <div id="intro">
@@ -443,7 +436,7 @@
       <div class="version">version 1.13</div>
     </div>
     <div>
-      <button class="edit-btn" id="edit-toggle">✏️ Modifier</button>
+      <!-- <button class="edit-btn" id="edit-toggle">✏️ Modifier</button> -->
       <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
     </div>
   </div>
@@ -495,53 +488,10 @@
     <div id="suggestions-dropdown" class="suggestions-dropdown"></div>
   </div>
 
-  <!-- Modal édition 7j -->
-  <div id="edit-modal">
-    <div class="modal-content">
-      <h3>Modifier le jour</h3>
-      <input type="text" id="edit-day-label" placeholder="Label (ex: Averses)">
-      <input type="number" id="edit-temp-min" placeholder="Min (°C)" min="-10" max="50">
-      <input type="number" id="edit-temp-max" placeholder="Max (°C)" min="-10" max="50">
-      <select id="edit-icon">
-        <option value="https://i.imgur.com/9mtLzHK.png">Ensoleillé / Ciel clair</option>
-        <option value="https://i.imgur.com/1gHBkKj.png">Partiellement nuageux</option>
-        <option value="https://i.imgur.com/8EIg3fq.png">Très nuageux / Couvert</option>
-        <option value="https://i.imgur.com/lBjVqLV.png">Averses faibles / Pluie faible</option>
-        <option value="https://i.imgur.com/UTtGtvk.png">Averses / Pluie modérée</option>
-        <option value="https://i.imgur.com/zFt161l.png">Averses fortes / Pluie forte</option>
-        <option value="https://i.imgur.com/Qre2CV4.png">Orages</option>
-        <option value="https://i.imgur.com/GlPii5L.png">Averses orageuses</option>
-      </select>
-      <div class="modal-btns">
-        <button class="modal-btn btn-save" id="save-edit">Sauvegarder</button>
-        <button class="modal-btn btn-cancel" id="cancel-edit">Annuler</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="settings-modal">
-    <div class="modal-content-settings">
-      <h3>MeteoRe</h3>
-      <button class="modal-btn" onclick="installApp()">📱 Installer l'application</button>
-      <button class="modal-btn" onclick="shareSite()">📤 Partager ce site</button>
-      <a href="https://youtube.com/@meteore974" target="_blank" class="modal-btn">🎥 Voir mes prévisions</a>
-      <button class="modal-btn" style="margin-top:16px;" onclick="closeSettings()">Fermer</button>
-    </div>
-  </div>
-
   <script>
     // === CONFIG MANUELLE JOURNALIÈRE (POUR LES 7 JOURS) ===
     const getManualDailyKey = (ville, dateStr) => `${ville}::${dateStr}`;
     let manualDailyOverrides = JSON.parse(localStorage.getItem('manualDailyOverrides') || '{}');
-
-    let editMode = false;
-    document.getElementById('edit-toggle').addEventListener('click', () => {
-      editMode = !editMode;
-      document.getElementById('edit-toggle').textContent = editMode ? '✅ Fin modifier' : '✏️ Modifier';
-      document.querySelectorAll('.day-card').forEach(card => {
-        card.classList.toggle('editable', editMode);
-      });
-    });
 
     const villesReunion = [
       { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
@@ -656,12 +606,6 @@
       return data;
     }
 
-    function saveManualDailyOverride(ville, dateStr, override) {
-      const key = getManualDailyKey(ville, dateStr);
-      manualDailyOverrides[key] = override;
-      localStorage.setItem('manualDailyOverrides', JSON.stringify(manualDailyOverrides));
-    }
-
     async function fetchWeather(lat, lon, nomVille) {
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
@@ -740,8 +684,6 @@
       }
     }
 
-    let editingCardIndex = -1;
-
     function renderForecast7j(daily, times, villeNom) {
       const container = document.getElementById('forecast-7j');
       container.innerHTML = '';
@@ -763,11 +705,6 @@
 
         const card = document.createElement('div');
         card.className = 'day-card';
-        if (editMode) card.classList.add('editable');
-        card.dataset.index = i;
-        card.dataset.date = dateStr;
-        card.dataset.ville = villeNom;
-
         card.innerHTML = `
           <div style="display:flex;align-items:center;gap:14px;">
             <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:28px;height:28px;">
@@ -778,44 +715,9 @@
             <div style="font-size:12px; opacity:0.85;">${weatherData.label}</div>
           </div>
         `;
-
-        card.addEventListener('click', () => {
-          if (!editMode) return;
-          editingCardIndex = i;
-          document.getElementById('edit-day-label').value = weatherData.label;
-          document.getElementById('edit-temp-min').value = min;
-          document.getElementById('edit-temp-max').value = max;
-          document.getElementById('edit-icon').value = weatherData.icon;
-          document.getElementById('edit-modal').style.display = 'flex';
-        });
-
         container.appendChild(card);
       }
     }
-
-    document.getElementById('save-edit').addEventListener('click', () => {
-      const label = document.getElementById('edit-day-label').value;
-      const min = parseInt(document.getElementById('edit-temp-min').value);
-      const max = parseInt(document.getElementById('edit-temp-max').value);
-      const icon = document.getElementById('edit-icon').value;
-      const cards = document.querySelectorAll('.day-card');
-      const card = cards[editingCardIndex];
-      const ville = card.dataset.ville;
-      const date = card.dataset.date;
-
-      if (label && !isNaN(min) && !isNaN(max)) {
-        saveManualDailyOverride(ville, date, { label, min, max, icon });
-        fetchWeather(
-          villesReunion.find(v => v.nom === ville).lat,
-          villesReunion.find(v => v.nom === ville).lon,
-          ville
-        );
-      }
-    });
-
-    document.getElementById('cancel-edit').addEventListener('click', () => {
-      document.getElementById('edit-modal').style.display = 'none';
-    });
 
     const searchInput = document.getElementById('search-input-bottom');
     const suggestionsDropdown = document.getElementById('suggestions-dropdown');
@@ -860,7 +762,6 @@
       } else {
         alert("👉 Sur mobile : menu Chrome → 'Installer'\n👉 Sur PC : icône '+' dans la barre d'adresse");
       }
-      closeSettings();
     }
 
     function shareSite() {
@@ -870,18 +771,7 @@
         navigator.clipboard.writeText(window.location.href);
         alert('Lien copié !');
       }
-      closeSettings();
     }
-
-    function closeSettings() {
-      document.getElementById('settings-modal').style.display = 'none';
-    }
-
-    window.addEventListener('click', (e) => {
-      if (e.target === document.getElementById('edit-modal')) {
-        document.getElementById('edit-modal').style.display = 'none';
-      }
-    });
 
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
