@@ -424,14 +424,6 @@
   </div>
 
   <script>
-  
-    };
-
-    // Fonction utilitaire pour appliquer les labels personnalisés
-    function applyCustomLabel(label) {
-      return customLabels[label] || label;
-    }
-
     const villesReunion = [
       { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
       { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
@@ -526,11 +518,7 @@
     };
 
     function getWeatherData(code) {
-      const data = weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/8EIg3fq.png' };
-      return {
-        label: applyCustomLabel(data.label),
-        icon: data.icon
-      };
+      return weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/8EIg3fq.png' };
     }
 
     // === FORMAT DE DATE PERSONNALISÉ ===
@@ -540,8 +528,8 @@
       const jour = date.getDate();
       const moisIndex = date.getMonth();
       const mois = moisNoms[moisIndex];
-      // Si le mois a 3 lettres exactes (ex: "mai"), on garde tel quel
-      // Sinon, on met la première lettre en majuscule
+      // Si le mois a exactement 3 lettres → on affiche tel quel (ex: "mai")
+      // Sinon → on met la première en majuscule (ex: "août")
       const moisAffiche = mois.length === 3 ? mois : mois.charAt(0).toUpperCase() + mois.slice(1);
       return `${jour} ${moisAffiche}`;
     }
@@ -576,8 +564,8 @@
       const container = document.getElementById('hourly');
       container.innerHTML = '';
       const now = new Date();
-
       let count = 0;
+
       for (let i = 0; i < times.length && count < 48; i++) {
         const time = new Date(times[i]);
         if (time < now) continue;
@@ -592,26 +580,18 @@
         const temp = Math.round(hourly.temperature_2m[i]);
         let weatherData = getWeatherData(hourly.weather_code[i]);
 
+        // Remplacement manuel si défini
         if (previsionsManuelles[villeNom] && (key in previsionsManuelles[villeNom])) {
-          const manual = previsionsManuelles[villeNom][key];
-          weatherData = {
-            label: applyCustomLabel(manual.label),
-            icon: manual.icon
-          };
+          const manuel = previsionsManuelles[villeNom][key];
+          weatherData = { label: manuel.label, icon: manuel.icon };
         }
 
         const card = document.createElement('div');
         card.className = 'hour-card';
-
-        let hourTop = hourStr;
-        let dateBottom = "";
-
-        if (!isToday) {
-          dateBottom = formatDateForHourly(time);
-        }
+        let dateBottom = !isToday ? formatDateForHourly(time) : '';
 
         card.innerHTML = `
-          <div style="font-size:13px; font-weight:600;">${hourTop}</div>
+          <div style="font-size:13px; font-weight:600;">${hourStr}</div>
           <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:28px;height:28px;margin:6px 0;">
           <div style="font-weight:700;">${temp}°</div>
           <div style="font-size:11px; opacity:0.85; margin-top:6px;">${weatherData.label}</div>
