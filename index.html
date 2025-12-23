@@ -2,203 +2,244 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Météo La Réunion – Nullyxx</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <title>MeteoRe – Météo précise pour La Réunion</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d47a1">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; }
     body {
-      color: white;
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      color: #0d47a1;
       min-height: 100vh;
-      padding: 0;
+      padding: 16px;
       overflow-x: hidden;
-      scroll-behavior: smooth;
-      transition: background 0.8s ease;
-      background: linear-gradient(135deg, #87CEEB, #1E90FF);
     }
-
-    #sky { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: -2; }
-    .rain { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
-    .raindrop { position: absolute; background: rgba(255,255,255,0.7); width: 2px; height: 15px; border-radius: 0 0 2px 2px; animation: fall linear infinite; }
-    @keyframes fall { to { transform: translateY(100vh); } }
-
-    .container {
-      position: relative;
-      z-index: 2;
-      padding: 24px 16px 40px;
-      max-width: 100%;
-    }
+    .container { max-width: 100%; margin: 0 auto; }
+    .header { text-align: center; margin: 16px 0 24px; }
+    .location { font-size: 28px; font-weight: 700; margin-bottom: 4px; color: #0d47a1; }
+    .last-update { font-size: 14px; color: #3949ab; opacity: 0.8; }
 
     .search-box {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 14px;
-      padding: 16px;
+      background: white;
+      border-radius: 16px;
+      padding: 12px 16px;
       margin-bottom: 24px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
     #search-input {
       width: 100%;
-      padding: 12px 16px;
       border: none;
-      border-radius: 12px;
       font-size: 16px;
       outline: none;
+      background: transparent;
     }
     #suggestions {
       margin-top: 12px;
-      max-height: 200px;
+      max-height: 150px;
       overflow-y: auto;
     }
     .suggestion {
-      padding: 10px 14px;
-      cursor: pointer;
-      border-radius: 10px;
-      margin-bottom: 6px;
-      background: #e3f2fd;
-      color: #0d47a1;
+      padding: 8px 12px;
+      background: #e8f5e9;
+      border-radius: 12px;
+      margin: 6px 0;
       font-weight: 600;
+      color: #1b5e20;
+      cursor: pointer;
     }
-    .suggestion:hover { background: #bbdefb; }
+    .suggestion:hover { background: #c8e6c9; }
 
-    .header { text-align: center; margin-bottom: 24px; }
-    .location { font-size: 28px; font-weight: 700; text-shadow: 0 2px 6px rgba(0,0,0,0.3); margin-bottom: 8px; }
-    .last-update { font-size: 14px; opacity: 0.9; }
-
-    .main-weather {
-      background: rgba(255, 255, 255, 0.92);
-      color: #1a237e;
+    .current-weather {
+      background: white;
       border-radius: 24px;
       padding: 24px;
+      text-align: center;
       margin-bottom: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      backdrop-filter: blur(10px);
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInUp 0.8s forwards;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
     }
-    @keyframes fadeInUp {
-      to { opacity: 1; transform: translateY(0); }
+    .current-temp { font-size: 80px; font-weight: 200; margin: 10px 0; }
+    .current-condition { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
+    .current-details {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 16px;
     }
+    .detail-item { text-align: center; font-size: 14px; }
+    .detail-value { font-weight: 700; font-size: 16px; }
 
     .section-title {
       font-size: 18px;
       font-weight: 700;
       margin: 24px 0 16px;
-      color: white;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      color: #0d47a1;
     }
-
-    .hourly {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding: 8px 0;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .hourly::-webkit-scrollbar { display: none; }
-
-    .hour-card {
-      background: rgba(255, 255, 255, 0.85);
-      border-radius: 18px;
-      padding: 16px 12px;
-      min-width: 70px;
-      text-align: center;
-      backdrop-filter: blur(5px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .hour-card .time { font-size: 13px; font-weight: 600; color: #1a237e; }
-    .hour-card .emoji { 
-      font-size: 24px; 
-      margin: 6px 0; 
-      cursor: pointer;
-      display: inline-block;
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .hour-card .emoji:active { transform: scale(1.4); }
-    .hour-card .temp { font-size: 16px; font-weight: 700; color: #1a237e; }
-
-    .forecast-3j {
+    .forecast-7j {
       display: grid;
       gap: 14px;
+      margin-bottom: 24px;
     }
     .day-card {
-      background: rgba(255, 255, 255, 0.85);
+      background: white;
       border-radius: 18px;
       padding: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      backdrop-filter: blur(5px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
-    .day-label { font-weight: 700; color: #1a237e; font-size: 16px; }
-    .day-detail { 
-      font-size: 16px; 
-      font-weight: 600; 
-      color: #1a237e;
-      cursor: pointer;
-      display: inline-block;
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    .day-info { display: flex; align-items: center; gap: 12px; }
+    .day-emoji { font-size: 28px; }
+    .day-name { font-weight: 600; font-size: 16px; }
+    .day-temp { font-weight: 700; font-size: 18px; }
+
+    .temp-graph {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
-    .day-detail:active { transform: scale(1.3); }
+    .hourly-cards {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 8px 0;
+    }
+    .hourly-cards::-webkit-scrollbar { display: none; }
+    .hour-card {
+      background: #f5fbff;
+      border-radius: 14px;
+      padding: 12px 10px;
+      min-width: 60px;
+      text-align: center;
+      border: 1px solid #e3f2fd;
+    }
+    .hour-time { font-size: 13px; font-weight: 600; color: #3949ab; }
+    .hour-emoji { font-size: 22px; margin: 6px 0; }
+    .hour-temp { font-size: 15px; font-weight: 700; color: #0d47a1; }
 
     #meteo-details {
-      background: rgba(13, 71, 161, 0.92);
-      border-radius: 24px;
-      padding: 28px;
-      margin-top: 40px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      backdrop-filter: blur(10px);
-      color: white;
+      background: white;
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
-    .detail-section { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+    .detail-section {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e0e0e0;
+    }
     .detail-section:last-child { border: none; margin-bottom: 0; padding-bottom: 0; }
-    .detail-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; color: #bbdefb; }
-    .detail-content { font-size: 15px; line-height: 1.6; color: #e3f2fd; }
-    .detail-content p { margin-bottom: 12px; font-size: 15px; }
-    .highlight { color: #4fc3f7; font-weight: 600; }
+    .detail-title {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #0d47a1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .detail-content {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #37474f;
+    }
+    .highlight { color: #1976d2; font-weight: 600; }
+
+    .youtube-link {
+      display: inline-block;
+      background: #ff0000;
+      color: white;
+      text-decoration: none;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      margin: 16px 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .share-widget { text-align: center; margin: 24px 0; }
+    .share-btn {
+      display: inline-block;
+      background: #4caf50;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
     .footer {
       text-align: center;
-      margin-top: 24px;
       font-size: 13px;
-      opacity: 0.9;
+      color: #3949ab;
+      opacity: 0.8;
+      padding: 16px 0;
     }
 
     @media (max-width: 600px) {
-      .current { font-size: 60px; }
+      .current-temp { font-size: 60px; }
       .location { font-size: 24px; }
-      #meteo-details { padding: 20px; }
     }
   </style>
 </head>
 <body>
 
-  <div id="sky"></div>
-  <div class="rain" id="rain"></div>
-
   <div class="container">
+    <!-- 🔗 YOUTUBE -->
+    <div style="text-align: center;">
+      <a href="https://youtube.com/@meteore974" target="_blank" rel="noopener" class="youtube-link">Retrouve-moi sur YouTube</a>
+    </div>
+
+    <!-- 🔍 RECHERCHE -->
     <div class="search-box">
       <input type="text" id="search-input" placeholder="Rechercher une ville à La Réunion...">
       <div id="suggestions"></div>
     </div>
 
+    <!-- 🌤️ TITRE -->
     <div class="header">
-      <div class="location" id="ville-nom">Sélectionnez une ville</div>
-      <div class="last-update" id="last-update">Aucune donnée</div>
+      <div class="location" id="ville-nom">Chargement...</div>
+      <div class="last-update" id="last-update">—</div>
     </div>
 
-    <div class="main-weather" id="main-weather" style="display:none;">
-      <div class="current" id="current-temp">--°</div>
-      <div class="condition" id="current-condition">--</div>
+    <!-- 📊 CARTE PRINCIPALE -->
+    <div class="current-weather">
+      <div class="current-temp" id="current-temp">--°</div>
+      <div class="current-condition" id="current-condition">—</div>
+      <div class="current-details">
+        <div class="detail-item">
+          <div class="detail-value" id="current-humid">—%</div>
+          <div>Humidité</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-value" id="current-wind">— km/h</div>
+          <div>Vent</div>
+        </div>
+      </div>
     </div>
 
-    <div class="section-title">Prévision dans les prochaines heures</div>
-    <div class="hourly" id="hourly"></div>
+    <!-- 📈 GRAPHIQUE TEMPÉRATURE -->
+    <div class="temp-graph">
+      <div class="hourly-title">Prévision dans les prochaines heures</div>
+      <div class="hourly-cards" id="hourly"></div>
+    </div>
 
-    <div class="section-title">Prévision 3 jours</div>
-    <div class="forecast-3j" id="forecast-3j"></div>
+    <!-- 📅 7 JOURS -->
+    <div class="section-title">Prévision 7 jours</div>
+    <div class="forecast-7j" id="forecast-7j"></div>
 
     <!-- 📚 SECTION ÉDUCATIVE -->
     <div id="meteo-details">
@@ -206,54 +247,30 @@
       <div class="detail-section">
         <h3 class="detail-title">🌩️ Comment se forment les orages ?</h3>
         <div class="detail-content">
-          <p>Un orage se forme quand <span class="highlight">l'air chaud et humide</span> monte rapidement dans l'atmosphère. À La Réunion, cela arrive souvent :</p>
-          <p>• L'après-midi, le soleil chauffe les pentes → l'air monte le long des reliefs<br>
+          <p>Un orage se forme quand <span class="highlight">l'air chaud et humide</span> monte rapidement. À La Réunion, cela arrive souvent :</p>
+          <p>• L'après-midi, le soleil chauffe les pentes → l'air monte<br>
           • En bord de mer, l'humidité marine rencontre l'air chaud<br>
-          • Quand l'air atteint les hauteurs, il se refroidit → condensation → nuages d'orage (cumulonimbus)</p>
-          <p>⚡ <span class="highlight">Éclairs et tonnerre</span> : causés par des décharges électriques entre les charges positives et négatives dans le nuage.</p>
+          • Condensation → nuages d'orage (cumulonimbus)</p>
         </div>
       </div>
       <div class="detail-section">
-        <h3 class="detail-title">🌀 Cyclones : trajectoire et impact</h3>
+        <h3 class="detail-title">⛰️ Reliefs et climat</h3>
         <div class="detail-content">
-          <p>Un cyclone tropical se forme au-dessus de l'<span class="highlight">océan Indien chaud</span> (>26,5°C). Sa trajectoire dépend des vents dominants :</p>
-          <p>• <span class="highlight">Anticyclone des Mascareignes</span> : situé à l'est, il "pousse" les cyclones vers l'ouest<br>
-          • <span class="highlight">Courant-jet</span> : en altitude, il peut dévier la trajectoire vers le sud</p>
-          <p>🎯 <span class="highlight">Pourquoi certains cyclones touchent La Réunion et d'autres non ?</span><br>
-          La trajectoire précise dépend de l'interaction entre ces systèmes. Si le cyclone passe à moins de 200 km, l'île ressent ses effets (vents, pluie).</p>
-        </div>
-      </div>
-      <div class="detail-section">
-        <h3 class="detail-title">⛰️ Reliefs de La Réunion et climat</h3>
-        <div class="detail-content">
-          <p>La Réunion a <span class="highlight">3 massifs volcaniques</span> (Piton des Neiges, Piton de la Fournaise, rempart) qui façonnent le climat :</p>
-          <p>• <span class="highlight">Au vent (est)</span> : les alizés chargés d'humidité rencontrent les reliefs → <span class="highlight">pluies abondantes</span> (jusqu'à 10m/an !)<br>
-          • <span class="highlight">Sous le vent (ouest)</span> : l'air descend, se réchauffe et s'assèche → <span class="highlight">climat sec et ensoleillé</span> (comme à L'Étang-Salé)</p>
-          <p>🌡️ <span class="highlight">Effet de foehn</span> : quand l'air humide traverse les montagnes, il perd son humidité et devient sec et chaud en redescendant (c'est pourquoi l'ouest est sec).</p>
-        </div>
-      </div>
-      <div class="detail-section">
-        <h3 class="detail-title">❄️ Fronts froids vs fronts chauds</h3>
-        <div class="detail-content">
-          <p>Un <span class="highlight">front</span> est la zone de contact entre deux masses d'air de températures différentes :</p>
-          <p>• <span class="highlight">Front froid</span> : masse d'air froid remplace de l'air chaud → orages violents, puis temps frais et sec<br>
-          • <span class="highlight">Front chaud</span> : air chaud remonte sur de l'air froid → pluie continue, puis temps doux et humide</p>
-          <p>🌀 À La Réunion, les fronts sont <span class="highlight">rares en été</span> (décembre-avril) mais plus fréquents en hiver (mai-novembre), surtout dans les hauts.</p>
-        </div>
-      </div>
-      <div class="detail-section">
-        <h3 class="detail-title">🌊 Anticyclone et vents dominants</h3>
-        <div class="detail-content">
-          <p>L'<span class="highlight">anticyclone des Mascareignes</span> est un système de haute pression permanent dans l'océan Indien sud :</p>
-          <p>• Il génère les <span class="highlight">alizés</span> (vents d'est) qui soufflent toute l'année à La Réunion<br>
-          • Ces vents apportent humidité sur la côte est et s'assèchent en traversant l'île<br>
-          • L'anticyclone "protège" aussi La Réunion en déviant certains cyclones vers le sud</p>
-          <p>🌬️ Quand l'anticyclone s'affaiblit (été austral), les cyclones ont plus de chances d'approcher l'île.</p>
+          <p>• <span class="highlight">À l'est</span> : alizés + reliefs → pluies abondantes<br>
+          • <span class="highlight">À l'ouest</span> (L’Étang-Salé) : effet de foehn → climat sec et ensoleillé</p>
         </div>
       </div>
     </div>
 
-    <div class="footer">© Nullyxx</div>
+    <!-- 🖼️ WIDGET PARTAGE -->
+    <div class="share-widget">
+      <button class="share-btn" id="share-btn">📷 Partager cette météo</button>
+    </div>
+
+    <div class="footer">
+      © 2025 MeteoRe • Données : Open-Meteo & Météo-France<br>
+      <a href="https://youtube.com/@meteore974" target="_blank" style="color:#ff0000; text-decoration: none;">YouTube</a>
+    </div>
   </div>
 
   <script>
@@ -280,24 +297,6 @@
         { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
       ];
 
-      function getCondition(code) {
-        if (code === 0) return "Ciel dégagé";
-        if (code === 1) return "Ciel peu nuageux";
-        if (code === 2) return "Ciel partiellement nuageux";
-        if (code === 3) return "Ciel couvert";
-        if ([45, 48].includes(code)) return "Brouillard";
-        if ([51, 53, 55].includes(code)) return "Bruine";
-        if ([61].includes(code)) return "Pluie faible";
-        if ([63].includes(code)) return "Pluie modérée";
-        if ([65].includes(code)) return "Pluie forte";
-        if ([80].includes(code)) return "Averses faibles";
-        if ([81].includes(code)) return "Averses modérées";
-        if ([82].includes(code)) return "Averses fortes";
-        if ([95].includes(code)) return "Orages";
-        if ([96, 99].includes(code)) return "Orages violents";
-        return "Ciel variable";
-      }
-
       function getEmoji(code) {
         if (code === 0) return "☀️";
         if (code === 1) return "🌤️";
@@ -310,171 +309,105 @@
         return "☁️";
       }
 
-      function isRaining(code) {
-        return [51,53,55,61,63,65,80,81,82,95,96,99].includes(code);
-      }
-
-      function updateSky(code) {
-        const sky = document.getElementById('sky');
-        if (code === 0 || code === 1) {
-          sky.style.background = 'linear-gradient(135deg, #87CEEB, #1E90FF)';
-        } else if (code === 2 || code === 3) {
-          sky.style.background = 'linear-gradient(160deg, #607d8b, #455a64)';
-        } else if (isRaining(code)) {
-          sky.style.background = 'linear-gradient(160deg, #2c3e50, #1a1a2e)';
-        }
-      }
-
-      function createRain() {
-        const rain = document.getElementById('rain');
-        rain.innerHTML = '';
-        for (let i = 0; i < 80; i++) {
-          const drop = document.createElement('div');
-          drop.className = 'raindrop';
-          drop.style.left = Math.random() * 100 + 'vw';
-          drop.style.animationDuration = (0.4 + Math.random() * 0.6) + 's';
-          rain.appendChild(drop);
-        }
-      }
-
       async function fetchWeather(lat, lon, nomVille) {
-        document.getElementById('main-weather').style.display = 'none';
-        document.getElementById('hourly').innerHTML = '';
-        document.getElementById('forecast-3j').innerHTML = '';
-
         try {
-          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&hourly=temperature_2m,weathercode&forecast_days=2&timezone=Indian/Reunion`;
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 8000);
-          const res = await fetch(url, { signal: controller.signal });
-          clearTimeout(timeoutId);
-
-          if (!res.ok) throw new Error('API indisponible');
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,relative_humidity_2m,wind_speed_10m&hourly=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&forecast_days=8&timezone=Indian/Reunion`;
+          const res = await fetch(url);
           const data = await res.json();
-          if (!data || !data.current) throw new Error('Données invalides');
 
-          const temp = Math.round(data.current.temperature_2m);
-          const code = data.current.weathercode;
-          const condition = getCondition(code);
-
+          const current = data.current;
           document.getElementById('ville-nom').textContent = nomVille;
           document.getElementById('last-update').textContent = `Données en temps réel`;
-          document.getElementById('current-temp').textContent = `${temp}°`;
-          document.getElementById('current-condition').textContent = condition;
+          document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
+          document.getElementById('current-condition').textContent = getConditionText(current.weathercode);
+          document.getElementById('current-humid').textContent = `${Math.round(current.relative_humidity_2m)}%`;
+          document.getElementById('current-wind').textContent = `${Math.round(current.wind_speed_10m * 3.6)} km/h`;
 
-          updateSky(code);
-          document.getElementById('rain').innerHTML = '';
-          if (isRaining(code)) createRain();
-
-          setTimeout(() => {
-            document.getElementById('main-weather').style.display = 'block';
-            renderHourly(data.hourly, data.hourly.time);
-            renderForecast3j();
-          }, 300);
+          renderHourly(data.hourly, data.hourly.time);
+          renderForecast7j(data.daily, data.daily.time);
 
         } catch (e) {
-          console.error('Erreur:', e);
+          console.error(e);
           document.getElementById('ville-nom').textContent = nomVille;
-          document.getElementById('last-update').textContent = `Données non disponibles`;
           document.getElementById('current-temp').textContent = `--°`;
-          document.getElementById('current-condition').textContent = `Eclaircies`;
-          updateSky(0);
-          document.getElementById('rain').innerHTML = '';
-          renderHourlyFallback();
-          renderForecast3j();
+          document.getElementById('current-condition').textContent = `Données non disponibles`;
+          document.getElementById('current-humid').textContent = `—%`;
+          document.getElementById('current-wind').textContent = `— km/h`;
         }
       }
 
-      // ✅ CORRECTION SIMPLE POUR L'ÉTANG-SALÉ
+      function getConditionText(code) {
+        if (code === 0) return "Ciel dégagé";
+        if ([1,2].includes(code)) return "Ciel partiellement nuageux";
+        if (code === 3) return "Ciel couvert";
+        if ([51,53,55,61].includes(code)) return "Pluie faible";
+        if ([63,65].includes(code)) return "Pluie modérée";
+        if ([80,81,82].includes(code)) return "Averses";
+        if ([95,96,99].includes(code)) return "Orages";
+        return "Nuageux";
+      }
+
       function renderHourly(hourly, times) {
         const container = document.getElementById('hourly');
         container.innerHTML = '';
         const now = new Date();
-
-        // =============================================
-        // ✏️ MODIFIE ICI → Emoji pour certaines heures
-        // =============================================
-        const correctionsHeures = {
-          "10h": "⛅", // Très nuageux
-          "12h": "⛅", // Très nuageux
-          "15h": "🌦️", // Averses faibles
-          "16h": "🌥️", // Eclaircies
-          // Exemple: "14h": "🌤️", "16h": "⛅"
-        };
-
         let count = 0;
         for (let i = 0; i < times.length && count < 12; i++) {
           const time = new Date(times[i]);
           if (time < now) continue;
           const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
-          const temp = Math.round(hourly.temperature_2m[i]) + '°';
-          let emoji = getEmoji(hourly.weathercode[i]);
-
-          // Appliquer ta correction
-          if (correctionsHeures[hourStr]) {
-            emoji = correctionsHeures[hourStr];
-          }
-
+          const temp = Math.round(hourly.temperature_2m[i]);
+          const emoji = getEmoji(hourly.weathercode[i]);
           const card = document.createElement('div');
           card.className = 'hour-card';
-          card.innerHTML = `<div class="time">${hourStr}</div><div class="emoji">${emoji}</div><div class="temp">${temp}</div>`;
+          card.innerHTML = `
+            <div class="hour-time">${hourStr}</div>
+            <div class="hour-emoji">${emoji}</div>
+            <div class="hour-temp">${temp}°</div>
+          `;
           container.appendChild(card);
           count++;
         }
       }
 
-      function renderHourlyFallback() {
-        const container = document.getElementById('hourly');
+      function renderForecast7j(daily, times) {
+        const container = document.getElementById('forecast-7j');
         container.innerHTML = '';
-        const heures = ["06h","08h","10h","12h","14h","16h","18h","20h","22h","00h","02h","04h"];
-        heures.forEach(h => {
-          const card = document.createElement('div');
-          card.className = 'hour-card';
-          card.innerHTML = `<div class="time">${h}</div><div class="emoji">☁️</div><div class="temp">25°</div>`;
-          container.appendChild(card);
-        });
-      }
-
-      function renderForecast3j() {
-        const data = [
-          { day: "Aujourd'hui", detail: "Averses faibles 🌦️" },
-          { day: "Demain", detail: "Averses 🌧️" },
-          { day: "Après-demain", detail: "Averses 🌧️" }
-        ];
-        const container = document.getElementById('forecast-3j');
-        container.innerHTML = '';
-        data.forEach(item => {
+        const days = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+        for (let i = 0; i < 7; i++) {
+          const date = new Date(times[i]);
+          const dayName = i === 0 ? "Aujourd'hui" : days[date.getDay()];
+          const min = Math.round(daily.temperature_2m_min[i]);
+          const max = Math.round(daily.temperature_2m_max[i]);
+          const emoji = getEmoji(daily.weathercode[i]);
           const card = document.createElement('div');
           card.className = 'day-card';
-          card.innerHTML = `<div class="day-label">${item.day}</div><div class="day-detail">${item.detail}</div>`;
+          card.innerHTML = `
+            <div class="day-info">
+              <div class="day-emoji">${emoji}</div>
+              <div class="day-name">${dayName}</div>
+            </div>
+            <div class="day-temp">${min}° / ${max}°</div>
+          `;
           container.appendChild(card);
-        });
+        }
       }
 
       const input = document.getElementById('search-input');
       const suggestions = document.getElementById('suggestions');
 
-      input.addEventListener('focus', () => {
-        showAllVilles();
-      });
-
+      input.addEventListener('focus', () => showAllVilles());
       input.addEventListener('input', () => {
         const term = input.value.toLowerCase().trim();
-        if (term === '') {
-          showAllVilles();
-        } else {
-          const matches = villesReunion
-            .filter(v => v.nom.toLowerCase().includes(term))
-            .slice(0, 8);
-          showVilles(matches);
+        if (term === '') showAllVilles();
+        else {
+          const matches = villesReunion.filter(v => v.nom.toLowerCase().includes(term)).slice(0, 8);
+          showSuggestions(matches);
         }
       });
 
-      function showAllVilles() {
-        showVilles(villesReunion);
-      }
-
-      function showVilles(list) {
+      function showAllVilles() { showSuggestions(villesReunion); }
+      function showSuggestions(list) {
         suggestions.innerHTML = '';
         list.forEach(v => {
           const el = document.createElement('div');
@@ -490,7 +423,16 @@
         });
       }
 
-      input.focus();
+      document.getElementById('share-btn').addEventListener('click', () => {
+        html2canvas(document.querySelector('.current-weather')).then(canvas => {
+          const link = document.createElement('a');
+          link.download = 'meteo-reunion.png';
+          link.href = canvas.toDataURL();
+          link.click();
+        });
+      });
+
+      fetchWeather(-21.150, 55.433, "L'Étang-Salé");
     }
   </script>
 
