@@ -440,268 +440,250 @@
       { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
     ];
 
-    // ✅ PRÉVISIONS MANUELLES COMPLÈTES : 00h à 23h x 2 jours
-<script>
-  const villesReunion = [
-    { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
-    { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
-    { nom: "L'Étang-Salé", lat: -21.150, lon: 55.433 },
-    { nom: "Le Tampon", lat: -21.267, lon: 55.517 },
-    { nom: "Saint-Benoît", lat: -21.033, lon: 55.717 },
-    { nom: "Saint-André", lat: -20.933, lon: 55.617 },
-    { nom: "Le Port", lat: -20.933, lon: 55.283 },
-    { nom: "Saint-Louis", lat: -21.21, lon: 55.4 },
-    { nom: "Saint-Joseph", lat: -21.383, lon: 55.6 },
-    { nom: "La Possession", lat: -20.9, lon: 55.317 },
-    { nom: "Cilaos", lat: -21.15, lon: 55.483 },
-    { nom: "Salazie", lat: -21.017, lon: 55.533 },
-    { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
-  ];
+    const previsionsManuelles = {
+      "L'Étang-Salé": {
+        // Jour 1 (aujourd'hui)
+        "00h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "01h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "02h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "03h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "04h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "05h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "06h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "07h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "08h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "09h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "10h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "11h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+        "12h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+        "13h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+        "14h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+        "15h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        "16h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        "17h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        "18h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "19h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "20h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "21h": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "22h": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "23h": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
 
-  const previsionsManuelles = {
-    "L'Étang-Salé": {
-      // Jour 1 (aujourd'hui)
-      "00h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "01h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "02h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "03h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "04h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "05h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "06h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "07h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "08h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "09h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "10h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "11h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
-      "12h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
-      "13h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
-      "14h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
-      "15h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
-      "16h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
-      "17h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
-      "18h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "19h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "20h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "21h": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
-      "22h": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
-      "23h": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
-
-      // Jour 2 (demain)
-      "00h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
-      "01h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
-      "02h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "03h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "04h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "05h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "06h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "07h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "08h_j2": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
-      "09h_j2": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
-      "10h_j2": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
-      "11h_j2": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png" },
-      "12h_j2": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png" },
-      "13h_j2": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
-      "14h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "15h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "16h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "17h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
-      "18h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
-      "19h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
-      "20h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
-      "21h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
-      "22h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
-      "23h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" }
-    }
-  };
-
-  const weatherCodeMap = {
-    0: { label: 'Ensoleillé', icon: 'https://i.imgur.com/9mtLzHK.png' },
-    1: { label: 'Partiellement nuageux', icon: 'https://i.imgur.com/1gHBkKj.png' },
-    2: { label: 'Partiellement nuageux', icon: 'https://i.imgur.com/1gHBkKj.png' },
-    3: { label: 'Très nuageux', icon: 'https://i.imgur.com/8EIg3fq.png' },
-    45: { label: 'Brouillard', icon: 'https://i.imgur.com/8EIg3fq.png' },
-    48: { label: 'Brouillard givrant', icon: 'https://i.imgur.com/8EIg3fq.png' },
-    51: { label: 'Averses faibles', icon: 'https://i.imgur.com/lBjVqLV.png' },
-    53: { label: 'Pluie faible', icon: 'https://i.imgur.com/lBjVqLV.png' },
-    55: { label: 'Pluie modérée', icon: 'https://i.imgur.com/UTtGtvk.png' },
-    61: { label: 'Pluie faible', icon: 'https://i.imgur.com/lBjVqLV.png' },
-    63: { label: 'Pluie modérée', icon: 'https://i.imgur.com/UTtGtvk.png' },
-    65: { label: 'Pluie forte', icon: 'https://i.imgur.com/zFt161l.png' },
-    80: { label: 'Averses faibles', icon: 'https://i.imgur.com/lBjVqLV.png' },
-    81: { label: 'Averses', icon: 'https://i.imgur.com/UTtGtvk.png' },
-    82: { label: 'Averses fortes', icon: 'https://i.imgur.com/zFt161l.png' },
-    95: { label: 'Orages', icon: 'https://i.imgur.com/Qre2CV4.png' },
-    96: { label: 'Averses orageuses', icon: 'https://i.imgur.com/GlPii5L.png' },
-    99: { label: 'Orages violents', icon: 'https://i.imgur.com/Qre2CV4.png' }
-  };
-
-  function getWeatherData(code) {
-    return weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/8EIg3fq.png' };
-  }
-
-  async function fetchWeather(lat, lon, nomVille) {
-    try {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
-      const res = await fetch(url);
-      const data = await res.json();
-
-      const current = data.current;
-      const currentW = getWeatherData(current.weather_code);
-      document.getElementById('ville-nom').textContent = nomVille;
-      document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
-      document.getElementById('current-condition').textContent = currentW.label;
-      document.getElementById('humidity').textContent = `${Math.round(current.relative_humidity_2m)}%`;
-      document.getElementById('wind').textContent = `${Math.round(current.wind_speed_10m * 3.6)} km/h`;
-      document.getElementById('uv').textContent = current.uv_index ? current.uv_index.toFixed(1) : "—";
-      document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
-
-      renderHourly(data.hourly, data.hourly.time, nomVille);
-      renderForecast7j(data.daily, data.daily.time);
-    } catch (e) {
-      console.error(e);
-      document.getElementById('ville-nom').textContent = nomVille;
-      document.getElementById('current-temp').textContent = `--°`;
-      document.getElementById('current-condition').textContent = `Données non disponibles`;
-    }
-  }
-
-  function renderHourly(hourly, times, villeNom) {
-    const container = document.getElementById('hourly');
-    container.innerHTML = '';
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    let count = 0;
-
-    for (let i = 0; i < times.length && count < 48; i++) {
-      const time = new Date(times[i]);
-      if (time < now) continue;
-
-      const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
-      const timeDate = new Date(time.getFullYear(), time.getMonth(), time.getDate());
-      const isTomorrow = timeDate.getTime() === (today.getTime() + 86400000);
-
-      let key = hourStr;
-      if (isTomorrow) key = hourStr + '_j2';
-
-      const temp = Math.round(hourly.temperature_2m[i]);
-      let weatherData = getWeatherData(hourly.weather_code[i]);
-
-      // Appliquer la prévision manuelle SEULEMENT pour aujourd'hui et demain
-      if (previsionsManuelles[villeNom] && (key in previsionsManuelles[villeNom])) {
-        weatherData = previsionsManuelles[villeNom][key];
+        // Jour 2 (demain)
+        "00h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "01h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "02h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "03h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "04h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "05h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "06h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "07h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "08h_j2": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+        "09h_j2": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        "10h_j2": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        "11h_j2": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png" },
+        "12h_j2": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png" },
+        "13h_j2": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        "14h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "15h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "16h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "17h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "18h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "19h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "20h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "21h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "22h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "23h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" }
       }
+    };
 
-      // Affichage : "20h" ou "25 20h"
-      const displayHour = isTomorrow
-        ? `${time.getDate()} ${hourStr}`
-        : hourStr;
+    const weatherCodeMap = {
+      0: { label: 'Ensoleillé', icon: 'https://i.imgur.com/9mtLzHK.png' },
+      1: { label: 'Partiellement nuageux', icon: 'https://i.imgur.com/1gHBkKj.png' },
+      2: { label: 'Partiellement nuageux', icon: 'https://i.imgur.com/1gHBkKj.png' },
+      3: { label: 'Très nuageux', icon: 'https://i.imgur.com/8EIg3fq.png' },
+      45: { label: 'Brouillard', icon: 'https://i.imgur.com/8EIg3fq.png' },
+      48: { label: 'Brouillard givrant', icon: 'https://i.imgur.com/8EIg3fq.png' },
+      51: { label: 'Averses faibles', icon: 'https://i.imgur.com/lBjVqLV.png' },
+      53: { label: 'Pluie faible', icon: 'https://i.imgur.com/lBjVqLV.png' },
+      55: { label: 'Pluie modérée', icon: 'https://i.imgur.com/UTtGtvk.png' },
+      61: { label: 'Pluie faible', icon: 'https://i.imgur.com/lBjVqLV.png' },
+      63: { label: 'Pluie modérée', icon: 'https://i.imgur.com/UTtGtvk.png' },
+      65: { label: 'Pluie forte', icon: 'https://i.imgur.com/zFt161l.png' },
+      80: { label: 'Averses faibles', icon: 'https://i.imgur.com/lBjVqLV.png' },
+      81: { label: 'Averses', icon: 'https://i.imgur.com/UTtGtvk.png' },
+      82: { label: 'Averses fortes', icon: 'https://i.imgur.com/zFt161l.png' },
+      95: { label: 'Orages', icon: 'https://i.imgur.com/Qre2CV4.png' },
+      96: { label: 'Averses orageuses', icon: 'https://i.imgur.com/GlPii5L.png' },
+      99: { label: 'Orages violents', icon: 'https://i.imgur.com/Qre2CV4.png' }
+    };
 
-      const card = document.createElement('div');
-      card.className = 'hour-card';
-      card.innerHTML = `
-        <div style="font-size:13px; font-weight:600;">${displayHour}</div>
-        <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:28px;height:28px;margin:6px 0;">
-        <div style="font-weight:700;">${temp}°</div>
-        <div style="font-size:11px; opacity:0.85; margin-top:6px;">${weatherData.label}</div>
-      `;
-      container.appendChild(card);
-      count++;
+    function getWeatherData(code) {
+      return weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/8EIg3fq.png' };
     }
-  }
 
-  function renderForecast7j(daily, times) {
-    const container = document.getElementById('forecast-7j');
-    container.innerHTML = '';
-    const days = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(times[i]);
-      const dayName = i === 0 ? "Aujourd'hui" : days[date.getDay()];
-      const min = Math.round(daily.temperature_2m_min[i]);
-      const max = Math.round(daily.temperature_2m_max[i]);
-      const weatherData = getWeatherData(daily.weather_code[i]);
+    async function fetchWeather(lat, lon, nomVille) {
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
+        const res = await fetch(url);
+        const data = await res.json();
 
-      const card = document.createElement('div');
-      card.className = 'day-card';
-      card.innerHTML = `
-        <div style="display:flex;align-items:center;gap:14px;">
-          <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:28px;height:28px;">
-          <div style="font-weight:600;">${dayName}</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-weight:700;">${min}° / ${max}°</div>
-          <div style="font-size:12px; opacity:0.85;">${weatherData.label}</div>
-        </div>
-      `;
-      container.appendChild(card);
+        const current = data.current;
+        const currentW = getWeatherData(current.weather_code);
+        document.getElementById('ville-nom').textContent = nomVille;
+        document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
+        document.getElementById('current-condition').textContent = currentW.label;
+        document.getElementById('humidity').textContent = `${Math.round(current.relative_humidity_2m)}%`;
+        document.getElementById('wind').textContent = `${Math.round(current.wind_speed_10m * 3.6)} km/h`;
+        document.getElementById('uv').textContent = current.uv_index ? current.uv_index.toFixed(1) : "—";
+        document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
+
+        renderHourly(data.hourly, data.hourly.time, nomVille);
+        renderForecast7j(data.daily, data.daily.time);
+      } catch (e) {
+        console.error(e);
+        document.getElementById('ville-nom').textContent = nomVille;
+        document.getElementById('current-temp').textContent = `--°`;
+        document.getElementById('current-condition').textContent = `Données non disponibles`;
+      }
     }
-  }
 
-  const searchInput = document.getElementById('search-input-bottom');
-  const suggestionsDropdown = document.getElementById('suggestions-dropdown');
+    function renderHourly(hourly, times, villeNom) {
+      const container = document.getElementById('hourly');
+      container.innerHTML = '';
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      let count = 0;
 
-  function showSuggestions() {
-    suggestionsDropdown.innerHTML = '';
-    suggestionsDropdown.style.display = 'block';
-    villesReunion.forEach(v => {
-      const el = document.createElement('div');
-      el.className = 'suggestion-item';
-      el.textContent = v.nom;
-      el.onclick = () => {
-        searchInput.value = v.nom;
+      for (let i = 0; i < times.length && count < 48; i++) {
+        const time = new Date(times[i]);
+        if (time < now) continue;
+
+        const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
+        const timeDate = new Date(time.getFullYear(), time.getMonth(), time.getDate());
+        const isTomorrow = timeDate.getTime() === (today.getTime() + 86400000);
+
+        let key = hourStr;
+        if (isTomorrow) key = hourStr + '_j2';
+
+        const temp = Math.round(hourly.temperature_2m[i]);
+        let weatherData = getWeatherData(hourly.weather_code[i]);
+
+        if (previsionsManuelles[villeNom] && (key in previsionsManuelles[villeNom])) {
+          weatherData = previsionsManuelles[villeNom][key];
+        }
+
+        const displayHour = isTomorrow
+          ? `${time.getDate()} ${hourStr}`
+          : hourStr;
+
+        const card = document.createElement('div');
+        card.className = 'hour-card';
+        card.innerHTML = `
+          <div style="font-size:13px; font-weight:600;">${displayHour}</div>
+          <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:28px;height:28px;margin:6px 0;">
+          <div style="font-weight:700;">${temp}°</div>
+          <div style="font-size:11px; opacity:0.85; margin-top:6px;">${weatherData.label}</div>
+        `;
+        container.appendChild(card);
+        count++;
+      }
+    }
+
+    function renderForecast7j(daily, times) {
+      const container = document.getElementById('forecast-7j');
+      container.innerHTML = '';
+      const days = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(times[i]);
+        const dayName = i === 0 ? "Aujourd'hui" : days[date.getDay()];
+        const min = Math.round(daily.temperature_2m_min[i]);
+        const max = Math.round(daily.temperature_2m_max[i]);
+        const weatherData = getWeatherData(daily.weather_code[i]);
+
+        const card = document.createElement('div');
+        card.className = 'day-card';
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;gap:14px;">
+            <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:28px;height:28px;">
+            <div style="font-weight:600;">${dayName}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:700;">${min}° / ${max}°</div>
+            <div style="font-size:12px; opacity:0.85;">${weatherData.label}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    const searchInput = document.getElementById('search-input-bottom');
+    const suggestionsDropdown = document.getElementById('suggestions-dropdown');
+
+    function showSuggestions() {
+      suggestionsDropdown.innerHTML = '';
+      suggestionsDropdown.style.display = 'block';
+      villesReunion.forEach(v => {
+        const el = document.createElement('div');
+        el.className = 'suggestion-item';
+        el.textContent = v.nom;
+        el.onclick = () => {
+          searchInput.value = v.nom;
+          suggestionsDropdown.style.display = 'none';
+          fetchWeather(v.lat, v.lon, v.nom);
+        };
+        suggestionsDropdown.appendChild(el);
+      });
+    }
+
+    searchInput.addEventListener('click', showSuggestions);
+    document.addEventListener('click', (e) => {
+      if (!searchInput.contains(e.target) && !suggestionsDropdown.contains(e.target)) {
         suggestionsDropdown.style.display = 'none';
-        fetchWeather(v.lat, v.lon, v.nom);
-      };
-      suggestionsDropdown.appendChild(el);
+      }
     });
-  }
 
-  searchInput.addEventListener('click', showSuggestions);
-  document.addEventListener('click', (e) => {
-    if (!searchInput.contains(e.target) && !suggestionsDropdown.contains(e.target)) {
-      suggestionsDropdown.style.display = 'none';
+    document.querySelector('.youtube-btn').addEventListener('click', () => {
+      window.open('https://youtube.com/@meteore974', '_blank');
+    });
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt = null;
+      } else {
+        alert("👉 Sur mobile : menu Chrome → 'Installer'\n👉 Sur PC : icône '+' dans la barre d'adresse");
+      }
+      closeSettings();
     }
-  });
 
-  document.querySelector('.youtube-btn').addEventListener('click', () => {
-    window.open('https://youtube.com/@meteore974', '_blank');
-  });
-
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-  });
-
-  function installApp() {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt = null;
-    } else {
-      alert("👉 Sur mobile : menu Chrome → 'Installer'\n👉 Sur PC : icône '+' dans la barre d'adresse");
+    function shareSite() {
+      if (navigator.share) {
+        navigator.share({ title: 'MeteoRe – La Réunion', text: 'Prévisions météo précises', url: window.location.href });
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Lien copié !');
+      }
+      closeSettings();
     }
-    closeSettings();
-  }
 
-  function shareSite() {
-    if (navigator.share) {
-      navigator.share({ title: 'MeteoRe – La Réunion', text: 'Prévisions météo précises', url: window.location.href });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Lien copié !');
+    function closeSettings() {
+      document.getElementById('settings-modal').style.display = 'none';
     }
-    closeSettings();
-  }
 
-  function closeSettings() {
-    document.getElementById('settings-modal').style.display = 'none';
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      document.getElementById('intro').classList.add('hidden');
-      const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
-      searchInput.value = etangSale.nom;
-      fetchWeather(etangSale.lat, etangSale.lon, etangSale.nom);
-    }, 2500);
-  });
-</script>
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.getElementById('intro').classList.add('hidden');
+        const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
+        searchInput.value = etangSale.nom;
+        fetchWeather(etangSale.lat, etangSale.lon, etangSale.nom);
+      }, 2500);
+    });
+  </script>
+</body>
+</html>
