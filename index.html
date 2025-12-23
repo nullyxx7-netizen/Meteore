@@ -130,6 +130,17 @@
     }
     body.dark .logo { color: #bbdefb; }
 
+    .logo-with-version {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .version {
+      font-size: 10px;
+      opacity: 0.7;
+      margin-top: -4px;
+    }
+
     .search-top {
       display: flex;
       align-items: center;
@@ -378,10 +389,13 @@
 
   <!-- 🔝 BARRE SUPÉRIEURE -->
   <div class="top-bar">
-    <div class="logo">MeteoRe</div>
+    <div class="logo-with-version">
+      <div class="logo">MeteoRe</div>
+      <div class="version">version 1.10</div>
+    </div>
     <div class="search-top">
       <div class="search-box-top">
-        <input type="text" id="search-input-top" placeholder="Choisissez une ville..." readonly>
+        <input type="text" id="search-input-top" placeholder="Cliquez pour défiler les villes..." readonly>
       </div>
       <button class="youtube-btn" style="background:#ff0000;color:white;padding:6px 12px;border:none;border-radius:8px;font-weight:600;font-size:12px;">▶️ Retrouve-moi sur YouTube</button>
       <div class="actions">
@@ -628,23 +642,43 @@
       }
     }
 
-    // ===== RECHERCHE DÉFILEMENT =====
-    let currentIndex = 0;
+    // ===== DÉFILEMENT DES VILLES =====
+    let autoScrollInterval = null;
     const searchInput = document.getElementById('search-input-top');
 
-    function updateSearchInput() {
-      const ville = villesReunion[currentIndex];
-      searchInput.value = ville.nom;
-      fetchWeather(ville.lat, ville.lon, ville.nom);
+    function startAutoScroll() {
+      clearInterval(autoScrollInterval);
+      let index = 0;
+      autoScrollInterval = setInterval(() => {
+        const ville = villesReunion[index];
+        searchInput.value = ville.nom;
+        fetchWeather(ville.lat, ville.lon, ville.nom);
+        index = (index + 1) % villesReunion.length;
+      }, 1200); // change toutes les 1.2 secondes
     }
 
+    function stopAutoScroll() {
+      clearInterval(autoScrollInterval);
+    }
+
+    // Clic sur la barre → défile
     searchInput.addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % villesReunion.length;
-      updateSearchInput();
+      if (!autoScrollInterval) {
+        startAutoScroll();
+      }
+    });
+
+    // Clic ailleurs → arrête
+    document.addEventListener('click', (e) => {
+      if (!searchInput.contains(e.target)) {
+        stopAutoScroll();
+      }
     });
 
     // INIT
-    updateSearchInput(); // Charge la première ville au démarrage
+    const firstVille = villesReunion[0];
+    searchInput.value = firstVille.nom;
+    fetchWeather(firstVille.lat, firstVille.lon, firstVille.nom);
 
     // ===== BOUTONS =====
     document.getElementById('refresh-btn').addEventListener('click', () => {
