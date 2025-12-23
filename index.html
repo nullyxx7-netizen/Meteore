@@ -397,9 +397,9 @@
     <div class="section-title">Prévision 7 jours</div>
     <div class="forecast-7j" id="forecast-7j"></div>
 
-    <div class="section-title">Carte cyclonique, cyclone qui pourrait afffecter La Réunion et Maurice d'ici janvier. (mise à jour le 23/12/2025 à 23h30)</div>
+    <div class="section-title">Carte cyclonique, cyclone qui pourrait toucher la réunion d'ici janvier. (mise à jour le 23/12/2025 à 22h05)</div>
     <div class="windy-widget">
-      <img src="https://i.imgur.com/L9Jqy56.png" alt="Carte Windy" onerror="this.src='https://via.placeholder.com/600x300/e0f7fa/006064?text=Carte+non+disponible';">
+      <img src="https://i.imgur.com/MCWCwB7.png" alt="Carte Windy" onerror="this.src='https://via.placeholder.com/600x300/e0f7fa/006064?text=Carte+non+disponible';">
       <p style="font-size:13px; opacity:0.85; margin-top:12px;">Source : Windy.com • Mise à jour manuelle par MeteoRe</p>
     </div>
 
@@ -443,12 +443,12 @@
     const previsionsManuelles = {
       "L'Étang-Salé": {
         // Jour 1 (aujourd'hui)
-        "00h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
-        "01h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
-        "02h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
-        "03h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
-        "04h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
-        "05h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+        "00h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "01h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "02h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "03h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "04h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "05h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
         "06h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
         "07h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
         "08h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
@@ -528,8 +528,6 @@
       const jour = date.getDate();
       const moisIndex = date.getMonth();
       const mois = moisNoms[moisIndex];
-      // Si le mois a exactement 3 lettres → on affiche tel quel (ex: "mai")
-      // Sinon → on met la première en majuscule (ex: "août")
       const moisAffiche = mois.length === 3 ? mois : mois.charAt(0).toUpperCase() + mois.slice(1);
       return `${jour} ${moisAffiche}`;
     }
@@ -541,7 +539,19 @@
         const data = await res.json();
 
         const current = data.current;
-        const currentW = getWeatherData(current.weather_code);
+        let currentW = getWeatherData(current.weather_code);
+
+        // ⭐ MODIFICATION ICI : si la ville a des prévisions manuelles, on utilise la condition de 00h comme condition actuelle
+        if (previsionsManuelles[nomVille]) {
+          const firstHourKey = Object.keys(previsionsManuelles[nomVille]).find(k => !k.includes('_j2'));
+          if (firstHourKey) {
+            currentW = {
+              label: previsionsManuelles[nomVille][firstHourKey].label,
+              icon: previsionsManuelles[nomVille][firstHourKey].icon
+            };
+          }
+        }
+
         document.getElementById('ville-nom').textContent = nomVille;
         document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
         document.getElementById('current-condition').textContent = currentW.label;
@@ -551,7 +561,7 @@
         document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
 
         renderHourly(data.hourly, data.hourly.time, nomVille);
-        renderForecast7j(data.daily, data.daily.time);
+        renderForecast7j(data.daily, data.daily.time, nomVille);
       } catch (e) {
         console.error(e);
         document.getElementById('ville-nom').textContent = nomVille;
@@ -602,16 +612,66 @@
       }
     }
 
-    function renderForecast7j(daily, times) {
+    function renderForecast7j(daily, times, villeNom) {
       const container = document.getElementById('forecast-7j');
       container.innerHTML = '';
       const days = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+      const now = new Date();
+      const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const tomorrowDate = new Date(todayDate);
+      tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+
       for (let i = 0; i < 7; i++) {
         const date = new Date(times[i]);
         const dayName = i === 0 ? "Aujourd'hui" : days[date.getDay()];
         const min = Math.round(daily.temperature_2m_min[i]);
         const max = Math.round(daily.temperature_2m_max[i]);
-        const weatherData = getWeatherData(daily.weather_code[i]);
+        let weatherData = getWeatherData(daily.weather_code[i]);
+
+        // 🔁 Remplacement pour Jour 0 (aujourd’hui) et Jour 1 (demain)
+        if (previsionsManuelles[villeNom] && i <= 1) {
+          // On cherche la condition la PLUS INTENSE de la journée dans tes données manuelles
+          let heuresJour = i === 0 
+            ? Object.keys(previsionsManuelles[villeNom]).filter(k => !k.includes('_j2'))
+            : Object.keys(previsionsManuelles[villeNom]).filter(k => k.includes('_j2'));
+
+          // Priorité : on choisit l’icône/label le plus "fort" (ordre de gravité)
+          const ordreGravite = {
+            'Orages violents': 10,
+            'Orages': 9,
+            'Averses orageuses': 8,
+            'Averses fortes': 7,
+            'Pluie forte': 7,
+            'Averses': 6,
+            'Pluie modérée': 6,
+            'Averses faibles': 5,
+            'Pluie faible': 5,
+            'Très nuageux': 4,
+            'Partiellement nuageux': 3,
+            'Ciel clair': 2,
+            'Ensoleillé': 1,
+            'Ciel dégagé': 2,
+            'Couvert': 4,
+            'Brouillard': 3,
+            'Brouillard givrant': 3
+          };
+
+          let pireCondition = 'Ciel clair';
+          let pireScore = 0;
+
+          heuresJour.forEach(heure => {
+            const label = previsionsManuelles[villeNom][heure].label;
+            const score = ordreGravite[label] || 0;
+            if (score > pireScore) {
+              pireScore = score;
+              pireCondition = label;
+              weatherData = {
+                label: label,
+                icon: previsionsManuelles[villeNom][heure].icon
+              };
+            }
+          });
+        }
 
         const card = document.createElement('div');
         card.className = 'day-card';
