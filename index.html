@@ -633,11 +633,18 @@
         const code = hourly.weathercode[i];
         let condition = getConditionText(code);
 
-        // CORRECTION MANUELLE → SEULEMENT POUR L'ÉTANG-SALÉ
-        if (villeNom === "L'Étang-Salé") {
-          if (hourStr === "15h") condition = "Partiellement nuageux";
-          if (hourStr === "16h") condition = "Partiellement nuageux";
-          if (hourStr === "17h") condition = "Risque d'averses";
+       // CORRECTION MANUELLE → SEULEMENT POUR L'ÉTANG-SALÉ
+    if (villeNom === "L'Étang-Salé") {
+      if (hourStr === "16h") {
+        condition = " Risque d'averses faibles";
+        emoji = "🌦️";
+      }
+      if (hourStr === "14h") {
+        condition = "Partiellement nuageux";
+        emoji = "⛅";
+      }
+      
+      }
          
         }
 
