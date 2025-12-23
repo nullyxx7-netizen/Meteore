@@ -127,7 +127,7 @@
       margin-top: -2px;
     }
 
-    .youtube-btn {
+    .youtube-btn, .edit-btn {
       background: #ff0000;
       color: white;
       padding: 6px 14px;
@@ -138,7 +138,10 @@
       cursor: pointer;
       box-shadow: 0 3px 8px rgba(0,0,0,0.15);
     }
-    .youtube-btn:hover {
+    .edit-btn {
+      background: var(--accent);
+    }
+    .youtube-btn:hover, .edit-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 5px 12px rgba(0,0,0,0.2);
     }
@@ -236,10 +239,17 @@
       align-items: center;
       border: 1px solid rgba(2, 136, 209, 0.1);
       transition: all 0.2s;
+      cursor: pointer;
     }
-    .day-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    .day-card.editable:hover {
+      background: #e3f2fd;
+    }
+    .day-card.editable::after {
+      content: "✏️";
+      position: absolute;
+      right: 12px;
+      opacity: 0.5;
+      font-size: 14px;
     }
 
     .windy-widget {
@@ -319,6 +329,51 @@
       color: var(--accent);
     }
 
+    #edit-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 24px;
+      width: 90%;
+      max-width: 350px;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .modal-content h3 {
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+    .modal-content input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    .modal-btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .modal-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-save { background: var(--accent); color: white; }
+    .btn-cancel { background: #f5f5f5; color: #333; }
+
     #settings-modal {
       display: none;
       position: fixed;
@@ -326,7 +381,7 @@
       background: rgba(0,0,0,0.5);
       z-index: 1000;
     }
-    .modal-content {
+    .modal-content-settings {
       background: white;
       margin: 10% auto;
       padding: 24px;
@@ -361,9 +416,12 @@
   <div class="top-bar">
     <div class="logo-with-version">
       <div class="logo">MeteoRe</div>
-      <div class="version">version 1.10</div>
+      <div class="version">version 1.11</div>
     </div>
-    <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
+    <div>
+      <button class="edit-btn" id="edit-toggle">✏️ Modifier</button>
+      <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
+    </div>
   </div>
 
   <div class="container">
@@ -413,8 +471,32 @@
     <div id="suggestions-dropdown" class="suggestions-dropdown"></div>
   </div>
 
-  <div id="settings-modal">
+  <!-- Modal édition 7j -->
+  <div id="edit-modal">
     <div class="modal-content">
+      <h3>Modifier le jour</h3>
+      <input type="text" id="edit-day-label" placeholder="Label (ex: Averses)">
+      <input type="number" id="edit-temp-min" placeholder="Min (°C)" min="-10" max="50">
+      <input type="number" id="edit-temp-max" placeholder="Max (°C)" min="-10" max="50">
+      <select id="edit-icon">
+        <option value="https://i.imgur.com/9mtLzHK.png">Ensoleillé / Ciel clair</option>
+        <option value="https://i.imgur.com/1gHBkKj.png">Partiellement nuageux</option>
+        <option value="https://i.imgur.com/8EIg3fq.png">Très nuageux / Couvert</option>
+        <option value="https://i.imgur.com/lBjVqLV.png">Averses faibles / Pluie faible</option>
+        <option value="https://i.imgur.com/UTtGtvk.png">Averses / Pluie modérée</option>
+        <option value="https://i.imgur.com/zFt161l.png">Averses fortes / Pluie forte</option>
+        <option value="https://i.imgur.com/Qre2CV4.png">Orages</option>
+        <option value="https://i.imgur.com/GlPii5L.png">Averses orageuses</option>
+      </select>
+      <div class="modal-btns">
+        <button class="modal-btn btn-save" id="save-edit">Sauvegarder</button>
+        <button class="modal-btn btn-cancel" id="cancel-edit">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settings-modal">
+    <div class="modal-content-settings">
       <h3>MeteoRe</h3>
       <button class="modal-btn" onclick="installApp()">📱 Installer l'application</button>
       <button class="modal-btn" onclick="shareSite()">📤 Partager ce site</button>
@@ -424,6 +506,21 @@
   </div>
 
   <script>
+    // === CONFIG MANUELLE JOURNALIÈRE (POUR LES 7 JOURS) ===
+    // Clé : "ville::YYYY-MM-DD"
+    const getManualDailyKey = (ville, dateStr) => `${ville}::${dateStr}`;
+    let manualDailyOverrides = JSON.parse(localStorage.getItem('manualDailyOverrides') || '{}');
+
+    // === TOGGLE ÉDITION ===
+    let editMode = false;
+    document.getElementById('edit-toggle').addEventListener('click', () => {
+      editMode = !editMode;
+      document.getElementById('edit-toggle').textContent = editMode ? '✅ Fin modifier' : '✏️ Modifier';
+      document.querySelectorAll('.day-card').forEach(card => {
+        card.classList.toggle('editable', editMode);
+      });
+    });
+
     const villesReunion = [
       { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
       { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
@@ -442,7 +539,6 @@
 
     const previsionsManuelles = {
       "L'Étang-Salé": {
-        // Jour 1 (aujourd'hui)
         "00h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png" },
         "01h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png" },
         "02h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png" },
@@ -468,7 +564,6 @@
         "22h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
         "23h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png" },
 
-        // Jour 2 (demain)
         "00h_j2": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png" },
         "01h_j2": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png" },
         "02h_j2": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png" },
@@ -521,7 +616,6 @@
       return weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/8EIg3fq.png' };
     }
 
-    // === FORMAT DE DATE PERSONNALISÉ ===
     const moisNoms = ["jan", "fév", "mar", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
 
     function formatDateForHourly(date) {
@@ -530,6 +624,21 @@
       const mois = moisNoms[moisIndex];
       const moisAffiche = mois.length === 3 ? mois : mois.charAt(0).toUpperCase() + mois.slice(1);
       return `${jour} ${moisAffiche}`;
+    }
+
+    // === MODIFICATIONS JOURNALIÈRES ===
+    function applyManualDailyOverride(ville, dateStr, data) {
+      const key = getManualDailyKey(ville, dateStr);
+      if (manualDailyOverrides[key]) {
+        return { ...data, ...manualDailyOverrides[key] };
+      }
+      return data;
+    }
+
+    function saveManualDailyOverride(ville, dateStr, override) {
+      const key = getManualDailyKey(ville, dateStr);
+      manualDailyOverrides[key] = override;
+      localStorage.setItem('manualDailyOverrides', JSON.stringify(manualDailyOverrides));
     }
 
     async function fetchWeather(lat, lon, nomVille) {
@@ -541,7 +650,6 @@
         const current = data.current;
         let currentW = getWeatherData(current.weather_code);
 
-        // ⭐ MODIFICATION ICI : si la ville a des prévisions manuelles, on utilise la condition de 00h comme condition actuelle
         if (previsionsManuelles[nomVille]) {
           const firstHourKey = Object.keys(previsionsManuelles[nomVille]).find(k => !k.includes('_j2'));
           if (firstHourKey) {
@@ -590,7 +698,6 @@
         const temp = Math.round(hourly.temperature_2m[i]);
         let weatherData = getWeatherData(hourly.weather_code[i]);
 
-        // Remplacement manuel si défini
         if (previsionsManuelles[villeNom] && (key in previsionsManuelles[villeNom])) {
           const manuel = previsionsManuelles[villeNom][key];
           weatherData = { label: manuel.label, icon: manuel.icon };
@@ -612,69 +719,35 @@
       }
     }
 
+    let editingCardIndex = -1;
+
     function renderForecast7j(daily, times, villeNom) {
       const container = document.getElementById('forecast-7j');
       container.innerHTML = '';
       const days = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
       const now = new Date();
-      const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const tomorrowDate = new Date(todayDate);
-      tomorrowDate.setDate(tomorrowDate.getDate() + 1);
 
       for (let i = 0; i < 7; i++) {
         const date = new Date(times[i]);
+        const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
         const dayName = i === 0 ? "Aujourd'hui" : days[date.getDay()];
-        const min = Math.round(daily.temperature_2m_min[i]);
-        const max = Math.round(daily.temperature_2m_max[i]);
+        let min = Math.round(daily.temperature_2m_min[i]);
+        let max = Math.round(daily.temperature_2m_max[i]);
         let weatherData = getWeatherData(daily.weather_code[i]);
 
-        // 🔁 Remplacement pour Jour 0 (aujourd’hui) et Jour 1 (demain)
-        if (previsionsManuelles[villeNom] && i <= 1) {
-          // On cherche la condition la PLUS INTENSE de la journée dans tes données manuelles
-          let heuresJour = i === 0 
-            ? Object.keys(previsionsManuelles[villeNom]).filter(k => !k.includes('_j2'))
-            : Object.keys(previsionsManuelles[villeNom]).filter(k => k.includes('_j2'));
-
-          // Priorité : on choisit l’icône/label le plus "fort" (ordre de gravité)
-          const ordreGravite = {
-            'Orages violents': 10,
-            'Orages': 9,
-            'Averses orageuses': 8,
-            'Averses fortes': 7,
-            'Pluie forte': 7,
-            'Averses': 6,
-            'Pluie modérée': 6,
-            'Averses faibles': 5,
-            'Pluie faible': 5,
-            'Très nuageux': 4,
-            'Partiellement nuageux': 3,
-            'Ciel clair': 2,
-            'Ensoleillé': 1,
-            'Ciel dégagé': 2,
-            'Couvert': 4,
-            'Brouillard': 3,
-            'Brouillard givrant': 3
-          };
-
-          let pireCondition = 'Ciel clair';
-          let pireScore = 0;
-
-          heuresJour.forEach(heure => {
-            const label = previsionsManuelles[villeNom][heure].label;
-            const score = ordreGravite[label] || 0;
-            if (score > pireScore) {
-              pireScore = score;
-              pireCondition = label;
-              weatherData = {
-                label: label,
-                icon: previsionsManuelles[villeNom][heure].icon
-              };
-            }
-          });
-        }
+        // Appliquer override journalier
+        const override = applyManualDailyOverride(villeNom, dateStr, { min, max, label: weatherData.label, icon: weatherData.icon });
+        min = override.min;
+        max = override.max;
+        weatherData = { label: override.label, icon: override.icon };
 
         const card = document.createElement('div');
         card.className = 'day-card';
+        if (editMode) card.classList.add('editable');
+        card.dataset.index = i;
+        card.dataset.date = dateStr;
+        card.dataset.ville = villeNom;
+
         card.innerHTML = `
           <div style="display:flex;align-items:center;gap:14px;">
             <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:28px;height:28px;">
@@ -685,10 +758,54 @@
             <div style="font-size:12px; opacity:0.85;">${weatherData.label}</div>
           </div>
         `;
+
+        card.addEventListener('click', () => {
+          if (!editMode) return;
+          editingCardIndex = i;
+          document.getElementById('edit-day-label').value = weatherData.label;
+          document.getElementById('edit-temp-min').value = min;
+          document.getElementById('edit-temp-max').value = max;
+          document.getElementById('edit-icon').value = weatherData.icon;
+          document.getElementById('edit-modal').style.display = 'flex';
+        });
+
         container.appendChild(card);
       }
     }
 
+    // === GESTION MODAL ÉDITION ===
+    document.getElementById('save-edit').addEventListener('click', () => {
+      const label = document.getElementById('edit-day-label').value;
+      const min = parseInt(document.getElementById('edit-temp-min').value);
+      const max = parseInt(document.getElementById('edit-temp-max').value);
+      const icon = document.getElementById('edit-icon').value;
+      const cards = document.querySelectorAll('.day-card');
+      const card = cards[editingCardIndex];
+      const ville = card.dataset.ville;
+      const date = card.dataset.date;
+
+      if (label && !isNaN(min) && !isNaN(max)) {
+        saveManualDailyOverride(ville, date, { label, min, max, icon });
+        document.getElementById('edit-modal').style.display = 'none';
+        fetchWeather(
+          villesReunion.find(v => v.nom === ville).lat,
+          villesReunion.find(v => v.nom === ville).lon,
+          ville
+        );
+      }
+    });
+
+    document.getElementById('cancel-edit').addEventListener('click', () => {
+      document.getElementById('edit-modal').style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+      if (e.target === document.getElementById('edit-modal')) {
+        document.getElementById('edit-modal').style.display = 'none';
+      }
+    });
+
+    // === RESTE DU CODE ===
     const searchInput = document.getElementById('search-input-bottom');
     const suggestionsDropdown = document.getElementById('suggestions-dropdown');
 
