@@ -460,7 +460,7 @@
     <div class="forecast-7j" id="forecast-7j"></div>
 
     <!-- 🌪️ CARTE WINDY -->
-    <div class="section-title">Carte Windy (mise à jour le 23/12/2025 à 13h41</div>
+    <div class="section-title">Carte Windy (mise à jour le 23/12/2025 à 13h41)</div>
     <div class="windy-widget">
       <img src="https://i.imgur.com/GTpMYCr.png" alt="Carte Windy" onerror="this.src='https://via.placeholder.com/600x300/e3f2fd/0d47a1?text=Carte+non+disponible';">
       <p style="font-size:13px; opacity:0.8; margin-top:10px;">Source : Windy.com • Mise à jour manuelle par MeteoRe</p>
@@ -608,7 +608,7 @@
         document.getElementById('uv').textContent = current.uv_index ? current.uv_index.toFixed(1) : "—";
         document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
 
-        renderHourly(data.hourly, data.hourly.time);
+        renderHourly(data.hourly, data.hourly.time, nomVille);
         renderForecast7j(data.daily, data.daily.time);
 
       } catch (e) {
@@ -619,8 +619,8 @@
       }
     }
 
-    // ===== PRÉVISION HORAIRE =====
-    function renderHourly(hourly, times) {
+    // ===== PRÉVISION HORAIRE (corrigée) =====
+    function renderHourly(hourly, times, villeNom) {
       const container = document.getElementById('hourly');
       container.innerHTML = '';
       const now = new Date();
@@ -633,9 +633,13 @@
         const code = hourly.weathercode[i];
         let condition = getConditionText(code);
 
-        // CORRECTION MANUELLE POUR L'ÉTANG-SALÉ
-        if (hourStr === "16h") condition = "Averses faibles";
-        if (hourStr === "14h") condition = "Partiellement nuageux";
+        // CORRECTION MANUELLE → SEULEMENT POUR L'ÉTANG-SALÉ
+        if (villeNom === "L'Étang-Salé") {
+          if (hourStr === "15h") condition = "Partiellement nuageux";
+          if (hourStr === "16h") condition = "Partiellement nuageux";
+          if (hourStr === "17h") condition = "Risque d'averses";
+         
+        }
 
         const emoji = getEmoji(code);
         const card = document.createElement('div');
