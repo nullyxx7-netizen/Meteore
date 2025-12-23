@@ -361,7 +361,7 @@
   <div class="top-bar">
     <div class="logo-with-version">
       <div class="logo">MeteoRe</div>
-      <div class="version">version 1.10</div>
+      <div class="version">version 1.12</div>
     </div>
     <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
   </div>
@@ -440,6 +440,7 @@
       { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
     ];
 
+    // 🌤️ PRÉVISIONS MANUELLES – 2 JOURS HEURE PAR HEURE
     const previsionsManuelles = {
       "L'Étang-Salé": {
         // Jour 1 (aujourd'hui)
@@ -496,6 +497,19 @@
       }
     };
 
+    // 📅 PRÉVISIONS 7 JOURS MANUELLES – POUR L'ÉTANG-SALÉ SEULEMENT
+    const previsions7jManuelles = {
+      "L'Étang-Salé": [
+        { day: "24 déc.", min: 24, max: 31, label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        { day: "25 déc.", min: 23, max: 30, label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        { day: "26 déc.", min: 23, max: 27, label: "Pluie faible", icon: "https://i.imgur.com/v4XPcNF.png" },
+        { day: "27 déc.", min: 19, max: 27, label: "Pluie faible", icon: "https://i.imgur.com/v4XPcNF.png" },
+        { day: "28 déc.", min: 21, max: 29, label: "Orages", icon: "https://i.imgur.com/Qre2CV4.png" },
+        { day: "29 déc.", min: 21, max: 27, label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png" },
+        { day: "30 déc.", min: 22, max: 28, label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" }
+      ]
+    };
+
     const weatherCodeMap = {
       0: { label: 'Ensoleillé', icon: 'https://i.imgur.com/9mtLzHK.png' },
       1: { label: 'Partiellement nuageux', icon: 'https://i.imgur.com/1gHBkKj.png' },
@@ -522,29 +536,99 @@
     }
 
     async function fetchWeather(lat, lon, nomVille) {
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
-        const res = await fetch(url);
-        const data = await res.json();
+      const isEtangSale = nomVille === "L'Étang-Salé";
 
-        const current = data.current;
-        const currentW = getWeatherData(current.weather_code);
+      if (isEtangSale) {
         document.getElementById('ville-nom').textContent = nomVille;
-        document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
-        document.getElementById('current-condition').textContent = currentW.label;
-        document.getElementById('humidity').textContent = `${Math.round(current.relative_humidity_2m)}%`;
-        document.getElementById('wind').textContent = `${Math.round(current.wind_speed_10m * 3.6)} km/h`;
-        document.getElementById('uv').textContent = current.uv_index ? current.uv_index.toFixed(1) : "—";
-        document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
+        document.getElementById('current-temp').textContent = '--°';
+        document.getElementById('current-condition').textContent = 'Prévision manuelle';
+        document.getElementById('humidity').textContent = '—%';
+        document.getElementById('wind').textContent = '— km/h';
+        document.getElementById('uv').textContent = '—';
+        document.getElementById('pressure').textContent = '— hPa';
 
-        renderHourly(data.hourly, data.hourly.time, nomVille);
-        renderForecast7j(data.daily, data.daily.time);
-      } catch (e) {
-        console.error(e);
-        document.getElementById('ville-nom').textContent = nomVille;
-        document.getElementById('current-temp').textContent = `--°`;
-        document.getElementById('current-condition').textContent = `Données non disponibles`;
+        renderManualHourly(nomVille);
+        renderManual7j(nomVille);
+      } else {
+        try {
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
+          const res = await fetch(url);
+          const data = await res.json();
+
+          const current = data.current;
+          const currentW = getWeatherData(current.weather_code);
+          document.getElementById('ville-nom').textContent = nomVille;
+          document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
+          document.getElementById('current-condition').textContent = currentW.label;
+          document.getElementById('humidity').textContent = `${Math.round(current.relative_humidity_2m)}%`;
+          document.getElementById('wind').textContent = `${Math.round(current.wind_speed_10m * 3.6)} km/h`;
+          document.getElementById('uv').textContent = current.uv_index ? current.uv_index.toFixed(1) : "—";
+          document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
+
+          renderHourly(data.hourly, data.hourly.time, nomVille);
+          renderForecast7j(data.daily, data.daily.time);
+        } catch (e) {
+          console.error(e);
+          document.getElementById('ville-nom').textContent = nomVille;
+          document.getElementById('current-temp').textContent = `--°`;
+          document.getElementById('current-condition').textContent = `Données non disponibles`;
+        }
       }
+    }
+
+    function renderManualHourly(villeNom) {
+      const container = document.getElementById('hourly');
+      container.innerHTML = '';
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      let count = 0;
+      const manuel = previsionsManuelles[villeNom];
+
+      for (let i = 0; i < 48 && count < 48; i++) {
+        const time = new Date(now.getTime() + i * 3600000);
+        const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
+        const timeDate = new Date(time.getFullYear(), time.getMonth(), time.getDate());
+        const isTomorrow = timeDate.getTime() !== today.getTime();
+        const key = isTomorrow ? hourStr + '_j2' : hourStr;
+
+        if (manuel && manuel[key]) {
+          const weatherData = manuel[key];
+          const displayHour = isTomorrow ? `${time.getDate()} ${hourStr}` : hourStr;
+
+          const card = document.createElement('div');
+          card.className = 'hour-card';
+          card.innerHTML = `
+            <div style="font-size:13px; font-weight:600;">${displayHour}</div>
+            <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:28px;height:28px;margin:6px 0;">
+            <div style="font-weight:700;">—°</div>
+            <div style="font-size:11px; opacity:0.85; margin-top:6px;">${weatherData.label}</div>
+          `;
+          container.appendChild(card);
+          count++;
+        }
+      }
+    }
+
+    function renderManual7j(villeNom) {
+      const container = document.getElementById('forecast-7j');
+      container.innerHTML = '';
+      const days = previsions7jManuelles[villeNom];
+
+      days.forEach(day => {
+        const card = document.createElement('div');
+        card.className = 'day-card';
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;gap:14px;">
+            <img src="${day.icon}" alt="${day.label}" style="width:28px;height:28px;">
+            <div style="font-weight:600;">${day.day}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:700;">${day.min}° / ${day.max}°</div>
+            <div style="font-size:12px; opacity:0.85;">${day.label}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
     }
 
     function renderHourly(hourly, times, villeNom) {
@@ -560,10 +644,8 @@
 
         const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
         const timeDate = new Date(time.getFullYear(), time.getMonth(), time.getDate());
-        const isTomorrow = timeDate.getTime() === (today.getTime() + 86400000);
-
-        let key = hourStr;
-        if (isTomorrow) key = hourStr + '_j2';
+        const isTomorrow = timeDate.getTime() !== today.getTime();
+        const key = isTomorrow ? hourStr + '_j2' : hourStr;
 
         const temp = Math.round(hourly.temperature_2m[i]);
         let weatherData = getWeatherData(hourly.weather_code[i]);
@@ -572,9 +654,7 @@
           weatherData = previsionsManuelles[villeNom][key];
         }
 
-        const displayHour = isTomorrow
-          ? `${time.getDate()} ${hourStr}`
-          : hourStr;
+        const displayHour = isTomorrow ? `${time.getDate()} ${hourStr}` : hourStr;
 
         const card = document.createElement('div');
         card.className = 'hour-card';
@@ -657,14 +737,14 @@
         deferredPrompt.prompt();
         deferredPrompt = null;
       } else {
-        alert("👉 Sur mobile : menu Chrome → 'Installer'\n👉 Sur PC : icône '+' dans la barre d'adresse");
+        alert("👉 Sur mobile : menu Chrome → 'Installer'");
       }
       closeSettings();
     }
 
     function shareSite() {
       if (navigator.share) {
-        navigator.share({ title: 'MeteoRe – La Réunion', text: 'Prévisions météo précises', url: window.location.href });
+        navigator.share({ title: 'MeteoRe – La Réunion', url: window.location.href });
       } else {
         navigator.clipboard.writeText(window.location.href);
         alert('Lien copié !');
