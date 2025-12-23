@@ -343,7 +343,57 @@
         }
       }
 
+      // ✅ DONNÉES MANUELLES POUR L'ÉTANG-SALÉ
+      function renderEtangSaleManual() {
+        document.getElementById('ville-nom').textContent = "L'Étang-Salé";
+        document.getElementById('last-update').textContent = "Mis à jour manuellement";
+        document.getElementById('current-temp').textContent = "26°";
+        document.getElementById('current-condition').textContent = "Ciel couvert";
+
+        updateSky(3);
+        document.getElementById('rain').innerHTML = '';
+
+        setTimeout(() => {
+          document.getElementById('main-weather').style.display = 'block';
+          
+          const heuresManuelles = [
+            { hour: "06h", emoji: "🌤️", temp: "24°" },
+            { hour: "08h", emoji: "⛅", temp: "25°" },
+            { hour: "10h", emoji: "☁️", temp: "25°" }, // ✅ Très nuageux
+            { hour: "12h", emoji: "☁️", temp: "26°" }, // ✅ Très nuageux
+            { hour: "14h", emoji: "🌤️", temp: "27°" },
+            { hour: "16h", emoji: "⛅", temp: "26°" },
+            { hour: "18h", emoji: "☁️", temp: "25°" },
+            { hour: "20h", emoji: "🌧️", temp: "24°" },
+            { hour: "22h", emoji: "🌧️", temp: "23°" },
+            { hour: "00h", emoji: "🌦️", temp: "23°" },
+            { hour: "02h", emoji: "🌦️", temp: "22°" },
+            { hour: "04h", emoji: "🌧️", temp: "22°" }
+          ];
+
+          const container = document.getElementById('hourly');
+          container.innerHTML = '';
+          heuresManuelles.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'hour-card';
+            card.innerHTML = `<div class="time">${item.hour}</div><div class="emoji">${item.emoji}</div><div class="temp">${item.temp}</div>`;
+            container.appendChild(card);
+          });
+
+          renderForecast3j();
+        }, 300);
+      }
+
+      // 🌐 API POUR LES AUTRES VILLES
       async function fetchWeather(lat, lon, nomVille) {
+        if (nomVille === "L'Étang-Salé") {
+          document.getElementById('main-weather').style.display = 'none';
+          document.getElementById('hourly').innerHTML = '';
+          document.getElementById('forecast-3j').innerHTML = '';
+          renderEtangSaleManual();
+          return;
+        }
+
         document.getElementById('main-weather').style.display = 'none';
         document.getElementById('hourly').innerHTML = '';
         document.getElementById('forecast-3j').innerHTML = '';
@@ -482,4 +532,4 @@
   </script>
 
 </body>
-          </html>
+</html>
