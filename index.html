@@ -8,10 +8,10 @@
   <meta name="theme-color" content="#0d47a1">
   <link rel="apple-touch-icon" href="icon-194.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="preconnect" href="https://fonts.googleapis.com  ">
-  <link rel="preconnect" href="https://fonts.gstatic.com  " crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter  :wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js  "></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     /* ===== FOND ANIMÉ (soleil + nuages) ===== */
     body::before {
@@ -356,7 +356,7 @@
 
   <!-- 🌀 ANIMATION D'OUVERTURE -->
   <div id="intro">
-    <img id="intro-logo" src="https://i.imgur.com/KsA0dbG.jpeg  " alt="Logo MeteoRe">
+    <img id="intro-logo" src="https://i.imgur.com/KsA0dbG.jpeg" alt="Logo MeteoRe">
     <div id="intro-text">MeteoRe</div>
   </div>
 
@@ -394,16 +394,15 @@
       </div>
     </div>
 
-    <!-- 🔁 Titre mis à jour -->
-    <div class="section-title">Prévision sur 2 jours</div>
+    <div class="section-title">Dans les prochaines heures</div>
     <div class="hourly-cards" id="hourly"></div>
 
     <div class="section-title">Prévision 7 jours</div>
     <div class="forecast-7j" id="forecast-7j"></div>
 
-    <div class="section-title">Carte Windy (mise à jour le 23/12/2025 à 19h01)</div>
+    <div class="section-title">Carte Windy (mise à jour le 23/12/2025 à 13h41)</div>
     <div class="windy-widget">
-      <img src="https://i.imgur.com/sgxq8IK.png  " alt="Carte Windy" onerror="this.src='https://via.placeholder.com/600x300/e0f7fa/006064?text=Carte+non+disponible  ';">
+      <img src="https://i.imgur.com/GTpMYCr.png" alt="Carte Windy" onerror="this.src='https://via.placeholder.com/600x300/e0f7fa/006064?text=Carte+non+disponible';">
       <p style="font-size:13px; opacity:0.85; margin-top:12px;">Source : Windy.com • Mise à jour manuelle par MeteoRe</p>
     </div>
 
@@ -424,7 +423,7 @@
       <h3>MeteoRe</h3>
       <button class="modal-btn" onclick="installApp()">📱 Installer l'application</button>
       <button class="modal-btn" onclick="shareSite()">📤 Partager ce site</button>
-      <a href="https://youtube.com/@meteore974  " target="_blank" class="modal-btn">🎥 Voir mes prévisions</a>
+      <a href="https://youtube.com/@meteore974" target="_blank" class="modal-btn">🎥 Voir mes prévisions</a>
       <button class="modal-btn" style="margin-top:16px;" onclick="closeSettings()">Fermer</button>
     </div>
   </div>
@@ -447,11 +446,10 @@
       { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
     ];
 
-    // ===== PRÉVISIONS MANUELLES =====
+    // ===== PRÉVISIONS MANUELLES (MODIFIE ICI) =====
     const previsionsManuelles = {
       "L'Étang-Salé": {
-        
-        "20h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+         "20h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
         "21h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
         "22h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
         "23h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
@@ -479,8 +477,11 @@
         "21h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" }
         "22h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" }
         "23h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" }
-        
+      },
+      "Salazie": {
+        "14h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" }
       }
+      // 👇 Ajoute ici d'autres villes/heures si besoin
     };
 
     // === 🗺️ MAPPING OPEN-METEO → TES PICTOS MÉTÉO FRANCE ===
@@ -536,19 +537,20 @@
       }
     }
 
-    // ===== PRÉVISION HORAIRE (48h) =====
+    // ===== PRÉVISION HORAIRE =====
     function renderHourly(hourly, times, villeNom) {
       const container = document.getElementById('hourly');
       container.innerHTML = '';
       const now = new Date();
       let count = 0;
-      for (let i = 0; i < times.length && count < 48; i++) {
+      for (let i = 0; i < times.length && count < 8; i++) {
         const time = new Date(times[i]);
         if (time < now) continue;
         const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
         const temp = Math.round(hourly.temperature_2m[i]);
         let weatherData = getWeatherData(hourly.weather_code[i]);
 
+        // 🔁 Remplace par ta prévision manuelle si définie
         if (previsionsManuelles[villeNom] && previsionsManuelles[villeNom][hourStr]) {
           weatherData = previsionsManuelles[villeNom][hourStr];
         }
@@ -556,7 +558,7 @@
         const card = document.createElement('div');
         card.className = 'hour-card';
         card.innerHTML = `
-          <div style="font-size:13px; font-weight:600;">${time.getDate() === now.getDate() ? '' : (time.getDate() + '/')} ${hourStr}</div>
+          <div style="font-size:13px; font-weight:600;">${hourStr}</div>
           <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:28px;height:28px;margin:6px 0;">
           <div style="font-weight:700;">${temp}°</div>
           <div style="font-size:11px; opacity:0.85; margin-top:6px;">${weatherData.label}</div>
