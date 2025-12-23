@@ -4,13 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>MeteoRe – Météo précise pour La Réunion</title>
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0d47a1">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- html2canvas pour le partage -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; }
@@ -25,6 +28,19 @@
     .header { text-align: center; margin: 16px 0 24px; }
     .location { font-size: 28px; font-weight: 700; margin-bottom: 4px; color: #0d47a1; }
     .last-update { font-size: 14px; color: #3949ab; opacity: 0.8; }
+
+    .bulletin-du-jour {
+      background: #e3f2fd;
+      border-radius: 16px;
+      padding: 16px;
+      margin: 16px 0;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 600;
+      color: #0d47a1;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      line-height: 1.4;
+    }
 
     .search-box {
       background: white;
@@ -128,6 +144,38 @@
     .hour-emoji { font-size: 22px; margin: 6px 0; }
     .hour-temp { font-size: 15px; font-weight: 700; color: #0d47a1; }
 
+    /* 🌪️ WINDY WIDGET */
+    .windy-widget {
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .windy-widget img {
+      width: 100%;
+      max-width: 600px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: block;
+      margin: 0 auto;
+    }
+    .windy-source {
+      font-size: 13px;
+      color: #3949ab;
+      opacity: 0.85;
+      text-align: center;
+      margin-top: 10px;
+    }
+    .windy-link {
+      display: inline-block;
+      margin-top: 12px;
+      color: #1976d2;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
     #meteo-details {
       background: white;
       border-radius: 18px;
@@ -192,6 +240,7 @@
     @media (max-width: 600px) {
       .current-temp { font-size: 60px; }
       .location { font-size: 24px; }
+      .bulletin-du-jour { font-size: 15px; }
     }
   </style>
 </head>
@@ -214,6 +263,9 @@
       <div class="location" id="ville-nom">Chargement...</div>
       <div class="last-update" id="last-update">—</div>
     </div>
+
+    <!-- 📰 BULLETIN DU JOUR -->
+    <div class="bulletin-du-jour" id="bulletin-du-jour">Chargement du bulletin météo...</div>
 
     <!-- 📊 CARTE PRINCIPALE -->
     <div class="current-weather">
@@ -240,6 +292,18 @@
     <!-- 📅 7 JOURS -->
     <div class="section-title">Prévision 7 jours</div>
     <div class="forecast-7j" id="forecast-7j"></div>
+
+    <!-- 🌪️ WINDY WIDGET -->
+    <div class="section-title">🗺️ Carte météo visuelle</div>
+    <div class="windy-widget">
+      <img 
+        src="https://i.imgur.com/abc123.png" 
+        alt="Carte météo visuelle – Windy"
+        onerror="this.src='https://i.imgur.com/irO8yxw.png';"
+      />
+      <p class="windy-source">Source : Windy.com • Mise à jour manuelle par Nullyxx</p>
+      <a href="https://www.windy.com" target="_blank" rel="noopener" class="windy-link">➡️ Voir la carte interactive</a>
+    </div>
 
     <!-- 📚 SECTION ÉDUCATIVE -->
     <div id="meteo-details">
@@ -268,7 +332,7 @@
     </div>
 
     <div class="footer">
-      © 2025 MeteoRe • Données : Open-Meteo & Météo-France<br>
+      © 2025 MeteoRe • Météo précise pour La Réunion<br>
       <a href="https://youtube.com/@meteore974" target="_blank" style="color:#ff0000; text-decoration: none;">YouTube</a>
     </div>
   </div>
@@ -309,6 +373,22 @@
         return "☁️";
       }
 
+      function generateBulletin(temp, code, wind, ville) {
+        const hour = new Date().getHours();
+        const greeting = hour < 12 ? "Bonjour" : "Bon après-midi";
+        const emoji = getEmoji(code);
+        
+        if (temp > 29) {
+          return `${greeting} de ${ville} ! ${emoji} Il fera très chaud (${temp}°). Hydratez-vous et évitez les efforts. — MeteoRe`;
+        } else if (code >= 80) {
+          return `${greeting} ! ${emoji} Averses ou orages prévus. Restez à l’abri en cas de forte pluie. — MeteoRe`;
+        } else if (wind > 30) {
+          return `${greeting} ! 💨 Vent fort (${wind} km/h). Attention aux déplacements en bord de mer. — MeteoRe`;
+        } else {
+          return `${greeting} de ${ville} ! ${emoji} Belle journée en perspective. — MeteoRe`;
+        }
+      }
+
       async function fetchWeather(lat, lon, nomVille) {
         try {
           const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,relative_humidity_2m,wind_speed_10m&hourly=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&forecast_days=8&timezone=Indian/Reunion`;
@@ -316,12 +396,19 @@
           const data = await res.json();
 
           const current = data.current;
+          const tempNow = Math.round(current.temperature_2m);
+          const windNow = Math.round(current.wind_speed_10m * 3.6);
+
           document.getElementById('ville-nom').textContent = nomVille;
           document.getElementById('last-update').textContent = `Données en temps réel`;
-          document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
+          document.getElementById('current-temp').textContent = `${tempNow}°`;
           document.getElementById('current-condition').textContent = getConditionText(current.weathercode);
           document.getElementById('current-humid').textContent = `${Math.round(current.relative_humidity_2m)}%`;
-          document.getElementById('current-wind').textContent = `${Math.round(current.wind_speed_10m * 3.6)} km/h`;
+          document.getElementById('current-wind').textContent = `${windNow} km/h`;
+
+          // Bulletin personnalisé
+          const bulletin = generateBulletin(tempNow, current.weathercode, windNow, nomVille);
+          document.getElementById('bulletin-du-jour').textContent = bulletin;
 
           renderHourly(data.hourly, data.hourly.time);
           renderForecast7j(data.daily, data.daily.time);
@@ -333,6 +420,7 @@
           document.getElementById('current-condition').textContent = `Données non disponibles`;
           document.getElementById('current-humid').textContent = `—%`;
           document.getElementById('current-wind').textContent = `— km/h`;
+          document.getElementById('bulletin-du-jour').textContent = `Impossible de charger le bulletin météo.`;
         }
       }
 
