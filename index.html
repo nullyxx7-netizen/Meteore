@@ -619,57 +619,45 @@
       }
     }
 
-    // ===== PRÉVISION HORAIRE (corrigée) =====
+    // ===== PRÉVISION HORAIRE =====
     function renderHourly(hourly, times, villeNom) {
-  const container = document.getElementById('hourly');
-  container.innerHTML = '';
-  const now = new Date();
-  let count = 0;
-  for (let i = 0; i < times.length && count < 8; i++) {
-    const time = new Date(times[i]);
-    if (time < now) continue;
-    const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
-    const temp = Math.round(hourly.temperature_2m[i]);
-    const code = hourly.weathercode[i];
-    let condition = getConditionText(code);
-    let emoji = getEmoji(code); // Emoji par défaut
+      const container = document.getElementById('hourly');
+      container.innerHTML = '';
+      const now = new Date();
+      let count = 0;
+      for (let i = 0; i < times.length && count < 8; i++) {
+        const time = new Date(times[i]);
+        if (time < now) continue;
+        const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
+        const temp = Math.round(hourly.temperature_2m[i]);
+        const code = hourly.weathercode[i];
+        let condition = getConditionText(code);
+        let emoji = getEmoji(code);
 
-    // CORRECTION MANUELLE → SEULEMENT POUR L'ÉTANG-SALÉ
-    if (villeNom === "L'Étang-Salé") {
-      if (hourStr === "14h") {
-        condition = "Partiellement nuageux";
-        emoji = "⛅";
-      }
-      if (hourStr === "15h") {
-        condition = "Partiellement nuageux";
-        emoji = "⛅";
-      }
-      // Exemple : 20h → Pluie + emoji pluie
-      if (hourStr === "20h") {
-        condition = "Pluie";
-        emoji = "🌧️";
-      }
-    }
-
-    const card = document.createElement('div');
-    card.className = 'hour-card';
-    card.innerHTML = `
-      <div style="font-size:12px; font-weight:600;">${hourStr}</div>
-      <div style="font-size:24px; margin:4px 0;">${emoji}</div>
-      <div style="font-weight:700;">${temp}°</div>
-      <div style="font-size:11px; opacity:0.8; margin-top:4px;">${condition}</div>
-    `;
-    container.appendChild(card);
-    count++;
-  }
-}
-      }
-      
-      }
-         
+        // ICIIIIIIIIIIIIIIIIIIIIIII //
+        // MODIFIE ICI POUR L'ÉTANG-SALÉ
+        // Syntaxe : if (hourStr === "14h") { condition = "..."; emoji = "..."; }
+        // Exemples déjà inclus :
+        if (villeNom === "L'Étang-Salé") {
+          if (hourStr === "14h") {
+            condition = "Partiellement nuageux";
+            emoji = "⛅";
+          }
+          if (hourStr === "16h") {
+            condition = "Partiellement nuageux";
+            emoji = "⛅";
+          }
+          if (hourStr === "17h") {
+            condition = "Pluie possible";
+            emoji = "🌧️";
+            if (hourStr === "15h") { condition = "Partiellement nuageux"; emoji = "⛅"; }
+          }
+          // 👇 AJOUTE TES PROPRES LIGNES ICI 👇
+          // if (hourStr === "10h") { condition = "Brouillard"; emoji = "🌫️"; }
+          // if (hourStr === "08h") { condition = "Ciel dégagé"; emoji = "☀️"; }
         }
+        // ICIIIIIIIIIIIIIIIIIIIIIII //
 
-        const emoji = getEmoji(code);
         const card = document.createElement('div');
         card.className = 'hour-card';
         card.innerHTML = `
@@ -712,7 +700,7 @@
       }
     }
 
-    // ===== RECHERCHE : TOUTES LES VILLES AU CLIC =====
+    // ===== RECHERCHE =====
     document.getElementById('search-input').addEventListener('focus', () => {
       const suggestions = document.getElementById('suggestions');
       suggestions.innerHTML = '';
