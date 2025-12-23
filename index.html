@@ -76,6 +76,37 @@
       color: var(--text-dark); 
     }
 
+    /* ===== ANIMATION D'OUVERTURE ===== */
+    #intro {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #bbdefb, #e3f2fd);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 1;
+      transition: opacity 0.6s ease-out;
+    }
+    #intro.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #intro-logo {
+      width: 120px;
+      height: 120px;
+      border-radius: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    #intro-text {
+      font-size: 32px;
+      font-weight: 800;
+      color: #0d47a1;
+      letter-spacing: 1px;
+    }
+
     /* ===== BARRE SUPÉRIEURE ===== */
     .top-bar {
       display: flex;
@@ -142,7 +173,7 @@
       border-radius: 12px;
       max-height: 200px;
       overflow-y: auto;
-      z-index: 999;
+      z-index: 9999; /* 👈 C’est ici qu’il faut ajouter */
       box-shadow: 0 4px 16px rgba(0,0,0,0.1);
       display: none;
     }
@@ -374,6 +405,12 @@
 </head>
 <body>
 
+  <!-- 🌀 ANIMATION D'OUVERTURE -->
+  <div id="intro">
+    <img id="intro-logo" src="https://i.imgur.com/KsA0dbG.jpeg" alt="Logo MeteoRe">
+    <div id="intro-text">MeteoRe</div>
+  </div>
+
   <!-- 🔝 BARRE SUPÉRIEURE -->
   <div class="top-bar">
     <div class="logo-with-version">
@@ -453,6 +490,17 @@
   </div>
 
   <script>
+    // ✨ INTRO
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.getElementById('intro').classList.add('hidden');
+        // ✅ Après l’animation, charge Saint-Denis
+        const firstVille = villesReunion[0];
+        document.getElementById('search-input-top').value = firstVille.nom;
+        fetchWeather(firstVille.lat, firstVille.lon, firstVille.nom);
+      }, 2500);
+    });
+
     // PWA INSTALL
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -575,9 +623,8 @@
         const temp = Math.round(hourly.temperature_2m[i]);
         let weatherData = getWeatherData(hourly.weather_code[i]);
 
-        // 🔧 CORRECTIONS MANUELLES POUR L'ÉTANG-SALÉ
         if (villeNom === "L'Étang-Salé") {
-          if (hourStr === "15h") weatherData = { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" };
+          if (hourStr === "18h") weatherData = { label: "Risque de pluie faible", icon: "https://i.imgur.com/lBjVqLV.png" };
           if (hourStr === "16h") weatherData = { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" };
           if (hourStr === "17h") weatherData = { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" };
           if (hourStr === "20h") weatherData = { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" };
@@ -675,11 +722,6 @@
     document.querySelector('.youtube-btn').addEventListener('click', () => {
       window.open('https://youtube.com/@meteore974', '_blank');
     });
-
-    // ✅ INIT : DÉMARRE SUR SAINT-DENIS
-    const firstVille = villesReunion[0]; // Saint-Denis
-    searchInput.value = firstVille.nom;
-    fetchWeather(firstVille.lat, firstVille.lon, firstVille.nom);
   </script>
 
 </body>
