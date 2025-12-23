@@ -8,10 +8,10 @@
   <meta name="theme-color" content="#0d47a1">
   <link rel="apple-touch-icon" href="icon-194.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="preconnect" href="https://fonts.googleapis.com  ">
-  <link rel="preconnect" href="https://fonts.gstatic.com  " crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter  :wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js  "></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     /* ===== FOND ANIMÉ (soleil + nuages) ===== */
     body::before {
@@ -99,7 +99,7 @@
       letter-spacing: 1px;
     }
 
-    /* ===== BARRE SUPÉRIEURE (version simplifiée) ===== */
+    /* ===== BARRE SUPÉRIEURE ===== */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -146,7 +146,7 @@
     .container {
       max-width: 900px;
       margin: 0 auto;
-      padding: 0 16px 100px; /* Espace en bas pour la barre */
+      padding: 0 16px 100px;
     }
 
     /* ===== CARTE PRINCIPALE ===== */
@@ -221,6 +221,7 @@
       transform: translateY(-5px);
       box-shadow: 0 8px 20px rgba(0,0,0,0.12);
     }
+
     .forecast-7j {
       display: grid;
       gap: 16px;
@@ -264,7 +265,6 @@
       padding: 16px 0;
     }
 
-    /* ===== BARRE DE RECHERCHE EN BAS (CENTRÉE) ===== */
     .search-bottom {
       position: fixed;
       bottom: 20px;
@@ -319,7 +319,6 @@
       color: var(--accent);
     }
 
-    /* ===== MODAL PARAMÈTRES ===== */
     #settings-modal {
       display: none;
       position: fixed;
@@ -354,13 +353,11 @@
 </head>
 <body>
 
-  <!-- 🌀 ANIMATION D'OUVERTURE -->
   <div id="intro">
-    <img id="intro-logo" src="https://i.imgur.com/KsA0dbG.jpeg  " alt="Logo MeteoRe">
+    <img id="intro-logo" src="https://i.imgur.com/KsA0dbG.jpeg" alt="Logo MeteoRe">
     <div id="intro-text">MeteoRe</div>
   </div>
 
-  <!-- 🔝 BARRE SUPÉRIEURE -->
   <div class="top-bar">
     <div class="logo-with-version">
       <div class="logo">MeteoRe</div>
@@ -394,16 +391,15 @@
       </div>
     </div>
 
-    <!-- 🔁 Titre mis à jour -->
     <div class="section-title">Prévision sur 2 jours</div>
     <div class="hourly-cards" id="hourly"></div>
 
     <div class="section-title">Prévision 7 jours</div>
     <div class="forecast-7j" id="forecast-7j"></div>
 
-    <div class="section-title">Carte Windy (mise à jour le 23/12/2025 à 19h01)</div>
+    <div class="section-title">Carte Windy (mise à jour le 23/12/2025 à 20h)</div>
     <div class="windy-widget">
-      <img src="https://i.imgur.com/sgxq8IK.png  " alt="Carte Windy" onerror="this.src='https://via.placeholder.com/600x300/e0f7fa/006064?text=Carte+non+disponible  ';">
+      <img src="https://i.imgur.com/sgxq8IK.png" alt="Carte Windy" onerror="this.src='https://via.placeholder.com/600x300/e0f7fa/006064?text=Carte+non+disponible';">
       <p style="font-size:13px; opacity:0.85; margin-top:12px;">Source : Windy.com • Mise à jour manuelle par MeteoRe</p>
     </div>
 
@@ -412,25 +408,22 @@
     </div>
   </div>
 
-  <!-- 🔍 BARRE DE RECHERCHE EN BAS (CENTRÉE) -->
   <div class="search-bottom">
     <input type="text" id="search-input-bottom" placeholder="Choisissez une ville..." readonly>
     <div id="suggestions-dropdown" class="suggestions-dropdown"></div>
   </div>
 
-  <!-- ⚙️ MODAL PARAMÈTRES -->
   <div id="settings-modal">
     <div class="modal-content">
       <h3>MeteoRe</h3>
       <button class="modal-btn" onclick="installApp()">📱 Installer l'application</button>
       <button class="modal-btn" onclick="shareSite()">📤 Partager ce site</button>
-      <a href="https://youtube.com/@meteore974  " target="_blank" class="modal-btn">🎥 Voir mes prévisions</a>
+      <a href="https://youtube.com/@meteore974" target="_blank" class="modal-btn">🎥 Voir mes prévisions</a>
       <button class="modal-btn" style="margin-top:16px;" onclick="closeSettings()">Fermer</button>
     </div>
   </div>
 
   <script>
-    // ===== VILLES RÉUNION =====
     const villesReunion = [
       { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
       { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
@@ -447,25 +440,63 @@
       { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
     ];
 
-    // ===== PRÉVISIONS MANUELLES =====
+    // ✅ PRÉVISIONS MANUELLES COMPLÈTES : 00h à 23h x 2 jours
     const previsionsManuelles = {
       "L'Étang-Salé": {
-        "18h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
-        "19h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
-        "20h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-        "21h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-        "22h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-        "23h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        // Jour 1 (aujourd'hui)
         "00h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "01h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "02h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "03h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "04h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "05h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "06h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "07h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "08h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
         "09h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-        "15h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" }
-      },
-      "Salazie": { 
-        "14h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" }
+        "10h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "11h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+        "12h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+        "13h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+        "14h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+        "15h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        "16h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        "17h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        "18h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "19h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "20h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "21h": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "22h": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "23h": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+
+        // Jour 2 (demain)
+        "00h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "01h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "02h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "03h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "04h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "05h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "06h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "07h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "08h_j2": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+        "09h_j2": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        "10h_j2": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        "11h_j2": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png" },
+        "12h_j2": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png" },
+        "13h_j2": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+        "14h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "15h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "16h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+        "17h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "18h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "19h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "20h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "21h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "22h_j2": { label: "Ciel dégagé", icon: "https://i.imgur.com/9mtLzHK.png" },
+        "23h_j2": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png" }
       }
     };
 
-    // === 🗺️ MAPPING OPEN-METEO → TES PICTOS MÉTÉO FRANCE ===
     const weatherCodeMap = {
       0: { label: 'Ensoleillé', icon: 'https://i.imgur.com/9mtLzHK.png' },
       1: { label: 'Partiellement nuageux', icon: 'https://i.imgur.com/1gHBkKj.png' },
@@ -491,7 +522,6 @@
       return weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/8EIg3fq.png' };
     }
 
-    // ===== MÉTÉO AVEC OPEN-METEO =====
     async function fetchWeather(lat, lon, nomVille) {
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
@@ -518,27 +548,40 @@
       }
     }
 
-    // ===== PRÉVISION HORAIRE (48h) =====
     function renderHourly(hourly, times, villeNom) {
       const container = document.getElementById('hourly');
       container.innerHTML = '';
       const now = new Date();
       let count = 0;
+      const todayDate = now.getDate();
+      const todayMonth = now.getMonth();
+
       for (let i = 0; i < times.length && count < 48; i++) {
         const time = new Date(times[i]);
         if (time < now) continue;
+
+        // Formater l'heure
         const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
+        const dayOffset = time.getDate() !== todayDate ? '_j2' : '';
+        const key = hourStr + dayOffset;
+
         const temp = Math.round(hourly.temperature_2m[i]);
         let weatherData = getWeatherData(hourly.weather_code[i]);
 
-        if (previsionsManuelles[villeNom] && previsionsManuelles[villeNom][hourStr]) {
-          weatherData = previsionsManuelles[villeNom][hourStr];
+        // Utiliser ta prévision manuelle si elle existe
+        if (previsionsManuelles[villeNom] && previsionsManuelles[villeNom][key]) {
+          weatherData = previsionsManuelles[villeNom][key];
         }
+
+        // Affichage jour + heure si J+1
+        const displayHour = time.getDate() === todayDate
+          ? hourStr
+          : `${time.getDate()} ${hourStr}`;
 
         const card = document.createElement('div');
         card.className = 'hour-card';
         card.innerHTML = `
-          <div style="font-size:13px; font-weight:600;">${time.getDate() === now.getDate() ? '' : (time.getDate() + '/')} ${hourStr}</div>
+          <div style="font-size:13px; font-weight:600;">${displayHour}</div>
           <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:28px;height:28px;margin:6px 0;">
           <div style="font-weight:700;">${temp}°</div>
           <div style="font-size:11px; opacity:0.85; margin-top:6px;">${weatherData.label}</div>
@@ -548,7 +591,6 @@
       }
     }
 
-    // ===== PRÉVISION 7 JOURS =====
     function renderForecast7j(daily, times) {
       const container = document.getElementById('forecast-7j');
       container.innerHTML = '';
@@ -576,7 +618,7 @@
       }
     }
 
-    // ===== RECHERCHE EN BAS =====
+    // Recherche
     const searchInput = document.getElementById('search-input-bottom');
     const suggestionsDropdown = document.getElementById('suggestions-dropdown');
 
@@ -603,12 +645,11 @@
       }
     });
 
-    // ===== BOUTONS =====
+    // Boutons
     document.querySelector('.youtube-btn').addEventListener('click', () => {
       window.open('https://youtube.com/@meteore974', '_blank');
     });
 
-    // === PWA ===
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -639,7 +680,7 @@
       document.getElementById('settings-modal').style.display = 'none';
     }
 
-    // ===== INIT : L'ÉTANG-SALÉ PAR DÉFAUT =====
+    // Init
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         document.getElementById('intro').classList.add('hidden');
