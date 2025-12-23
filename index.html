@@ -200,7 +200,7 @@
     <div class="section-title">Prévision 3 jours</div>
     <div class="forecast-3j" id="forecast-3j"></div>
 
-    <!-- 📚 SECTION ÉDUCATIVE (inchangée) -->
+    <!-- 📚 SECTION ÉDUCATIVE -->
     <div id="meteo-details">
       <h2 class="detail-title">📖 Comprendre la météo à La Réunion</h2>
       <div class="detail-section">
@@ -213,7 +213,34 @@
           <p>⚡ <span class="highlight">Éclairs et tonnerre</span> : causés par des décharges électriques entre les charges positives et négatives dans le nuage.</p>
         </div>
       </div>
-      <!-- ... reste inchangé ... -->
+      <div class="detail-section">
+        <h3 class="detail-title">🌀 Cyclones : trajectoire et impact</h3>
+        <div class="detail-content">
+          <p>Un cyclone tropical se forme au-dessus de l'<span class="highlight">océan Indien chaud</span> (>26,5°C). Sa trajectoire dépend des vents dominants :</p>
+          <p>• <span class="highlight">Anticyclone des Mascareignes</span> : situé à l'est, il "pousse" les cyclones vers l'ouest<br>
+          • <span class="highlight">Courant-jet</span> : en altitude, il peut dévier la trajectoire vers le sud</p>
+          <p>🎯 <span class="highlight">Pourquoi certains cyclones touchent La Réunion et d'autres non ?</span><br>
+          La trajectoire précise dépend de l'interaction entre ces systèmes. Si le cyclone passe à moins de 200 km, l'île ressent ses effets (vents, pluie).</p>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h3 class="detail-title">⛰️ Reliefs de La Réunion et climat</h3>
+        <div class="detail-content">
+          <p>La Réunion a <span class="highlight">3 massifs volcaniques</span> (Piton des Neiges, Piton de la Fournaise, rempart) qui façonnent le climat :</p>
+          <p>• <span class="highlight">Au vent (est)</span> : les alizés chargés d'humidité rencontrent les reliefs → <span class="highlight">pluies abondantes</span> (jusqu'à 10m/an !)<br>
+          • <span class="highlight">Sous le vent (ouest)</span> : l'air descend, se réchauffe et s'assèche → <span class="highlight">climat sec et ensoleillé</span> (comme à L'Étang-Salé)</p>
+          <p>🌡️ <span class="highlight">Effet de foehn</span> : quand l'air humide traverse les montagnes, il perd son humidité et devient sec et chaud en redescendant (c'est pourquoi l'ouest est sec).</p>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h3 class="detail-title">❄️ Fronts froids vs fronts chauds</h3>
+        <div class="detail-content">
+          <p>Un <span class="highlight">front</span> est la zone de contact entre deux masses d'air de températures différentes :</p>
+          <p>• <span class="highlight">Front froid</span> : masse d'air froid remplace de l'air chaud → orages violents, puis temps frais et sec<br>
+          • <span class="highlight">Front chaud</span> : air chaud remonte sur de l'air froid → pluie continue, puis temps doux et humide</p>
+          <p>🌀 À La Réunion, les fronts sont <span class="highlight">rares en été</span> (décembre-avril) mais plus fréquents en hiver (mai-novembre), surtout dans les hauts.</p>
+        </div>
+      </div>
       <div class="detail-section">
         <h3 class="detail-title">🌊 Anticyclone et vents dominants</h3>
         <div class="detail-content">
@@ -310,80 +337,7 @@
         }
       }
 
-      // ==================================================
-      // ✅ MODIFIE ICI → PRÉVISION HORAIRE POUR L'ÉTANG-SALÉ
-      // ==================================================
-      const heuresManuelles = [
-        { hour: "06h", emoji: "🌥️", temp: "24°" },
-        { hour: "08h", emoji: "🌥️", temp: "25°" },
-        { hour: "10h", emoji: "🌥️", temp: "25°" }, // Très nuageux
-        { hour: "12h", emoji: "🌥️", temp: "26°" }, // Très nuageux
-        { hour: "14h", emoji: "🌤️", temp: "27°" },
-        { hour: "16h", emoji: "🌤️", temp: "26°" },
-        { hour: "18h", emoji: "🌤️", temp: "25°" },
-        { hour: "20h", emoji: "🌤️", temp: "24°" },
-        { hour: "22h", emoji: "🌦️", temp: "23°" },
-        { hour: "00h", emoji: "🌤️", temp: "23°" },
-        { hour: "02h", emoji: "🌤️", temp: "22°" },
-        { hour: "04h", emoji: "🌤️", temp: "22°" }
-      ];
-
-      // ==================================================
-      // ✅ MODIFIE ICI → PRÉVISION 3 JOURS POUR L'ÉTANG-SALÉ
-      // ==================================================
-      const forecast3jManuel = [
-        { day: "Aujourd'hui", detail: "Ciel couvert ☁️" },
-        { day: "Demain", detail: "Averses 🌧️" },
-        { day: "Après-demain", detail: "Averses faibles 🌧️" }
-      ];
-
-      // ✅ AFFICHAGE MANUEL POUR L'ÉTANG-SALÉ
-      function renderEtangSaleManual() {
-        // Température et condition principales (tu peux aussi les modifier ici si besoin)
-        document.getElementById('ville-nom').textContent = "L'Étang-Salé";
-        document.getElementById('last-update').textContent = "Données en temps réel";
-        document.getElementById('current-temp').textContent = "26°";
-        document.getElementById('current-condition').textContent = "Eclaircies";
-
-        updateSky(3); // 3 = Ciel couvert → gris
-        document.getElementById('rain').innerHTML = '';
-
-        setTimeout(() => {
-          document.getElementById('main-weather').style.display = 'block';
-          
-          // Afficher les heures manuelles
-          const container = document.getElementById('hourly');
-          container.innerHTML = '';
-          heuresManuelles.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'hour-card';
-            card.innerHTML = `<div class="time">${item.hour}</div><div class="emoji">${item.emoji}</div><div class="temp">${item.temp}</div>`;
-            container.appendChild(card);
-          });
-
-          // Afficher les 3 jours manuels
-          const container3j = document.getElementById('forecast-3j');
-          container3j.innerHTML = '';
-          forecast3jManuel.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'day-card';
-            card.innerHTML = `<div class="day-label">${item.day}</div><div class="day-detail">${item.detail}</div>`;
-            container3j.appendChild(card);
-          });
-        }, 300);
-      }
-
-      // 🌐 API POUR LES AUTRES VILLES
       async function fetchWeather(lat, lon, nomVille) {
-        if (nomVille === "L'Étang-Salé") {
-          document.getElementById('main-weather').style.display = 'none';
-          document.getElementById('hourly').innerHTML = '';
-          document.getElementById('forecast-3j').innerHTML = '';
-          renderEtangSaleManual();
-          return;
-        }
-
-        // ... (le reste reste inchangé - API pour autres villes)
         document.getElementById('main-weather').style.display = 'none';
         document.getElementById('hourly').innerHTML = '';
         document.getElementById('forecast-3j').innerHTML = '';
@@ -431,19 +385,35 @@
         }
       }
 
-      // ... (fonctions renderHourly, renderHourlyFallback, renderForecast3j, recherche - inchangées)
-
+      // ✅ CORRECTION SIMPLE POUR L'ÉTANG-SALÉ
       function renderHourly(hourly, times) {
         const container = document.getElementById('hourly');
         container.innerHTML = '';
         const now = new Date();
+
+        // =============================================
+        // ✏️ MODIFIE ICI → Emoji pour certaines heures
+        // =============================================
+        const correctionsHeures = {
+          "10h": "⛅", // Très nuageux
+          "12h": "⛅", // Très nuageux
+          "15h": "🌦️", // Averses faibles
+          // Exemple: "14h": "🌤️", "16h": "⛅"
+        };
+
         let count = 0;
         for (let i = 0; i < times.length && count < 12; i++) {
           const time = new Date(times[i]);
           if (time < now) continue;
           const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
           const temp = Math.round(hourly.temperature_2m[i]) + '°';
-          const emoji = getEmoji(hourly.weathercode[i]);
+          let emoji = getEmoji(hourly.weathercode[i]);
+
+          // Appliquer ta correction
+          if (correctionsHeures[hourStr]) {
+            emoji = correctionsHeures[hourStr];
+          }
+
           const card = document.createElement('div');
           card.className = 'hour-card';
           card.innerHTML = `<div class="time">${hourStr}</div><div class="emoji">${emoji}</div><div class="temp">${temp}</div>`;
@@ -466,9 +436,9 @@
 
       function renderForecast3j() {
         const data = [
-          { day: "Aujourd'hui", detail: "—" },
-          { day: "Demain", detail: "—" },
-          { day: "Après-demain", detail: "—" }
+          { day: "Aujourd'hui", detail: "très nuageux ☁️" },
+          { day: "Demain", detail: "Averses 🌧️" },
+          { day: "Après-demain", detail: "Averses 🌧️" }
         ];
         const container = document.getElementById('forecast-3j');
         container.innerHTML = '';
