@@ -424,13 +424,13 @@
     <div id="intro-text">MeteoRe</div>
   </div>
 
-  <!-- ✅ VIGILANCE DANS LE FLUX — DÉFILE AVEC LA PAGE -->
+  <!-- ✅ VIGILANCE DANS LE FLUX -->
   <div id="vigilance-static">Vigilance – Pas de vigilance</div>
 
   <div class="top-bar">
     <div class="logo-with-version">
       <div class="logo">MeteoRe</div>
-      <div class="version">version 1.16 - L'Étang-Salé</div>
+      <div class="version">version 1.17 - L'Étang-Salé</div>
     </div>
     <div>
       <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
@@ -462,7 +462,8 @@
       </div>
     </div>
 
-    <div class="section-title">Prévision sur 2 jours (manuelle - MeteoRe)</div>
+    <!-- ✅ TITRE CORRIGÉ -->
+    <div class="section-title">Prévision sur 2 jours</div>
     <div class="hourly-cards" id="hourly"></div>
 
     <div class="section-title">Prévision 7 jours</div>
@@ -487,6 +488,7 @@
   <script>
     // === DONNÉES MANUELLES POUR L'ÉTANG-SALÉ (2 JOURS COMPLETS) ===
     const previsionsManuelles_EtangSale = {
+      // Jour 1 : Aujourd'hui
       "00h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 24 },
       "01h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 23 },
       "02h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 23 },
@@ -495,11 +497,11 @@
       "05h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 22 },
       "06h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 23 },
       "07h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 24 },
-      "08h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png", temp: 25 },
-      "09h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png", temp: 26 },
+      "08h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 25 },
+      "09h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 26 },
       "10h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 27 },
-      "11h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 27 },
-      "12h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 28 },
+      "11h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png", temp: 27 },
+      "12h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png", temp: 28 },
       "13h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png", temp: 28 },
       "14h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png", temp: 28 },
       "15h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", temp: 27 },
@@ -511,6 +513,7 @@
       "21h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png", temp: 23 },
       "22h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 23 },
       "23h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
+      // Jour 2 : Demain (J+1)
       "00h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
       "01h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 21 },
       "02h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 21 },
@@ -547,13 +550,16 @@
       return `${jour} ${moisAffiche}`;
     }
 
+    // ✅ AFFICHAGE DES HEURES FUTURES SEULEMENT, AVEC PRÉVISION MANUELLE FORCÉE
     function renderHourlyManual() {
       const container = document.getElementById('hourly');
       container.innerHTML = '';
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      let count = 0;
+      const maxHours = 48;
 
-      for (let offset = 0; offset < 48; offset++) {
+      for (let offset = 0; count < maxHours; offset++) {
         const time = new Date(now.getTime() + offset * 60 * 60 * 1000);
         const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
         const forecastDay = new Date(time.getFullYear(), time.getMonth(), time.getDate());
@@ -563,7 +569,10 @@
         if (diffDays === 1) key = hourStr + '_j1';
 
         const data = previsionsManuelles_EtangSale[key];
-        if (!data) continue;
+        if (!data) {
+          // Si pas de donnée manuelle, on arrête (ou on pourrait skip)
+          break;
+        }
 
         const card = document.createElement('div');
         card.className = 'hour-card';
@@ -577,8 +586,10 @@
           ${dateBottom ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${dateBottom}</div>` : ''}
         `;
         container.appendChild(card);
+        count++;
       }
 
+      // Mise à jour actuelle
       const currentHourKey = now.getHours().toString().padStart(2, '0') + 'h';
       const currentData = previsionsManuelles_EtangSale[currentHourKey] || previsionsManuelles_EtangSale["00h"];
       document.getElementById('current-temp').textContent = `${currentData.temp}°`;
