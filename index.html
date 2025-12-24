@@ -13,7 +13,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    /* ===== VIGILANCE DANS LE FLUX ===== */
+    /* ===== WATERMARK CSS (reste, mais moins critique car intégré dans PNG) ===== */
+    body::after {
+      content: "MeteoRe";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-size: 120px;
+      font-weight: 900;
+      color: rgba(2, 136, 209, 0.025);
+      pointer-events: none;
+      z-index: -2;
+      white-space: nowrap;
+    }
+
+    /* ===== Reste identique ===== */
     #vigilance-static {
       display: inline-block;
       background: #4CAF50;
@@ -26,33 +41,53 @@
       border-radius: 4px;
       margin: 8px 16px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      z-index: 2000;
     }
 
-    /* ===== FOND ANIMÉ ===== */
-    body::before {
-      content: "";
+    .weather-animation {
       position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0;
+      display: none;
+    }
+
+    #anim-sun {
       top: -100px;
       right: -100px;
       width: 300px;
       height: 300px;
-      background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(255,215,0,0.25) 0%, transparent 70%);
       border-radius: 50%;
-      z-index: -1;
       animation: floatSun 40s infinite linear;
     }
-    body::after {
-      content: "";
-      position: fixed;
+
+    #anim-cloud {
       top: 20%;
       left: -150px;
       width: 200px;
       height: 80px;
       background: radial-gradient(ellipse, rgba(255,255,255,0.6) 0%, transparent 80%);
       border-radius: 50%;
-      z-index: -1;
       animation: floatCloud 60s infinite ease-in-out;
     }
+
+    #anim-rain {
+      background: repeating-linear-gradient(
+        transparent 0px,
+        transparent 4px,
+        rgba(173, 216, 230, 0.5) 4px,
+        rgba(173, 216, 230, 0.5) 5px
+      );
+      animation: rainDrop 0.5s linear infinite;
+    }
+
+    #anim-lightning {
+      background: white;
+      animation: lightningFlash 4s infinite;
+    }
+
     @keyframes floatSun {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
@@ -63,6 +98,17 @@
       50% { transform: translateX(200px) translateY(0); }
       75% { transform: translateX(100px) translateY(20px); }
       100% { transform: translateX(0) translateY(0); }
+    }
+    @keyframes rainDrop {
+      0% { background-position: 0 0; }
+      100% { background-position: 10px 10px; }
+    }
+    @keyframes lightningFlash {
+      0%, 95% { opacity: 0; }
+      96% { opacity: 0.25; }
+      97% { opacity: 0; }
+      98% { opacity: 0.15; }
+      99% { opacity: 0; }
     }
 
     :root {
@@ -83,7 +129,6 @@
       overflow-x: hidden;
     }
 
-    /* ===== ANIMATION D'OUVERTURE ===== */
     #intro {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -114,7 +159,6 @@
       letter-spacing: 1px;
     }
 
-    /* ===== BARRE SUPÉRIEURE ===== */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -164,7 +208,6 @@
       padding: 0 16px 100px;
     }
 
-    /* ===== CARTE PRINCIPALE ===== */
     .current-weather {
       background: var(--card-bg);
       backdrop-filter: blur(12px);
@@ -189,6 +232,13 @@
       margin-bottom: 18px;
       color: #004d40;
     }
+    .current-insight {
+      font-size: 16px;
+      font-weight: 500;
+      margin-top: 8px;
+      opacity: 0.9;
+      color: #0288d1;
+    }
     .details-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -209,13 +259,16 @@
     .detail-value { font-weight: 700; font-size: 18px; color: #006064; }
     .detail-label { font-size: 13px; opacity: 0.85; }
 
-    /* ===== PRÉVISIONS ===== */
     .section-title {
       font-size: 20px;
       font-weight: 700;
       margin: 28px 0 18px;
       color: #004d40;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
+
     .hourly-cards {
       display: flex;
       gap: 14px;
@@ -252,16 +305,6 @@
       border: 1px solid rgba(2, 136, 209, 0.1);
       transition: all 0.2s;
     }
-    .day-card.editable:hover {
-      background: #e3f2fd;
-    }
-    .day-card.editable::after {
-      content: "✏️";
-      position: absolute;
-      right: 12px;
-      opacity: 0.5;
-      font-size: 14px;
-    }
 
     .windy-widget {
       background: var(--card-bg);
@@ -270,13 +313,8 @@
       margin-bottom: 30px;
       box-shadow: var(--shadow);
       border: 1px solid rgba(2, 136, 209, 0.1);
-    }
-    .windy-widget img {
-      width: 100%;
-      max-width: 600px;
-      border-radius: 14px;
-      display: block;
-      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
     }
 
     .footer {
@@ -339,92 +377,20 @@
       background: #e0f7fa;
       color: var(--accent);
     }
-
-    #edit-modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: white;
-      padding: 24px;
-      width: 90%;
-      max-width: 350px;
-      border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-    .modal-content h3 {
-      margin-bottom: 16px;
-      color: var(--accent);
-    }
-    .modal-content input, select {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 15px;
-    }
-    .modal-btns {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .modal-btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn-save { background: var(--accent); color: white; }
-    .btn-cancel { background: #f5f5f5; color: #333; }
-
-    #settings-modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-    }
-    .modal-content-settings {
-      background: white;
-      margin: 10% auto;
-      padding: 24px;
-      width: 90%;
-      max-width: 400px;
-      border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-    .modal-btn {
-      display: block;
-      width: 100%;
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 12px;
-      margin: 8px 0;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: center;
-      text-decoration: none;
-    }
   </style>
 </head>
 <body>
+
+  <div class="weather-animation" id="anim-sun"></div>
+  <div class="weather-animation" id="anim-cloud"></div>
+  <div class="weather-animation" id="anim-rain"></div>
+  <div class="weather-animation" id="anim-lightning"></div>
 
   <div id="intro">
     <img id="intro-logo" src="https://i.imgur.com/KsA0dbG.jpeg" alt="Logo MeteoRe">
     <div id="intro-text">MeteoRe</div>
   </div>
 
-  <!-- ✅ VIGILANCE DANS LE FLUX -->
   <div id="vigilance-static">Vigilance – Pas de vigilance</div>
 
   <div class="top-bar">
@@ -432,9 +398,7 @@
       <div class="logo">MeteoRe</div>
       <div class="version">version 1.20</div>
     </div>
-    <div>
-      <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
-    </div>
+    <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
   </div>
 
   <div class="container">
@@ -442,6 +406,7 @@
       <div class="location" id="ville-nom">Chargement...</div>
       <div class="current-temp" id="current-temp">--°</div>
       <div class="current-condition" id="current-condition">—</div>
+      <div class="current-insight" id="current-insight" style="font-size:16px; font-weight:500; margin-top:8px; opacity:0.9; color:#0288d1;"></div>
       <div class="details-grid">
         <div class="detail-card">
           <div class="detail-value" id="humidity">—%</div>
@@ -462,21 +427,38 @@
       </div>
     </div>
 
-    <!-- ✅ TITRE SIMPLIFIÉ -->
-    <div class="section-title">Prévision sur 2 jours</div>
+    <div class="section-title">
+      <span>Prévision sur 2 jours</span>
+      <button id="share-btn" style="background:#0288d1;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 6px rgba(2,136,209,0.3);">
+        📸 Partager
+      </button>
+    </div>
     <div class="hourly-cards" id="hourly"></div>
 
     <div class="section-title">Prévision 7 jours</div>
     <div class="forecast-7j" id="forecast-7j"></div>
 
-    <div class="section-title">Carte cyclonique, cyclone qui pourrait toucher la réunion d'ici janvier. (mise à jour le 24/12/2025 à 12h25)</div>
     <div class="windy-widget">
-      <img src="https://postimg.cc/QHXCyw35" alt="Carte Windy" onerror="this.src='https://via.placeholder.com/600x300/e0f7fa/006064?text=Carte+non+disponible';">
-      <p style="font-size:13px; opacity:0.85; margin-top:12px;">Source : Windy.com • Mise à jour par MeteoRe</p>
+      <div style="position:absolute; top:12px; right:16px; z-index:3; background:rgba(255,255,255,0.85); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; color:#0288d1; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+        MeteoRe
+      </div>
+      <iframe
+        src="https://embed.windy.com/embed2.html?lat=-21.150&lon=55.433&detailLat=-21.150&detailLon=55.433&width=650&height=350&zoom=9&level=surface&overlay=rain&menu=off&message=&marker=&calendar=off&pressure=&type=map&location=off&detail=&metricRain=mm%2Fh&metricTemp=%C2%B0C&metricWind=km%2Fh&colorWind=undefined&spotlightRegion=RE&region=RE"
+        width="100%"
+        height="350"
+        frameborder="0"
+        style="border-radius:14px; display:block;"
+        allowfullscreen>
+      </iframe>
+      <p style="font-size:13px; opacity:0.85; margin-top:12px; text-align:center;">
+        Source : Windy.com • Mise à jour par MeteoRe
+      </p>
     </div>
 
     <div class="footer">
       © 2025 MeteoRe • Météo précise pour La Réunion
+      <br>
+      <img src="https://i.imgur.com/KsA0dbG.jpeg" alt="MeteoRe" style="width:20px; height:20px; opacity:0.7; margin-top:6px;">
     </div>
   </div>
 
@@ -486,7 +468,6 @@
   </div>
 
   <script>
-    // === LISTE DES VILLES DE LA RÉUNION ===
     const villesReunion = [
       { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
       { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
@@ -503,7 +484,6 @@
       { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
     ];
 
-    // === PRÉVISION MANUELLE UNIQUEMENT POUR L'ÉTANG-SALÉ ===
     const previsionsManuelles_EtangSale = {
       "00h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
       "01h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
@@ -524,30 +504,30 @@
       "16h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 26 },
       "17h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 26 },
       "18h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 25 },
-      "19h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 24 },
-      "20h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 24 },
-      "21h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 23 },
-      "22h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 23 },
-      "23h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
-      "00h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
-      "01h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 21 },
-      "02h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 21 },
-      "03h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 21 },
-      "04h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 21 },
-      "05h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 21 },
-      "06h_j1": { label: "Ciel voilé", icon: "https://i.imgur.com/8EIg3fq.png", temp: 22 },
-      "07h_j1": { label: "Ciel voilé", icon: "https://i.imgur.com/8EIg3fq.png", temp: 23 },
-      "08h_j1": { label: "Ciel voilé", icon: "https://i.imgur.com/8EIg3fq.png", temp: 24 },
-      "09h_j1": { label: "Ciel voilé", icon: "https://i.imgur.com/8EIg3fq.png", temp: 25 },
-      "10h_j1": { label: "Ciel voilé", icon: "https://i.imgur.com/8EIg3fq.png", temp: 26 },
-      "11h_j1": { label: "Ciel voilé", icon: "https://i.imgur.com/8EIg3fq.png", temp: 26 },
-      "12h_j1": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 27 },
-      "13h_j1": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 27 },
-      "14h_j1": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 27 },
-      "15h_j1": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png", temp: 26 },
-      "16h_j1": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png", temp: 25 },
-      "17h_j1": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png", temp: 24 },
-      "18h_j1": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 24 },
+      "19h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 24 },
+      "20h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 24 },
+      "21h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 23 },
+      "22h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 23 },
+      "23h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 22 },
+      "00h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 22 },
+      "01h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 21 },
+      "02h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 21 },
+      "03h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 23 },
+      "04h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 25 },
+      "05h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 26 },
+      "06h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 27 },
+      "07h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 27 },
+      "08h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 28 },
+      "09h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 28 },
+      "10h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 29 },
+      "11h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 30 },
+      "12h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 30 },
+      "13h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png", temp: 31 },
+      "14h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", temp: 30 },
+      "15h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", temp: 28 },
+      "16h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", temp: 27 },
+      "17h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", temp: 25 },
+      "18h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 24 },
       "19h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 23 },
       "20h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
       "21h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 21 },
@@ -582,15 +562,67 @@
       const jour = date.getDate();
       const moisIndex = date.getMonth();
       const mois = moisNoms[moisIndex];
-      const moisAffiche = mois.length === 3 ? mois : mois.charAt(0).toUpperCase() + mois.slice(1);
-      return `${jour} ${moisAffiche}`;
+      return `${jour} ${mois}`;
     }
 
     function getWeatherData(code) {
       return weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/8EIg3fq.png' };
     }
 
-    // ✅ RENDU DES PRÉVISIONS HORAIRE (MANUEL POUR ÉTANG-SALÉ, API POUR LES AUTRES)
+    function generateInsight(condition, temp, windSpeed, humidity) {
+      const c = condition.toLowerCase();
+      const insight = document.getElementById('current-insight');
+      
+      if (c.includes('orage') || c.includes('orages') || c.includes('averses orageuses')) {
+        insight.textContent = "⚡ Évitez les zones exposées et les randonnées en altitude.";
+      } 
+      else if (c.includes('pluie') || c.includes('averses')) {
+        insight.textContent = "💧 Prévoyez un imperméable si vous sortez.";
+      } 
+      else if (c.includes('ensoleillé') || c.includes('clair') || c.includes('éclaircies')) {
+        if (temp > 28) {
+          insight.textContent = "☀️ Parfait pour la plage — mais n’oubliez pas la crème solaire !";
+        } else {
+          insight.textContent = "🌤 Idéal pour une randonnée ou un pique-nique !";
+        }
+      } 
+      else if (c.includes('nuageux') || c.includes('couvert') || c.includes('voilé')) {
+        insight.textContent = "☁️ Ambiance calme — bon moment pour découvrir les cirques.";
+      } 
+      else if (windSpeed > 40) {
+        insight.textContent = "💨 Vents forts : attention sur les routes et en bord de mer.";
+      } 
+      else if (humidity > 85 && temp > 25) {
+        insight.textContent = "💦 Chaleur humide — restez hydraté !";
+      } 
+      else {
+        insight.textContent = "🌦 Une journée typique à La Réunion.";
+      }
+    }
+
+    function updateWeatherAnimation(condition) {
+      const els = ['anim-sun', 'anim-cloud', 'anim-rain', 'anim-lightning'];
+      els.forEach(id => document.getElementById(id).style.display = 'none');
+
+      const c = condition.toLowerCase();
+
+      if (c.includes('clair') || c.includes('soleil') || c.includes('éclaircies') || c.includes('dégagé') || c.includes('ensoleillé')) {
+        document.getElementById('anim-sun').style.display = 'block';
+      } 
+      else if (c.includes('nuageux') || c.includes('couvert') || c.includes('brouillard') || c.includes('voilé')) {
+        document.getElementById('anim-cloud').style.display = 'block';
+      } 
+      else if (c.includes('pluie') || c.includes('averses')) {
+        document.getElementById('anim-cloud').style.display = 'block';
+        document.getElementById('anim-rain').style.display = 'block';
+      } 
+      else if (c.includes('orage') || c.includes('orages')) {
+        document.getElementById('anim-cloud').style.display = 'block';
+        document.getElementById('anim-rain').style.display = 'block';
+        document.getElementById('anim-lightning').style.display = 'block';
+      }
+    }
+
     function renderHourly(hourly, times, villeNom, isEtangSale = false) {
       const container = document.getElementById('hourly');
       container.innerHTML = '';
@@ -606,14 +638,12 @@
         const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
         const forecastDay = new Date(time.getFullYear(), time.getMonth(), time.getDate());
         const diffDays = Math.floor((forecastDay - today) / (1000 * 60 * 60 * 24));
-
         let key = hourStr;
         if (diffDays === 1) key = hourStr + '_j1';
 
         const temp = Math.round(hourly.temperature_2m[i]);
         let weatherData = getWeatherData(hourly.weather_code[i]);
 
-        // ✅ FORCER LA PRÉVISION MANUELLE SEULEMENT POUR L'ÉTANG-SALÉ
         if (isEtangSale && previsionsManuelles_EtangSale[key]) {
           const manuel = previsionsManuelles_EtangSale[key];
           weatherData = { label: manuel.label, icon: manuel.icon };
@@ -648,7 +678,6 @@
         let max = Math.round(daily.temperature_2m_max[i]);
         let weatherData = getWeatherData(daily.weather_code[i]);
 
-        // Option : appliquer des overrides manuels si besoin (ici on garde API pour 7j)
         const card = document.createElement('div');
         card.className = 'day-card';
         card.innerHTML = `
@@ -675,7 +704,6 @@
         const current = data.current;
         let currentW = getWeatherData(current.weather_code);
 
-        // ✅ Pour Étang-Salé : forcer la condition actuelle manuelle
         if (isEtangSale) {
           const currentHourKey = new Date().getHours().toString().padStart(2, '0') + 'h';
           const manuel = previsionsManuelles_EtangSale[currentHourKey];
@@ -692,13 +720,24 @@
         document.getElementById('uv').textContent = current.uv_index ? current.uv_index.toFixed(1) : "—";
         document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
 
+        const windSpeedKmh = current.wind_speed_10m * 3.6;
+        generateInsight(currentW.label, current.temperature_2m, windSpeedKmh, current.relative_humidity_2m);
+
+        updateWeatherAnimation(currentW.label);
+
         renderHourly(data.hourly, data.hourly.time, nomVille, isEtangSale);
         renderForecast7j(data.daily, data.daily.time, nomVille, isEtangSale);
+
+        // Mise à jour iframe Windy si changement de ville
+        const windyIframe = document.querySelector('.windy-widget iframe');
+        windyIframe.src = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&detailLat=${lat}&detailLon=${lon}&width=650&height=350&zoom=9&level=surface&overlay=rain&menu=off&message=&marker=&calendar=off&pressure=&type=map&location=off&detail=&metricRain=mm%2Fh&metricTemp=%C2%B0C&metricWind=km%2Fh&colorWind=undefined&spotlightRegion=RE&region=RE`;
       } catch (e) {
         console.error(e);
         document.getElementById('ville-nom').textContent = nomVille;
         document.getElementById('current-temp').textContent = `--°`;
         document.getElementById('current-condition').textContent = `Données non disponibles`;
+        document.getElementById('current-insight').textContent = "";
+        updateWeatherAnimation("Couvert");
       }
     }
 
@@ -732,14 +771,38 @@
       window.open('https://youtube.com/@meteore974', '_blank');
     });
 
+    // === NOUVEAU : Partage avec watermark intégré ===
+    document.getElementById('share-btn').addEventListener('click', async () => {
+      const element = document.querySelector('.container');
+      const canvas = await html2canvas(element, {
+        backgroundColor: null,
+        scale: 1.5,
+        useCORS: true
+      });
+
+      const ctx = canvas.getContext('2d');
+      ctx.globalAlpha = 0.04;
+      ctx.font = 'bold 90px Inter';
+      ctx.fillStyle = '#0288d1';
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(-Math.PI / 6);
+      ctx.fillText('MeteoRe', -200, 0);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+      const link = document.createElement('a');
+      link.download = `meteoRe-${new Date().toISOString().slice(0,10)}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         document.getElementById('intro').classList.add('hidden');
         const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
         searchInput.value = etangSale.nom;
         fetchWeather(etangSale.lat, etangSale.lon, etangSale.nom);
-      }, 2500);
+      }, 1500);
     });
   </script>
 </body>
-      </html>
+          </html>
