@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    /* ===== WATERMARK CSS (reste, mais moins critique car intégré dans PNG) ===== */
+    /* ===== WATERMARK ===== */
     body::after {
       content: "MeteoRe";
       position: fixed;
@@ -28,7 +28,55 @@
       white-space: nowrap;
     }
 
-    /* ===== Reste identique ===== */
+    /* ===== EFFETS MÉTÉO CONTEXTUELS (CORPS) ===== */
+    body.sun-glow {
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      --text: #006064;
+    }
+    body.cloudy-dim {
+      background: linear-gradient(135deg, #cfd8dc, #b0bec5);
+      filter: brightness(0.92);
+    }
+    body.rainy-dim {
+      background: linear-gradient(135deg, #b0bec5, #90a4ae);
+      filter: brightness(0.88);
+    }
+    body.stormy-dim {
+      background: linear-gradient(135deg, #78909c, #546e7a);
+      filter: brightness(0.75);
+    }
+
+    /* ===== ANIMATIONS DE GOUTTES (pluie + orage) ===== */
+    .rain-container {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0;
+      display: none;
+    }
+    .raindrop {
+      position: absolute;
+      width: 2px;
+      height: 20px;
+      background: rgba(173, 216, 230, 0.6);
+      border-radius: 0 0 2px 2px;
+      animation: fall linear infinite;
+    }
+    @keyframes fall {
+      to { transform: translateY(100vh); }
+    }
+
+    .storm-flash {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 2000;
+    }
+
+    /* ===== Reste du style ===== */
     #vigilance-static {
       display: inline-block;
       background: #4CAF50;
@@ -58,9 +106,11 @@
       right: -100px;
       width: 300px;
       height: 300px;
-      background: radial-gradient(circle, rgba(255,215,0,0.25) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(255,215,0,0.35) 0%, transparent 70%);
       border-radius: 50%;
       animation: floatSun 40s infinite linear;
+      filter: blur(5px);
+      opacity: 0.9;
     }
 
     #anim-cloud {
@@ -68,47 +118,9 @@
       left: -150px;
       width: 200px;
       height: 80px;
-      background: radial-gradient(ellipse, rgba(255,255,255,0.6) 0%, transparent 80%);
+      background: radial-gradient(ellipse, rgba(255,255,255,0.4) 0%, transparent 80%);
       border-radius: 50%;
       animation: floatCloud 60s infinite ease-in-out;
-    }
-
-    #anim-rain {
-      background: repeating-linear-gradient(
-        transparent 0px,
-        transparent 4px,
-        rgba(173, 216, 230, 0.5) 4px,
-        rgba(173, 216, 230, 0.5) 5px
-      );
-      animation: rainDrop 0.5s linear infinite;
-    }
-
-    #anim-lightning {
-      background: white;
-      animation: lightningFlash 4s infinite;
-    }
-
-    @keyframes floatSun {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    @keyframes floatCloud {
-      0% { transform: translateX(0) translateY(0); }
-      25% { transform: translateX(100px) translateY(-20px); }
-      50% { transform: translateX(200px) translateY(0); }
-      75% { transform: translateX(100px) translateY(20px); }
-      100% { transform: translateX(0) translateY(0); }
-    }
-    @keyframes rainDrop {
-      0% { background-position: 0 0; }
-      100% { background-position: 10px 10px; }
-    }
-    @keyframes lightningFlash {
-      0%, 95% { opacity: 0; }
-      96% { opacity: 0.25; }
-      97% { opacity: 0; }
-      98% { opacity: 0.15; }
-      99% { opacity: 0; }
     }
 
     :root {
@@ -127,6 +139,7 @@
       min-height: 100vh;
       padding: 0;
       overflow-x: hidden;
+      transition: filter 0.6s ease, background 0.6s ease;
     }
 
     #intro {
@@ -306,15 +319,22 @@
       transition: all 0.2s;
     }
 
-    .windy-widget {
+    .cyclone-widget {
       background: var(--card-bg);
       border-radius: 20px;
       padding: 20px;
       margin-bottom: 30px;
       box-shadow: var(--shadow);
       border: 1px solid rgba(2, 136, 209, 0.1);
-      position: relative;
-      overflow: hidden;
+      text-align: center;
+    }
+    #cyclone-image {
+      width: 100%;
+      max-width: 600px;
+      border-radius: 14px;
+      display: block;
+      margin: 0 auto;
+      object-fit: cover;
     }
 
     .footer {
@@ -381,10 +401,14 @@
 </head>
 <body>
 
+  <!-- 🌧️/⛈️ Gouttes de pluie & éclairs -->
+  <div class="rain-container" id="rain-normal"></div>
+  <div class="rain-container" id="rain-storm"></div>
+  <div class="storm-flash" id="lightning-flash"></div>
+
+  <!-- ☀️/☁️ Animations météo douces -->
   <div class="weather-animation" id="anim-sun"></div>
   <div class="weather-animation" id="anim-cloud"></div>
-  <div class="weather-animation" id="anim-rain"></div>
-  <div class="weather-animation" id="anim-lightning"></div>
 
   <div id="intro">
     <img id="intro-logo" src="https://i.imgur.com/KsA0dbG.jpeg" alt="Logo MeteoRe">
@@ -396,7 +420,7 @@
   <div class="top-bar">
     <div class="logo-with-version">
       <div class="logo">MeteoRe</div>
-      <div class="version">version 1.20</div>
+      <div class="version">version 1.20.1</div> <!-- ✅ Mise à jour -->
     </div>
     <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
   </div>
@@ -406,7 +430,7 @@
       <div class="location" id="ville-nom">Chargement...</div>
       <div class="current-temp" id="current-temp">--°</div>
       <div class="current-condition" id="current-condition">—</div>
-      <div class="current-insight" id="current-insight" style="font-size:16px; font-weight:500; margin-top:8px; opacity:0.9; color:#0288d1;"></div>
+      <div class="current-insight" id="current-insight"></div>
       <div class="details-grid">
         <div class="detail-card">
           <div class="detail-value" id="humidity">—%</div>
@@ -438,20 +462,15 @@
     <div class="section-title">Prévision 7 jours</div>
     <div class="forecast-7j" id="forecast-7j"></div>
 
-    <div class="windy-widget">
-      <div style="position:absolute; top:12px; right:16px; z-index:3; background:rgba(255,255,255,0.85); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; color:#0288d1; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
-        MeteoRe
-      </div>
-      <iframe
-        src="https://embed.windy.com/embed2.html?lat=-21.150&lon=55.433&detailLat=-21.150&detailLon=55.433&width=650&height=350&zoom=9&level=surface&overlay=rain&menu=off&message=&marker=&calendar=off&pressure=&type=map&location=off&detail=&metricRain=mm%2Fh&metricTemp=%C2%B0C&metricWind=km%2Fh&colorWind=undefined&spotlightRegion=RE&region=RE"
-        width="100%"
-        height="350"
-        frameborder="0"
-        style="border-radius:14px; display:block;"
-        allowfullscreen>
-      </iframe>
-      <p style="font-size:13px; opacity:0.85; margin-top:12px; text-align:center;">
-        Source : Windy.com • Mise à jour par MeteoRe
+    <!-- 🌀 IMAGE CYCLONIQUE (à remplacer demain) -->
+    <div class="section-title">Activité cyclonique – Mise à jour quotidienne</div>
+    <div class="cyclone-widget">
+      <img id="cyclone-image"
+           src=""
+           alt="Carte cyclonique MeteoRe"
+           onerror="this.src='https://via.placeholder.com/600x300/e0f7fa/006064?text=Image+cyclonique+à+venir';">
+      <p style="font-size:13px; opacity:0.85; margin-top:12px;">
+        Mise à jour quotidienne par MeteoRe
       </p>
     </div>
 
@@ -468,6 +487,74 @@
   </div>
 
   <script>
+    // ==== Générateur de gouttes ====
+    function createRain(containerId, count, speed, opacity, height = '20px', width = '2px') {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      container.style.display = 'block';
+      container.style.opacity = '1';
+      
+      for (let i = 0; i < count; i++) {
+        const drop = document.createElement('div');
+        drop.className = 'raindrop';
+        drop.style.left = Math.random() * 100 + 'vw';
+        drop.style.animationDuration = speed + 's';
+        drop.style.opacity = opacity;
+        drop.style.height = height;
+        drop.style.width = width;
+        container.appendChild(drop);
+      }
+    }
+
+    function flashLightning() {
+      const flash = document.getElementById('lightning-flash');
+      flash.style.opacity = '0.3';
+      setTimeout(() => flash.style.opacity = '0', 100);
+      setTimeout(() => {
+        flash.style.opacity = '0.2';
+        setTimeout(() => flash.style.opacity = '0', 80);
+      }, 300 + Math.random() * 500);
+    }
+
+    function clearWeatherEffects() {
+      document.body.className = '';
+      ['anim-sun', 'anim-cloud'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      ['rain-normal', 'rain-storm'].forEach(id => {
+        document.getElementById(id).style.opacity = '0';
+      });
+      // Stoppe les éclairs en cours
+      if (window.lightningInterval) clearInterval(window.lightningInterval);
+    }
+
+    function updateWeatherAnimation(condition) {
+      clearWeatherEffects();
+      const c = condition.toLowerCase();
+
+      if (c.includes('ensoleillé') || c.includes('clair') || c.includes('éclaircies') || c.includes('soleil')) {
+        document.body.classList.add('sun-glow');
+        document.getElementById('anim-sun').style.display = 'block';
+      } 
+      else if (c.includes('nuageux') || c.includes('couvert') || c.includes('brouillard') || c.includes('voilé')) {
+        document.body.classList.add('cloudy-dim');
+        document.getElementById('anim-cloud').style.display = 'block';
+      } 
+      else if (c.includes('pluie') || c.includes('averses') || c.includes('faibles')) {
+        document.body.classList.add('rainy-dim');
+        document.getElementById('anim-cloud').style.display = 'block';
+        createRain('rain-normal', 100, '1.2', '0.5');
+      } 
+      else if (c.includes('orage') || c.includes('orages') || c.includes('violents') || c.includes('fortes')) {
+        document.body.classList.add('stormy-dim');
+        document.getElementById('anim-cloud').style.display = 'block';
+        createRain('rain-storm', 200, '0.6', '0.7', '25px', '3px');
+        // Éclairs aléatoires
+        window.lightningInterval = setInterval(flashLightning, 2000 + Math.random() * 3000);
+      }
+    }
+
+    // ==== RESTE DU CODE IDENTIQUE (villes, météo, etc.) ====
     const villesReunion = [
       { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
       { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
@@ -487,52 +574,7 @@
     const previsionsManuelles_EtangSale = {
       "00h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
       "01h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
-      "02h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
-      "03h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
-      "04h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
-      "05h": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
-      "06h": { label: "Ciel voilé", icon: "https://i.imgur.com/8EIg3fq.png", temp: 23 },
-      "07h": { label: "Ciel voilé", icon: "https://i.imgur.com/8EIg3fq.png", temp: 24 },
-      "08h": { label: "Ciel voilé", icon: "https://i.imgur.com/8EIg3fq.png", temp: 25 },
-      "09h": { label: "Ciel voilé", icon: "https://i.imgur.com/8EIg3fq.png", temp: 26 },
-      "10h": { label: "Ciel voilé", icon: "https://i.imgur.com/8EIg3fq.png", temp: 28 },
-      "11h": { label: "Ciel voilé", icon: "https://i.imgur.com/8EIg3fq.png", temp: 29 },
-      "12h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 30 },
-      "13h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 29 },
-      "14h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 28 },
-      "15h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 27 },
-      "16h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 26 },
-      "17h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 26 },
-      "18h": { label: "Partiellement nuageux", icon: "https://i.imgur.com/1gHBkKj.png", temp: 25 },
-      "19h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 24 },
-      "20h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 24 },
-      "21h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 23 },
-      "22h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 23 },
-      "23h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 22 },
-      "00h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 22 },
-      "01h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 21 },
-      "02h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 21 },
-      "03h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 23 },
-      "04h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 25 },
-      "05h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 26 },
-      "06h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 27 },
-      "07h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 27 },
-      "08h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 28 },
-      "09h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 28 },
-      "10h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 29 },
-      "11h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 30 },
-      "12h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 30 },
-      "13h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png", temp: 31 },
-      "14h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", temp: 30 },
-      "15h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", temp: 28 },
-      "16h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", temp: 27 },
-      "17h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", temp: 25 },
-      "18h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png", temp: 24 },
-      "19h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 23 },
-      "20h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 22 },
-      "21h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 21 },
-      "22h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 21 },
-      "23h_j1": { label: "Ciel clair", icon: "https://i.imgur.com/9mtLzHK.png", temp: 20 }
+      // ... (tu peux garder le reste tel quel)
     };
 
     const weatherCodeMap = {
@@ -597,29 +639,6 @@
       } 
       else {
         insight.textContent = "🌦 Une journée typique à La Réunion.";
-      }
-    }
-
-    function updateWeatherAnimation(condition) {
-      const els = ['anim-sun', 'anim-cloud', 'anim-rain', 'anim-lightning'];
-      els.forEach(id => document.getElementById(id).style.display = 'none');
-
-      const c = condition.toLowerCase();
-
-      if (c.includes('clair') || c.includes('soleil') || c.includes('éclaircies') || c.includes('dégagé') || c.includes('ensoleillé')) {
-        document.getElementById('anim-sun').style.display = 'block';
-      } 
-      else if (c.includes('nuageux') || c.includes('couvert') || c.includes('brouillard') || c.includes('voilé')) {
-        document.getElementById('anim-cloud').style.display = 'block';
-      } 
-      else if (c.includes('pluie') || c.includes('averses')) {
-        document.getElementById('anim-cloud').style.display = 'block';
-        document.getElementById('anim-rain').style.display = 'block';
-      } 
-      else if (c.includes('orage') || c.includes('orages')) {
-        document.getElementById('anim-cloud').style.display = 'block';
-        document.getElementById('anim-rain').style.display = 'block';
-        document.getElementById('anim-lightning').style.display = 'block';
       }
     }
 
@@ -727,10 +746,6 @@
 
         renderHourly(data.hourly, data.hourly.time, nomVille, isEtangSale);
         renderForecast7j(data.daily, data.daily.time, nomVille, isEtangSale);
-
-        // Mise à jour iframe Windy si changement de ville
-        const windyIframe = document.querySelector('.windy-widget iframe');
-        windyIframe.src = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&detailLat=${lat}&detailLon=${lon}&width=650&height=350&zoom=9&level=surface&overlay=rain&menu=off&message=&marker=&calendar=off&pressure=&type=map&location=off&detail=&metricRain=mm%2Fh&metricTemp=%C2%B0C&metricWind=km%2Fh&colorWind=undefined&spotlightRegion=RE&region=RE`;
       } catch (e) {
         console.error(e);
         document.getElementById('ville-nom').textContent = nomVille;
@@ -740,6 +755,8 @@
         updateWeatherAnimation("Couvert");
       }
     }
+
+    // ... (reste du JS identique : search, YouTube, share, etc.)
 
     const searchInput = document.getElementById('search-input-bottom');
     const suggestionsDropdown = document.getElementById('suggestions-dropdown');
@@ -771,7 +788,6 @@
       window.open('https://youtube.com/@meteore974', '_blank');
     });
 
-    // === NOUVEAU : Partage avec watermark intégré ===
     document.getElementById('share-btn').addEventListener('click', async () => {
       const element = document.querySelector('.container');
       const canvas = await html2canvas(element, {
@@ -805,4 +821,4 @@
     });
   </script>
 </body>
-          </html>
+</html>
