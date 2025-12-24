@@ -13,10 +13,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    /* ===== VIGILANCE DANS LE FLUX (non fixée à l'écran) ===== */
+    /* ===== VIGILANCE DANS LE FLUX ===== */
     #vigilance-static {
       display: inline-block;
-      background: #4CAF50; /* Vert = Pas de vigilance */
+      background: #4CAF50;
       color: #000;
       font-weight: 700;
       font-size: 12px;
@@ -28,7 +28,7 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    /* ===== FOND ANIMÉ (soleil + nuages) ===== */
+    /* ===== FOND ANIMÉ ===== */
     body::before {
       content: "";
       position: fixed;
@@ -430,7 +430,7 @@
   <div class="top-bar">
     <div class="logo-with-version">
       <div class="logo">MeteoRe</div>
-      <div class="version">version 1.17 - L'Étang-Salé</div>
+      <div class="version">version 1.18 - L'Étang-Salé</div>
     </div>
     <div>
       <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
@@ -462,7 +462,7 @@
       </div>
     </div>
 
-    <!-- ✅ TITRE CORRIGÉ -->
+    <!-- ✅ TITRE SIMPLIFIÉ -->
     <div class="section-title">Prévision sur 2 jours</div>
     <div class="hourly-cards" id="hourly"></div>
 
@@ -570,7 +570,7 @@
 
         const data = previsionsManuelles_EtangSale[key];
         if (!data) {
-          // Si pas de donnée manuelle, on arrête (ou on pourrait skip)
+          // Si pas de donnée manuelle, on arrête (ou on skip)
           break;
         }
 
