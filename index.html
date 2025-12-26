@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>MeteoRe – Météo précise pour La Réunion</title>
+  <title>MeteoRe – Météo pour La Réunion {le plus précis à l'étang salé}</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0d47a1">
   <link rel="apple-touch-icon" href="icon-194.png">
@@ -47,11 +47,10 @@
     }
     body.stormy-dim {
       background: linear-gradient(135deg, #607d8b, #455a64);
-      filter: brightness(0.85); /* ✅ adouci */
+      filter: brightness(0.85);
       --text: #e0e0e0;
     }
 
-    /* ===== ANIMATIONS MÉTÉO (SANS PLUIE) ===== */
     .storm-flash {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -95,7 +94,6 @@
     @keyframes floatSun { to { transform: translateX(200px) rotate(360deg); } }
     @keyframes floatCloud { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(200px); } }
 
-    /* ===== GLOBAL ===== */
     :root {
       --bg: linear-gradient(135deg, #f0f9ff, #d0f0ff);
       --card-bg: rgba(255, 255, 255, 0.92);
@@ -321,17 +319,16 @@
       padding: 0 4px;
     }
 
-    /* ✅ SEULE MODIFICATION : BARRE DE DÉFILEMENT VISIBLE */
     .hourly-cards {
       display: flex;
       gap: 16px;
       overflow-x: auto;
       padding: 8px 0 16px;
-      -ms-overflow-style: auto;    /* Pour Edge/IE */
-      scrollbar-width: auto;       /* Pour Firefox */
+      -ms-overflow-style: auto;
+      scrollbar-width: auto;
     }
     .hourly-cards::-webkit-scrollbar {
-      display: block;              /* Pour Chrome/Safari */
+      display: block;
       height: 6px;
     }
     .hourly-cards::-webkit-scrollbar-thumb {
@@ -425,7 +422,6 @@
       filter: grayscale(1) opacity(0.6);
     }
 
-    /* ===== SEARCH EN BAS ===== */
     .search-bottom {
       position: fixed;
       bottom: 24px;
@@ -489,7 +485,6 @@
       transform: translateX(4px);
     }
 
-    /* ===== BADGE SOURCE ===== */
     #source-badge {
       text-align: right;
       font-size: 12px;
@@ -501,7 +496,6 @@
 </head>
 <body>
 
-  <!-- ✅ PLUS DE GOUTTES DE PLUIE -->
   <div class="storm-flash" id="lightning-flash"></div>
   <div class="weather-animation" id="anim-sun"></div>
   <div class="weather-animation" id="anim-cloud"></div>
@@ -516,7 +510,7 @@
   <div class="top-bar">
     <div class="logo-with-version">
       <div class="logo">MeteoRe</div>
-      <div class="version">version 1.20.1</div>
+      <div class="version">version V1.20.8</div>
     </div>
     <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
   </div>
@@ -554,7 +548,6 @@
       </button>
     </div>
     
-    <!-- ✅ BADGE DE SOURCE -->
     <div id="source-badge"></div>
     
     <div class="hourly-cards" id="hourly"></div>
@@ -586,7 +579,6 @@
   </div>
 
   <script>
-    // ==== ANIMATIONS MÉTÉO (SANS PLUIE) ====
     function flashLightning() {
       const flash = document.getElementById('lightning-flash');
       flash.style.opacity = '0.3';
@@ -620,17 +612,14 @@
       else if (c.includes('pluie') || c.includes('averses') || c.includes('faibles')) {
         document.body.classList.add('rainy-dim');
         document.getElementById('anim-cloud').style.display = 'block';
-        // ✅ PLUS DE createRain()
       } 
       else if (c.includes('orage') || c.includes('orages') || c.includes('violents') || c.includes('fortes')) {
         document.body.classList.add('stormy-dim');
         document.getElementById('anim-cloud').style.display = 'block';
-        // ✅ PLUS DE createRain()
         window.lightningInterval = setInterval(flashLightning, 2000 + Math.random() * 3000);
       }
     }
 
-    // ==== DONNÉES ====
     const villesReunion = [
       { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
       { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
@@ -647,6 +636,7 @@
       { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
     ];
 
+    // ✅ PRÉVISIONS MANUELLES 48H - L'ÉTANG-SALÉ (inchangées)
     const previsionsManuelles_EtangSale = {
       "00h": { label: "Nuit clair", icon: "https://i.imgur.com/9mtLzHK.png" },
       "01h": { label: "Nuit clair", icon: "https://i.imgur.com/9mtLzHK.png" },
@@ -654,16 +644,16 @@
       "03h": { label: "Nuit clair", icon: "https://i.imgur.com/9mtLzHK.png" },
       "04h": { label: "Nuit clair", icon: "https://i.imgur.com/9mtLzHK.png" },
       "05h": { label: "Nuit clair", icon: "https://i.imgur.com/9mtLzHK.png" },
-      "06h": { label: "Peu nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "07h": { label: "Peu nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "08h": { label: "Peu nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "09h": { label: "Peu nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "10h": { label: "Peu nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "11h": { label: "Peu nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+      "06h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png" },
+      "07h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png" },
+      "08h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png" },
+      "09h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png" },
+      "10h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png" },
+      "11h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png" },
       "12h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
       "13h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
-      "14h": { label: "Orages", icon: "https://i.imgur.com/Qre2CV4.png" },
-      "15h": { label: "Orages", icon: "https://i.imgur.com/Qre2CV4.png" },
+      "14h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+      "15h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
       "16h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
       "17h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
       "18h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
@@ -698,17 +688,27 @@
       "23h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" }
     };
 
+    // ✅ PRÉVISIONS 7 JOURS MANUELLES - L'ÉTANG-SALÉ
+    const previsions7j_EtangSale = [
+      { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", min: "22°", max: "31°" },
+      { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", min: "23°", max: "30°" },
+      { label: "Orages", icon: "https://i.imgur.com/1gHBkKj.png", min: "22°", max: "32°" },
+      { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png", min: "21°", max: "29°" },
+      { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png", min: "22°", max: "32°" },
+      { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png", min: "23°", max: "29°" },
+      { label: "Averses orageuses", icon: "https://i.imgur.com/GlPii5L.png", min: "22°", max: "29°" }
+    ];
+
     const weatherCodeMap = {
       0:  { label: 'Ensoleillé', icon: 'https://i.imgur.com/9mtLzHK.png' },
       1:  { label: 'Éclaircies', icon: 'https://i.imgur.com/1gHBkKj.png' },
-      2:  { label: 'Peu nuageux', icon: 'https://i.imgur.com/1gHBkKj.png' },
+      2:  { label: 'Peu nuageux', icon: 'https://i.imgur.com/LrHBg6l.png' },
       3:  { label: 'Très nuageux', icon: 'https://i.imgur.com/8EIg3fq.png' },
       45: { label: 'Brouillard', icon: 'https://i.imgur.com/8EIg3fq.png' },
       48: { label: 'Brouillard givrant', icon: 'https://i.imgur.com/8EIg3fq.png' },
-      51: { label: 'Averses faibles', icon: 'https://i.imgur.com/lBjVqLV.png' },
-      53: { label: 'Pluie faible', icon: 'https://i.imgur.com/lBjVqLV.png' },
+      53: { label: 'Pluie faible', icon: 'https://i.imgur.com/cyxhtHc.png' },
       55: { label: 'Pluie modérée', icon: 'https://i.imgur.com/UTtGtvk.png' },
-      61: { label: 'Pluie faible', icon: 'https://i.imgur.com/lBjVqLV.png' },
+      61: { label: 'Pluie faible', icon: 'https://i.imgur.com/cyxhtHc.png' },
       63: { label: 'Pluie modérée', icon: 'https://i.imgur.com/UTtGtvk.png' },
       65: { label: 'Pluie forte', icon: 'https://i.imgur.com/zFt161l.png' },
       80: { label: 'Averses faibles', icon: 'https://i.imgur.com/lBjVqLV.png' },
@@ -720,6 +720,7 @@
     };
 
     const moisNoms = ["jan", "fév", "mar", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
+    const joursSemaine = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
 
     function formatDateForHourly(date) {
       const jour = date.getDate();
@@ -729,207 +730,119 @@
     }
 
     function getWeatherData(code) {
-      return weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/8EIg3fq.png' };
+      return weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/QR2QKNA.png' };
     }
 
-    // ✅ AJOUT : ORDRE DE PRIORITÉ
-    const intensiteOrdre = [
-      'Ensoleillé',
-      'Peu nuageux',
-      'Éclaircies',
-      'Très nuageux',
-      'Couvert',
-      'Pluie faible',
-      'Averses faibles',
-      'Pluie modérée',
-      'Averses',
-      'Orages',
-      'Averses orageuses'
-    ];
-
-    // ✅ AJOUT : ICÔNE À PARTIR DU LABEL
-    function getIconFromLabel(label) {
-      const map = {
-        'Ensoleillé': 'https://i.imgur.com/9mtLzHK.png',
-        'Peu nuageux': 'https://i.imgur.com/1gHBkKj.png',
-        'Éclaircies': 'https://i.imgur.com/1gHBkKj.png',
-        'Très nuageux': 'https://i.imgur.com/8EIg3fq.png',
-        'Couvert': 'https://i.imgur.com/8EIg3fq.png',
-        'Pluie faible': 'https://i.imgur.com/lBjVqLV.png',
-        'Averses faibles': 'https://i.imgur.com/lBjVqLV.png',
-        'Pluie modérée': 'https://i.imgur.com/UTtGtvk.png',
-        'Averses': 'https://i.imgur.com/UTtGtvk.png',
-        'Orages': 'https://i.imgur.com/Qre2CV4.png',
-        'Averses orageuses': 'https://i.imgur.com/GlPii5L.png',
-        'Nuit clair': 'https://i.imgur.com/9mtLzHK.png'
-      };
-      return map[label] || 'https://i.imgur.com/8EIg3fq.png';
-    }
-
-    // ✅ AJOUT : CONDITION MAX PAR JOUR
-    function getConditionMaxJour(jourCles) {
-      const conditions = [];
-      for (const cle of jourCles) {
-        if (previsionsManuelles_EtangSale[cle]) {
-          conditions.push(previsionsManuelles_EtangSale[cle].label);
-        }
-      }
-      if (conditions.length === 0) return 'Couvert';
-      
-      let maxIndex = -1;
-      let conditionMax = 'Ensoleillé';
-      for (const cond of conditions) {
-        const index = intensiteOrdre.indexOf(cond);
-        if (index > maxIndex) {
-          maxIndex = index;
-          conditionMax = cond;
-        }
-      }
-      return conditionMax;
-    }
-
-    function generateInsight(condition, temp, windSpeed, humidity) {
+    function generateInsight(condition) {
       const c = condition.toLowerCase();
       const insight = document.getElementById('current-insight');
-      
       if (c.includes('orage') || c.includes('orages') || c.includes('averses orageuses')) {
         insight.textContent = "⚡ Évitez les zones exposées et les randonnées en altitude.";
-      } 
-      else if (c.includes('pluie') || c.includes('averses')) {
+      } else if (c.includes('pluie') || c.includes('averses')) {
         insight.textContent = "💧 Prévoyez un imperméable si vous sortez.";
-      } 
-      else if (c.includes('ensoleillé') || c.includes('clair') || c.includes('éclaircies')) {
-        if (temp > 28) {
-          insight.textContent = "☀️ Parfait pour la plage — mais n’oubliez pas la crème solaire !";
-        } else {
-          insight.textContent = "🌤 Idéal pour une randonnée ou un pique-nique !";
-        }
-      } 
-      else if (c.includes('nuageux') || c.includes('couvert') || c.includes('voilé')) {
+      } else if (c.includes('ensoleillé') || c.includes('clair') || c.includes('éclaircies')) {
+        insight.textContent = "☀️ Parfait pour la plage — mais n’oubliez pas la crème solaire !";
+      } else if (c.includes('nuageux') || c.includes('couvert') || c.includes('voilé')) {
         insight.textContent = "☁️ Ambiance calme — bon moment pour découvrir les cirques.";
-      } 
-      else if (windSpeed > 45) {
-        insight.textContent = "💨 Vents forts : attention sur les routes et en bord de mer.";
-      } 
-      else if (humidity > 85 && temp > 28) {
-        insight.textContent = "💦 Chaleur humide — restez hydraté !";
-      } 
-      else {
+      } else {
         insight.textContent = "🌦 Une journée typique à La Réunion.";
       }
     }
 
-    function renderHourly(hourly, times, villeNom, isEtangSale = false) {
+    // ✅ NOUVELLE FONCTION : 48H MANUELLES FLUIDES
+    function renderHourlyForEtangSale() {
       const container = document.getElementById('hourly');
       container.innerHTML = '';
       const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      let count = 0;
       const maxHours = 48;
 
-      for (let i = 0; i < times.length && count < maxHours; i++) {
-        const time = new Date(times[i]);
-        if (time < now) continue;
+      for (let i = 0; i < maxHours; i++) {
+        const future = new Date(now.getTime() + i * 3600000);
+        const h = future.getHours();
+        const isNextDay = future.getDate() !== now.getDate();
+        const isDayAfter = future.getDate() !== now.getDate() && future.getDate() !== new Date(now.getTime() + 3600000).getDate();
 
-        const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
-        const forecastDay = new Date(time.getFullYear(), time.getMonth(), time.getDate());
-        const diffDays = Math.floor((forecastDay - today) / (1000 * 60 * 60 * 24));
-        let key = hourStr;
-        if (diffDays === 1) key = hourStr + '_j1';
-
-        const temp = Math.round(hourly.temperature_2m[i]);
-        let weatherData = getWeatherData(hourly.weather_code[i]);
-
-        if (isEtangSale && previsionsManuelles_EtangSale[key]) {
-          const manuel = previsionsManuelles_EtangSale[key];
-          weatherData = { label: manuel.label, icon: manuel.icon };
+        let key = h.toString().padStart(2, '0') + 'h';
+        if (isNextDay && !isDayAfter) {
+          key += '_j1';
+        } else if (isDayAfter) {
+          key += '_j1'; // on réutilise j1 pour j2 (pas de données au-delà)
         }
+
+        const data = previsionsManuelles_EtangSale[key] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png" };
+        const hourStr = h.toString().padStart(2, '0') + 'h';
+        const showDate = i > 0 && (future.getDate() !== new Date(now.getTime() + (i - 1) * 3600000).getDate());
 
         const card = document.createElement('div');
         card.className = 'hour-card';
-        let dateBottom = diffDays > 0 ? formatDateForHourly(time) : '';
-
         card.innerHTML = `
           <div style="font-size:13px; font-weight:600;">${hourStr}</div>
-          <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:30px;height:30px;margin:6px 0;">
-          <div style="font-weight:800;">${temp}°</div>
-          <div style="font-size:11px; opacity:0.85; margin-top:6px;">${weatherData.label}</div>
-          ${dateBottom ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${dateBottom}</div>` : ''}
+          <img src="${data.icon}" alt="${data.label}" style="width:30px;height:30px;margin:6px 0;">
+          <div style="font-size:11px; opacity:0.85; margin-top:6px;">${data.label}</div>
+          ${showDate ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${formatDateForHourly(future)}</div>` : ''}
         `;
         container.appendChild(card);
-        count++;
       }
     }
 
-    // ✅ MODIFIÉ : renderForecast7j
-    function renderForecast7j(daily, times, villeNom, isEtangSale = false) {
+    function renderForecast7jForEtangSale() {
       const container = document.getElementById('forecast-7j');
       container.innerHTML = '';
-      
-      if (isEtangSale) {
-        // ✅ MODE MANUEL POUR L'ÉTANG-SALÉ (2 jours)
-        const jours = ["Aujourd'hui", "Demain"];
-        
-        // Jour 0 : 00h → 23h
-        const clesJ0 = [];
-        for (let h = 0; h < 24; h++) clesJ0.push(`${h}h`);
-        
-        // Jour 1 : 00h_j1 → 23h_j1
-        const clesJ1 = [];
-        for (let h = 0; h < 24; h++) clesJ1.push(`${h}h_j1`);
-        
-        const conditions = [
-          getConditionMaxJour(clesJ0),
-          getConditionMaxJour(clesJ1)
-        ];
-        
-        for (let i = 0; i < 2; i++) {
-          const label = conditions[i];
-          const icon = getIconFromLabel(label);
-          
-          const card = document.createElement('div');
-          card.className = 'day-card';
-          card.innerHTML = `
-            <div style="display:flex;align-items:center;gap:12px;">
-              <img src="${icon}" alt="${label}" style="width:32px;height:32px;">
-              <div style="font-weight:600;">${jours[i]}</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-weight:800;">—° / —°</div>
-              <div style="font-size:12px; opacity:0.85;">${label}</div>
-            </div>
-          `;
-          container.appendChild(card);
-        }
-      } else {
-        // ➤ MODE API pour les autres villes (7 jours)
-        const days = ["Aujourd'hui", "Demain", "J+2", "J+3", "J+4", "J+5", "J+6"];
-        for (let i = 0; i < 7; i++) {
-          const date = new Date(times[i]);
-          const dayName = i === 0 ? "Aujourd'hui" : days[i];
-          let min = Math.round(daily.temperature_2m_min[i]);
-          let max = Math.round(daily.temperature_2m_max[i]);
-          let weatherData = getWeatherData(daily.weather_code[i]);
-
-          const card = document.createElement('div');
-          card.className = 'day-card';
-          card.innerHTML = `
-            <div style="display:flex;align-items:center;gap:12px;">
-              <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:32px;height:32px;">
-              <div style="font-weight:600;">${dayName}</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-weight:800;">${min}° / ${max}°</div>
-              <div style="font-size:12px; opacity:0.85;">${weatherData.label}</div>
-            </div>
-          `;
-          container.appendChild(card);
-        }
+      const now = new Date();
+      const todayIndex = now.getDay();
+      const labelsJours = [];
+      for (let i = 0; i < 7; i++) {
+        if (i === 0) labelsJours.push("Aujourd'hui");
+        else if (i === 1) labelsJours.push("Demain");
+        else labelsJours.push(joursSemaine[(todayIndex + i) % 7]);
       }
+
+      for (let i = 0; i < 7; i++) {
+        const data = previsions7j_EtangSale[i] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png", min: "—°", max: "—°" };
+        const card = document.createElement('div');
+        card.className = 'day-card';
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;gap:12px;">
+            <img src="${data.icon}" alt="${data.label}" style="width:32px;height:32px;">
+            <div style="font-weight:600;">${labelsJours[i]}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:800;">${data.min} / ${data.max}</div>
+            <div style="font-size:12px; opacity:0.85;">${data.label}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    function renderManualEtangSale() {
+      const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
+      document.getElementById('ville-nom').textContent = etangSale.nom;
+      document.getElementById('source-badge').textContent = "Donnée fiable";
+
+      const currentHour = new Date().getHours().toString().padStart(2, '0') + 'h';
+      const currentData = previsionsManuelles_EtangSale[currentHour] || previsionsManuelles_EtangSale["12h"];
+      
+      // Données fixes (tu les mets à jour toi-même)
+      document.getElementById('current-temp').textContent = "27°";
+      document.getElementById('current-condition').textContent = currentData.label;
+      document.getElementById('humidity').textContent = "78%";
+      document.getElementById('wind').textContent = "18 km/h";
+      document.getElementById('uv').textContent = "7";
+      document.getElementById('pressure').textContent = "1012 hPa";
+
+      generateInsight(currentData.label);
+      updateWeatherAnimation(currentData.label);
+      renderHourlyForEtangSale();
+      renderForecast7jForEtangSale();
     }
 
     async function fetchWeather(lat, lon, nomVille) {
-      const isEtangSale = (nomVille === "L'Étang-Salé");
+      if (nomVille === "L'Étang-Salé") {
+        renderManualEtangSale();
+        return;
+      }
+
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
         const res = await fetch(url);
@@ -937,14 +850,6 @@
 
         const current = data.current;
         let currentW = getWeatherData(current.weather_code);
-
-        if (isEtangSale) {
-          const currentHourKey = new Date().getHours().toString().padStart(2, '0') + 'h';
-          const manuel = previsionsManuelles_EtangSale[currentHourKey];
-          if (manuel) {
-            currentW = { label: manuel.label, icon: manuel.icon };
-          }
-        }
 
         document.getElementById('ville-nom').textContent = nomVille;
         document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
@@ -955,20 +860,65 @@
         document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
 
         const windSpeedKmh = current.wind_speed_10m * 3.6;
-        generateInsight(currentW.label, current.temperature_2m, windSpeedKmh, current.relative_humidity_2m);
-
+        generateInsight(currentW.label);
         updateWeatherAnimation(currentW.label);
 
-        renderHourly(data.hourly, data.hourly.time, nomVille, isEtangSale);
-        renderForecast7j(data.daily, data.daily.time, nomVille, isEtangSale);
+        const container = document.getElementById('hourly');
+        container.innerHTML = '';
+        const now = new Date();
+        let count = 0;
+        const maxHours = 48;
+        for (let i = 0; i < data.hourly.time.length && count < maxHours; i++) {
+          const time = new Date(data.hourly.time[i]);
+          if (time < now) continue;
+          const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
+          const temp = Math.round(data.hourly.temperature_2m[i]);
+          let weatherData = getWeatherData(data.hourly.weather_code[i]);
+          const forecastDay = new Date(time.getFullYear(), time.getMonth(), time.getDate());
+          const diffDays = Math.floor((forecastDay - now) / (24 * 60 * 60 * 1000));
+          let dateBottom = diffDays > 0 ? formatDateForHourly(time) : '';
 
-        // ✅ BADGE DE SOURCE
-        const sourceBadge = document.getElementById('source-badge');
-        if (isEtangSale) {
-          sourceBadge.textContent = "Donnée fiable";
-        } else {
-          sourceBadge.textContent = "Donnée de Open-Meteo";
+          const card = document.createElement('div');
+          card.className = 'hour-card';
+          card.innerHTML = `
+            <div style="font-size:13px; font-weight:600;">${hourStr}</div>
+            <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:30px;height:30px;margin:6px 0;">
+            <div style="font-weight:800;">${temp}°</div>
+            <div style="font-size:11px; opacity:0.85; margin-top:6px;">${weatherData.label}</div>
+            ${dateBottom ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${dateBottom}</div>` : ''}
+          `;
+          container.appendChild(card);
+          count++;
         }
+
+        const dailyContainer = document.getElementById('forecast-7j');
+        dailyContainer.innerHTML = '';
+        const labelsJours = [];
+        for (let i = 0; i < 7; i++) {
+          if (i === 0) labelsJours.push("Aujourd'hui");
+          else if (i === 1) labelsJours.push("Demain");
+          else labelsJours.push(joursSemaine[(now.getDay() + i) % 7]);
+        }
+        for (let i = 0; i < 7; i++) {
+          let min = Math.round(data.daily.temperature_2m_min[i]);
+          let max = Math.round(data.daily.temperature_2m_max[i]);
+          let weatherData = getWeatherData(data.daily.weather_code[i]);
+          const card = document.createElement('div');
+          card.className = 'day-card';
+          card.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;">
+              <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:32px;height:32px;">
+              <div style="font-weight:600;">${labelsJours[i]}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:800;">${min}° / ${max}°</div>
+              <div style="font-size:12px; opacity:0.85;">${weatherData.label}</div>
+            </div>
+          `;
+          dailyContainer.appendChild(card);
+        }
+
+        document.getElementById('source-badge').textContent = "Donnée de Open-Meteo";
       } catch (e) {
         console.error(e);
         document.getElementById('ville-nom').textContent = nomVille;
@@ -979,7 +929,6 @@
       }
     }
 
-    // ==== SEARCH & UI ====
     const searchInput = document.getElementById('search-input-bottom');
     const suggestionsDropdown = document.getElementById('suggestions-dropdown');
 
