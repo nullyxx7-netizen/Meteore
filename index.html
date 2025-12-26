@@ -579,6 +579,57 @@
   </div>
 
   <script>
+    // 🔧 1. SYSTÈME DE CORRECTION MANUELLE (40 MIN PAR DÉFAUT)
+    let manualOverride = {};
+    const DEFAULT_DURATION_MIN = 40; // ⏱️ MODIFIABLE DEPUIS LA CONSOLE
+
+    // ✅ Force une correction (ex: setManualOverride('temp', 30))
+    function setManualOverride(key, value, minutes = DEFAULT_DURATION_MIN) {
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + minutes * 60 * 1000);
+      manualOverride[key] = { value, expiresAt };
+      localStorage.setItem('manualOverride', JSON.stringify(manualOverride));
+      console.log(`💡 [MeteoRe] ${key} = ${value} (expire dans ${minutes} min à ${expiresAt.toLocaleTimeString()})`);
+      // Recharger les données pour appliquer immédiatement
+      const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
+      if (document.getElementById('ville-nom').textContent === etangSale.nom) {
+        fetchWeather(etangSale.lat, etangSale.lon, etangSale.nom);
+      }
+    }
+
+    // 🔄 Charger les corrections sauvegardées
+    function loadManualOverrides() {
+      const saved = localStorage.getItem('manualOverride');
+      if (saved) {
+        manualOverride = JSON.parse(saved);
+        const now = new Date();
+        for (const key in manualOverride) {
+          if (new Date(manualOverride[key].expiresAt) < now) {
+            delete manualOverride[key];
+          }
+        }
+        localStorage.setItem('manualOverride', JSON.stringify(manualOverride));
+      }
+    }
+
+    // 🎯 Obtenir la valeur à afficher
+    function getDisplayedValue(key, apiValue) {
+      const override = manualOverride[key];
+      if (override && new Date() < new Date(override.expiresAt)) {
+        return override.value;
+      }
+      return apiValue;
+    }
+
+    // 🧹 Option : supprimer TOUTES les corrections
+    function clearAllOverrides() {
+      manualOverride = {};
+      localStorage.removeItem('manualOverride');
+      console.log("🧹 [MeteoRe] Toutes les corrections manuelles supprimées.");
+    }
+
+    // ------------------ RESTE DE TON CODE (inchangé sauf intégration) ------------------
+
     function flashLightning() {
       const flash = document.getElementById('lightning-flash');
       flash.style.opacity = '0.3';
@@ -600,20 +651,16 @@
     function updateWeatherAnimation(condition) {
       clearWeatherEffects();
       const c = condition.toLowerCase();
-
       if (c.includes('ensoleillé') || c.includes('clair') || c.includes('éclaircies') || c.includes('soleil')) {
         document.body.classList.add('sun-glow');
         document.getElementById('anim-sun').style.display = 'block';
-      } 
-      else if (c.includes('nuageux') || c.includes('couvert') || c.includes('brouillard') || c.includes('voilé')) {
+      } else if (c.includes('nuageux') || c.includes('couvert') || c.includes('brouillard') || c.includes('voilé')) {
         document.body.classList.add('cloudy-dim');
         document.getElementById('anim-cloud').style.display = 'block';
-      } 
-      else if (c.includes('pluie') || c.includes('averses') || c.includes('faibles')) {
+      } else if (c.includes('pluie') || c.includes('averses') || c.includes('faibles')) {
         document.body.classList.add('rainy-dim');
         document.getElementById('anim-cloud').style.display = 'block';
-      } 
-      else if (c.includes('orage') || c.includes('orages') || c.includes('violents') || c.includes('fortes')) {
+      } else if (c.includes('orage') || c.includes('orages') || c.includes('violents') || c.includes('fortes')) {
         document.body.classList.add('stormy-dim');
         document.getElementById('anim-cloud').style.display = 'block';
         window.lightningInterval = setInterval(flashLightning, 2000 + Math.random() * 3000);
@@ -688,7 +735,6 @@
       "23h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" }
     };
 
-    // ✅ PRÉVISIONS 7 JOURS MANUELLES - L'ÉTANG-SALÉ
     const previsions7j_EtangSale = [
       { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", min: "22°", max: "31°" },
       { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", min: "23°", max: "30°" },
@@ -749,30 +795,22 @@
       }
     }
 
-    // ✅ FONCTION 48H MANUELLES (inchangée)
     function renderHourlyForEtangSale() {
       const container = document.getElementById('hourly');
       container.innerHTML = '';
       const now = new Date();
       const maxHours = 48;
-
       for (let i = 0; i < maxHours; i++) {
         const future = new Date(now.getTime() + i * 3600000);
         const h = future.getHours();
         const isNextDay = future.getDate() !== now.getDate();
         const isDayAfter = future.getDate() !== now.getDate() && future.getDate() !== new Date(now.getTime() + 3600000).getDate();
-
         let key = h.toString().padStart(2, '0') + 'h';
-        if (isNextDay && !isDayAfter) {
-          key += '_j1';
-        } else if (isDayAfter) {
-          key += '_j1';
-        }
-
+        if (isNextDay && !isDayAfter) key += '_j1';
+        else if (isDayAfter) key += '_j1';
         const data = previsionsManuelles_EtangSale[key] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png" };
         const hourStr = h.toString().padStart(2, '0') + 'h';
         const showDate = i > 0 && (future.getDate() !== new Date(now.getTime() + (i - 1) * 3600000).getDate());
-
         const card = document.createElement('div');
         card.className = 'hour-card';
         card.innerHTML = `
@@ -785,7 +823,6 @@
       }
     }
 
-    // ✅ FONCTION 7J MANUELLES (inchangée)
     function renderForecast7jForEtangSale() {
       const container = document.getElementById('forecast-7j');
       container.innerHTML = '';
@@ -797,7 +834,6 @@
         else if (i === 1) labelsJours.push("Demain");
         else labelsJours.push(joursSemaine[(todayIndex + i) % 7]);
       }
-
       for (let i = 0; i < 7; i++) {
         const data = previsions7j_EtangSale[i] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png", min: "—°", max: "—°" };
         const card = document.createElement('div');
@@ -816,38 +852,38 @@
       }
     }
 
-    // ✅ NOUVELLE FONCTION : API POUR DONNÉES ACTUELLES + MANUEL POUR PRÉVISIONS
     async function fetchWeatherForEtangSale(lat, lon, nomVille) {
       try {
-        // Appel API pour les données actuelles
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&timezone=Indian/Reunion`;
         const res = await fetch(url);
         const data = await res.json();
-
         const current = data.current;
-        document.getElementById('ville-nom').textContent = nomVille;
-        document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
-        document.getElementById('humidity').textContent = `${Math.round(current.relative_humidity_2m)}%`;
-        document.getElementById('wind').textContent = `${Math.round(current.wind_speed_10m * 3.6)} km/h`;
-        document.getElementById('uv').textContent = current.uv_index ? current.uv_index.toFixed(1) : "—";
-        document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
 
-        // Condition météo : on garde TON icône manuel pour l'heure actuelle
+        // 🔀 APPLIQUER LES CORRECTIONS MANUELLES
+        const temp = getDisplayedValue('temp', Math.round(current.temperature_2m));
+        const humidity = getDisplayedValue('humidity', Math.round(current.relative_humidity_2m));
+        const wind = getDisplayedValue('wind', Math.round(current.wind_speed_10m * 3.6));
+        const uv = getDisplayedValue('uv', current.uv_index ? current.uv_index.toFixed(1) : "—");
+        const pressure = getDisplayedValue('pressure', Math.round(current.pressure_msl));
+
+        document.getElementById('ville-nom').textContent = nomVille;
+        document.getElementById('current-temp').textContent = `${temp}°`;
+        document.getElementById('humidity').textContent = `${humidity}%`;
+        document.getElementById('wind').textContent = `${wind} km/h`;
+        document.getElementById('uv').textContent = uv;
+        document.getElementById('pressure').textContent = `${pressure} hPa`;
+
         const currentHour = new Date().getHours().toString().padStart(2, '0') + 'h';
         const currentData = previsionsManuelles_EtangSale[currentHour] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png" };
         document.getElementById('current-condition').textContent = currentData.label;
-
         generateInsight(currentData.label);
         updateWeatherAnimation(currentData.label);
-
-        // Prévisions = TES données manuelles
         renderHourlyForEtangSale();
         renderForecast7jForEtangSale();
-
         document.getElementById('source-badge').textContent = "Donnée fiable (API + manuel)";
       } catch (e) {
         console.error("API error:", e);
-        // En cas d'échec API, fallback total manuel
+        // Fallback manuel en cas d'échec
         const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
         document.getElementById('ville-nom').textContent = etangSale.nom;
         document.getElementById('current-temp').textContent = "25°";
@@ -856,7 +892,6 @@
         document.getElementById('wind').textContent = "17 km/h";
         document.getElementById('uv').textContent = "7";
         document.getElementById('pressure').textContent = "1012 hPa";
-        document.getElementById('current-insight').textContent = "🌦 Une journée typique à La Réunion.";
         updateWeatherAnimation("Éclaircies");
         renderHourlyForEtangSale();
         renderForecast7jForEtangSale();
@@ -875,10 +910,8 @@
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
         const res = await fetch(url);
         const data = await res.json();
-
         const current = data.current;
         let currentW = getWeatherData(current.weather_code);
-
         document.getElementById('ville-nom').textContent = nomVille;
         document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
         document.getElementById('current-condition').textContent = currentW.label;
@@ -886,12 +919,10 @@
         document.getElementById('wind').textContent = `${Math.round(current.wind_speed_10m * 3.6)} km/h`;
         document.getElementById('uv').textContent = current.uv_index ? current.uv_index.toFixed(1) : "—";
         document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
-
         const windSpeedKmh = current.wind_speed_10m * 3.6;
-        generateInsight(currentW.label, current.temperature_2m, windSpeedKmh, current.relative_humidity_2m);
+        generateInsight(currentW.label);
         updateWeatherAnimation(currentW.label);
 
-        // Rendu horaire API
         const container = document.getElementById('hourly');
         container.innerHTML = '';
         const now = new Date();
@@ -906,7 +937,6 @@
           const forecastDay = new Date(time.getFullYear(), time.getMonth(), time.getDate());
           const diffDays = Math.floor((forecastDay - now) / (24 * 60 * 60 * 1000));
           let dateBottom = diffDays > 0 ? formatDateForHourly(time) : '';
-
           const card = document.createElement('div');
           card.className = 'hour-card';
           card.innerHTML = `
@@ -920,11 +950,10 @@
           count++;
         }
 
-        // Rendu 7j API
         const dailyContainer = document.getElementById('forecast-7j');
         dailyContainer.innerHTML = '';
-        const labelsJours = [];
         const nowDate = new Date();
+        const labelsJours = [];
         for (let i = 0; i < 7; i++) {
           if (i === 0) labelsJours.push("Aujourd'hui");
           else if (i === 1) labelsJours.push("Demain");
@@ -948,7 +977,6 @@
           `;
           dailyContainer.appendChild(card);
         }
-
         document.getElementById('source-badge').textContent = "Donnée de Open-Meteo";
       } catch (e) {
         console.error(e);
@@ -997,7 +1025,6 @@
         scale: 1.5,
         useCORS: true
       });
-
       const ctx = canvas.getContext('2d');
       ctx.globalAlpha = 0.04;
       ctx.font = 'bold 90px Inter';
@@ -1006,7 +1033,6 @@
       ctx.rotate(-Math.PI / 6);
       ctx.fillText('MeteoRe', -200, 0);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-
       const link = document.createElement('a');
       link.download = `meteoRe-${new Date().toISOString().slice(0,10)}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -1014,6 +1040,7 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+      loadManualOverrides(); // 👈 CHARGE LES CORRECTIONS
       setTimeout(() => {
         document.getElementById('intro').classList.add('hidden');
         const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
