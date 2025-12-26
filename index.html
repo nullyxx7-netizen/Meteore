@@ -505,12 +505,12 @@
     <div id="intro-text">MeteoRe</div>
   </div>
 
-  <div id="Information">IMPORTANT !! MeteoRe est plus fiable et précise à L'étang Salé, et mis à jour en temps réel.</div>
+  <div id="vigilance-static">Vigilance jaune / Fortes pluies et orages</div>
 
   <div class="top-bar">
     <div class="logo-with-version">
       <div class="logo">MeteoRe</div>
-      <div class="version">version V1.20.9</div>
+      <div class="version">version V1.20.8</div>
     </div>
     <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
   </div>
@@ -581,23 +581,20 @@
   <script>
     // 🔧 1. SYSTÈME DE CORRECTION MANUELLE (40 MIN PAR DÉFAUT)
     let manualOverride = {};
-    const DEFAULT_DURATION_MIN = 40; // ⏱️ MODIFIABLE DEPUIS LA CONSOLE
+    const DEFAULT_DURATION_MIN = 40;
 
-    // ✅ Force une correction (ex: setManualOverride('temp', 30))
     function setManualOverride(key, value, minutes = DEFAULT_DURATION_MIN) {
       const now = new Date();
       const expiresAt = new Date(now.getTime() + minutes * 60 * 1000);
       manualOverride[key] = { value, expiresAt };
       localStorage.setItem('manualOverride', JSON.stringify(manualOverride));
       console.log(`💡 [MeteoRe] ${key} = ${value} (expire dans ${minutes} min à ${expiresAt.toLocaleTimeString()})`);
-      // Recharger les données pour appliquer immédiatement
       const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
       if (document.getElementById('ville-nom').textContent === etangSale.nom) {
         fetchWeather(etangSale.lat, etangSale.lon, etangSale.nom);
       }
     }
 
-    // 🔄 Charger les corrections sauvegardées
     function loadManualOverrides() {
       const saved = localStorage.getItem('manualOverride');
       if (saved) {
@@ -612,7 +609,6 @@
       }
     }
 
-    // 🎯 Obtenir la valeur à afficher
     function getDisplayedValue(key, apiValue) {
       const override = manualOverride[key];
       if (override && new Date() < new Date(override.expiresAt)) {
@@ -621,14 +617,11 @@
       return apiValue;
     }
 
-    // 🧹 Option : supprimer TOUTES les corrections
     function clearAllOverrides() {
       manualOverride = {};
       localStorage.removeItem('manualOverride');
       console.log("🧹 [MeteoRe] Toutes les corrections manuelles supprimées.");
     }
-
-    // ------------------ RESTE DE TON CODE (inchangé sauf intégration) ------------------
 
     function flashLightning() {
       const flash = document.getElementById('lightning-flash');
@@ -795,32 +788,45 @@
       }
     }
 
+    // ✅ FONCTION CORRIGÉE POUR 48H FLACIDE ET STABLE
     function renderHourlyForEtangSale() {
       const container = document.getElementById('hourly');
       container.innerHTML = '';
       const now = new Date();
       const maxHours = 48;
+
+      const hourlySlots = [];
       for (let i = 0; i < maxHours; i++) {
-        const future = new Date(now.getTime() + i * 3600000);
-        const h = future.getHours();
-        const isNextDay = future.getDate() !== now.getDate();
-        const isDayAfter = future.getDate() !== now.getDate() && future.getDate() !== new Date(now.getTime() + 3600000).getDate();
-        let key = h.toString().padStart(2, '0') + 'h';
-        if (isNextDay && !isDayAfter) key += '_j1';
-        else if (isDayAfter) key += '_j1';
-        const data = previsionsManuelles_EtangSale[key] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png" };
-        const hourStr = h.toString().padStart(2, '0') + 'h';
-        const showDate = i > 0 && (future.getDate() !== new Date(now.getTime() + (i - 1) * 3600000).getDate());
+        const slot = new Date(now.getTime() + i * 3600000);
+        hourlySlots.push(slot);
+      }
+
+      hourlySlots.forEach((slot, index) => {
+        const hour = slot.getHours();
+        const isToday = slot.getDate() === now.getDate();
+        let key = `${hour.toString().padStart(2, '0')}h`;
+        if (!isToday) {
+          key += '_j1';
+        }
+
+        const data = previsionsManuelles_EtangSale[key] || { 
+          label: "Couvert", 
+          icon: "https://i.imgur.com/QR2QKNA.png" 
+        };
+
+        const hourStr = `${hour.toString().padStart(2, '0')}h`;
+        const showDate = index > 0 && slot.getDate() !== hourlySlots[index - 1].getDate();
+
         const card = document.createElement('div');
         card.className = 'hour-card';
         card.innerHTML = `
           <div style="font-size:13px; font-weight:600;">${hourStr}</div>
           <img src="${data.icon}" alt="${data.label}" style="width:30px;height:30px;margin:6px 0;">
           <div style="font-size:11px; opacity:0.85; margin-top:6px;">${data.label}</div>
-          ${showDate ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${formatDateForHourly(future)}</div>` : ''}
+          ${showDate ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${formatDateForHourly(slot)}</div>` : ''}
         `;
         container.appendChild(card);
-      }
+      });
     }
 
     function renderForecast7jForEtangSale() {
@@ -834,6 +840,7 @@
         else if (i === 1) labelsJours.push("Demain");
         else labelsJours.push(joursSemaine[(todayIndex + i) % 7]);
       }
+
       for (let i = 0; i < 7; i++) {
         const data = previsions7j_EtangSale[i] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png", min: "—°", max: "—°" };
         const card = document.createElement('div');
@@ -859,7 +866,6 @@
         const data = await res.json();
         const current = data.current;
 
-        // 🔀 APPLIQUER LES CORRECTIONS MANUELLES
         const temp = getDisplayedValue('temp', Math.round(current.temperature_2m));
         const humidity = getDisplayedValue('humidity', Math.round(current.relative_humidity_2m));
         const wind = getDisplayedValue('wind', Math.round(current.wind_speed_10m * 3.6));
@@ -883,7 +889,6 @@
         document.getElementById('source-badge').textContent = "Donnée fiable (API + manuel)";
       } catch (e) {
         console.error("API error:", e);
-        // Fallback manuel en cas d'échec
         const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
         document.getElementById('ville-nom').textContent = etangSale.nom;
         document.getElementById('current-temp').textContent = "25°";
@@ -905,7 +910,6 @@
         return;
       }
 
-      // Autres villes = Open-Meteo complet
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
         const res = await fetch(url);
@@ -1040,7 +1044,7 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-      loadManualOverrides(); // 👈 CHARGE LES CORRECTIONS
+      loadManualOverrides();
       setTimeout(() => {
         document.getElementById('intro').classList.add('hidden');
         const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
