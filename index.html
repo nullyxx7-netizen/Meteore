@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>MeteoRe – Météo précise pour La Réunion</title>
+  <title>MeteoRe – Météo pour La Réunion</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0d47a1">
   <link rel="apple-touch-icon" href="icon-194.png">
@@ -321,17 +321,24 @@
       padding: 0 4px;
     }
 
+    /* ✅ SEULE MODIFICATION : BARRE DE DÉFILEMENT VISIBLE */
     .hourly-cards {
       display: flex;
       gap: 16px;
       overflow-x: auto;
       padding: 8px 0 16px;
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+      -ms-overflow-style: auto;    /* Pour Edge/IE */
+      scrollbar-width: auto;       /* Pour Firefox */
     }
     .hourly-cards::-webkit-scrollbar {
-      display: none;
+      display: block;              /* Pour Chrome/Safari */
+      height: 6px;
     }
+    .hourly-cards::-webkit-scrollbar-thumb {
+      background: rgba(2, 136, 209, 0.4);
+      border-radius: 3px;
+    }
+
     .hour-card {
       background: var(--card-bg);
       border-radius: 20px;
@@ -560,7 +567,7 @@
       <img id="cyclone-image"
            src=""
            alt="Carte cyclonique MeteoRe"
-           onerror="this.src='https://via.placeholder.com/600x300/e0f7fa/006064?text=Image+cyclonique+à+venir';">
+           onerror="this.src='https://i.imgur.com/mWO8hAe.png';">
       <p style="font-size:13px; opacity:0.85; margin-top:12px;">
         Mise à jour quotidienne par MeteoRe
       </p>
