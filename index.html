@@ -523,13 +523,15 @@ margin-right: 8px;
 </div>
 </div>
 </div>
+<!-- ✅ Titre modifié -->
 <div class="section-title">
-<span>Prévision sur 2 jours</span>
+<span>Prévision par heure sur 2 jours</span>
 <button id="share-btn" style="background:#0288d1;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 6px rgba(2,136,209,0.3);">
 📸 Partager
 </button>
 </div>
-<div id="source-badge"></div>
+<!-- ✅ Badge simplifié -->
+<div id="source-badge">Donnée fiable</div>
 <div class="hourly-cards" id="hourly"></div>
 <div class="section-title">Prévision 7 jours</div>
 <div class="forecast-7j" id="forecast-7j"></div>
@@ -722,8 +724,7 @@ const weatherCodeMap = {
 99: { label: 'Orages violents', icon: 'https://i.imgur.com/GlPii5L.png' }
 };
 const moisNoms = ["jan", "fév", "mar", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
-const joursSemaine = ["DIMANCHE", "LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI"]; // ✅ MAJUSCULES
-
+const joursSemaine = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
 function formatDateForHourly(date) {
 const jour = date.getDate();
 const moisIndex = date.getMonth();
@@ -748,7 +749,7 @@ insight.textContent = "☁️ Ambiance calme";
 insight.textContent = "🌦 Une journée typique à La Réunion.";
 }
 }
-// ✅ FONCTION 48H — INTACTE (utilise tes clés _j1)
+// ✅ FONCTION 48H GLISSANTE (HEURE + JOUR)
 function renderHourlyForEtangSale() {
 const container = document.getElementById('hourly');
 container.innerHTML = '';
@@ -757,53 +758,46 @@ const maxHours = 48;
 for (let i = 0; i < maxHours; i++) {
 const future = new Date(now.getTime() + i * 3600000);
 const hour = future.getHours();
+const dayNameShort = joursSemaine[future.getDay()].substring(0, 3).toLowerCase();
+// Construire la clé
 let key = `${hour.toString().padStart(2, '0')}h`;
 if (i >= 24) {
-key += '_j1';
+key += '_j1'; // heures 24-47 → utiliser les données de demain
 }
 const data = previsionsManuelles_EtangSale[key] || {
 label: "Couvert",
 icon: "https://i.imgur.com/QR2QKNA.png"
 };
-const hourStr = `${hour.toString().padStart(2, '0')}h`;
-let dateLabel = "";
-if (i === 0) {
-dateLabel = formatDateForHourly(future);
-} else {
-const prevTime = new Date(now.getTime() + (i - 1) * 3600000);
-if (future.getDate() !== prevTime.getDate() || future.getMonth() !== prevTime.getMonth()) {
-dateLabel = formatDateForHourly(future);
-}
-}
 const card = document.createElement('div');
 card.className = 'hour-card';
 card.innerHTML = `
-<div style="font-size:13px; font-weight:600;">${hourStr}</div>
+<div style="font-size:13px; font-weight:600;">${hour.toString().padStart(2, '0')}h</div>
+<div style="font-size:11px; opacity:0.85;">${dayNameShort}</div>
 <img src="${data.icon}" alt="${data.label}" style="width:30px;height:30px;margin:6px 0;">
 <div style="font-size:11px; opacity:0.85; margin-top:6px;">${data.label}</div>
-${dateLabel ? `<div style="font-size:11px; margin-top:4px; color:#006064; font-weight:600;">${dateLabel}</div>` : ''}
 `;
 container.appendChild(card);
 }
 }
-// ✅ FONCTION 7 JOURS — MAJUSCULES + DATE AUTO
 function renderForecast7jForEtangSale() {
 const container = document.getElementById('forecast-7j');
 container.innerHTML = '';
 const now = new Date();
+const todayIndex = now.getDay();
+const labelsJours = [];
 for (let i = 0; i < 7; i++) {
-const date = new Date(now.getTime() + i * 24 * 3600000);
-const dayName = joursSemaine[date.getDay()]; // ✅ MAJUSCULES
-const dayAndMonth = `${date.getDate()} ${moisNoms[date.getMonth()]}`;
-const label = `${dayName} ${date.getDate()}`;
-
+if (i === 0) labelsJours.push("Aujourd'hui");
+else if (i === 1) labelsJours.push("Demain");
+else labelsJours.push(joursSemaine[(todayIndex + i) % 7]);
+}
+for (let i = 0; i < 7; i++) {
 const data = previsions7j_EtangSale[i] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png", min: "—°", max: "—°" };
 const card = document.createElement('div');
 card.className = 'day-card';
 card.innerHTML = `
 <div style="display:flex;align-items:center;gap:12px;">
 <img src="${data.icon}" alt="${data.label}" style="width:32px;height:32px;">
-<div style="font-weight:600;">${label}</div>
+<div style="font-weight:600;">${labelsJours[i]}</div>
 </div>
 <div style="text-align:right;">
 <div style="font-weight:800;">${data.min} / ${data.max}</div>
@@ -815,6 +809,7 @@ container.appendChild(card);
 }
 async function fetchWeatherForEtangSale(lat, lon, nomVille) {
 try {
+// ✅ URL CORRIGÉE (pas d'espace après latitude=)
 const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&timezone=Indian/Reunion`;
 const res = await fetch(url);
 const data = await res.json();
@@ -837,7 +832,8 @@ generateInsight(currentData.label);
 updateWeatherAnimation(currentData.label);
 renderHourlyForEtangSale();
 renderForecast7jForEtangSale();
-document.getElementById('source-badge').textContent = "Donnée fiable (API + manuel)";
+// ✅ Badge simplifié
+document.getElementById('source-badge').textContent = "Donnée fiable";
 } catch (e) {
 console.error("API error:", e);
 const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
@@ -851,7 +847,7 @@ document.getElementById('pressure').textContent = "1012 hPa";
 updateWeatherAnimation("Éclaircies");
 renderHourlyForEtangSale();
 renderForecast7jForEtangSale();
-document.getElementById('source-badge').textContent = "Donnée fiable (manuel)";
+document.getElementById('source-badge').textContent = "Donnée fiable";
 }
 }
 async function fetchWeather(lat, lon, nomVille) {
@@ -859,7 +855,85 @@ if (nomVille === "L'Étang-Salé") {
 await fetchWeatherForEtangSale(lat, lon, nomVille);
 return;
 }
-// ... (reste du code API pour autres villes — inchangé)
+try {
+// ✅ URL CORRIGÉE
+const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
+const res = await fetch(url);
+const data = await res.json();
+const current = data.current;
+let currentW = getWeatherData(current.weather_code);
+document.getElementById('ville-nom').textContent = nomVille;
+document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
+document.getElementById('current-condition').textContent = currentW.label;
+document.getElementById('humidity').textContent = `${Math.round(current.relative_humidity_2m)}%`;
+document.getElementById('wind').textContent = `${Math.round(current.wind_speed_10m * 3.6)} km/h`;
+document.getElementById('uv').textContent = current.uv_index ? current.uv_index.toFixed(1) : "—";
+document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
+const windSpeedKmh = current.wind_speed_10m * 3.6;
+generateInsight(currentW.label);
+updateWeatherAnimation(currentW.label);
+const container = document.getElementById('hourly');
+container.innerHTML = '';
+const now = new Date();
+let count = 0;
+const maxHours = 48;
+for (let i = 0; i < data.hourly.time.length && count < maxHours; i++) {
+const time = new Date(data.hourly.time[i]);
+if (time < now) continue;
+const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
+const temp = Math.round(data.hourly.temperature_2m[i]);
+let weatherData = getWeatherData(data.hourly.weather_code[i]);
+const forecastDay = new Date(time.getFullYear(), time.getMonth(), time.getDate());
+const diffDays = Math.floor((forecastDay - now) / (24 * 60 * 60 * 1000));
+let dateBottom = diffDays > 0 ? formatDateForHourly(time) : '';
+const card = document.createElement('div');
+card.className = 'hour-card';
+card.innerHTML = `
+<div style="font-size:13px; font-weight:600;">${hourStr}</div>
+<img src="${weatherData.icon}" alt="${weatherData.label}" style="width:30px;height:30px;margin:6px 0;">
+<div style="font-weight:800;">${temp}°</div>
+<div style="font-size:11px; opacity:0.85; margin-top:6px;">${weatherData.label}</div>
+${dateBottom ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${dateBottom}</div>` : ''}
+`;
+container.appendChild(card);
+count++;
+}
+const dailyContainer = document.getElementById('forecast-7j');
+dailyContainer.innerHTML = '';
+const nowDate = new Date();
+const labelsJours = [];
+for (let i = 0; i < 7; i++) {
+if (i === 0) labelsJours.push("Aujourd'hui");
+else if (i === 1) labelsJours.push("Demain");
+else labelsJours.push(joursSemaine[(nowDate.getDay() + i) % 7]);
+}
+for (let i = 0; i < 7; i++) {
+let min = Math.round(data.daily.temperature_2m_min[i]);
+let max = Math.round(data.daily.temperature_2m_max[i]);
+let weatherData = getWeatherData(data.daily.weather_code[i]);
+const card = document.createElement('div');
+card.className = 'day-card';
+card.innerHTML = `
+<div style="display:flex;align-items:center;gap:12px;">
+<img src="${weatherData.icon}" alt="${weatherData.label}" style="width:32px;height:32px;">
+<div style="font-weight:600;">${labelsJours[i]}</div>
+</div>
+<div style="text-align:right;">
+<div style="font-weight:800;">${min}° / ${max}°</div>
+<div style="font-size:12px; opacity:0.85;">${weatherData.label}</div>
+</div>
+`;
+dailyContainer.appendChild(card);
+}
+document.getElementById('source-badge').textContent = "Donnée de Open-Meteo";
+} catch (e) {
+console.error(e);
+document.getElementById('ville-nom').textContent = nomVille;
+document.getElementById('current-temp').textContent = `--°`;
+document.getElementById('current-condition').textContent = `Données non disponibles`;
+document.getElementById('current-insight').textContent = "";
+updateWeatherAnimation("Couvert");
+}
 }
 const searchInput = document.getElementById('search-input-bottom');
 const suggestionsDropdown = document.getElementById('suggestions-dropdown');
