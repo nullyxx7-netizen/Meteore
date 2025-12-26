@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>MeteoRe – Météo pour La Réunion</title>
+  <title>MeteoRe – Météo précise pour La Réunion</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0d47a1">
   <link rel="apple-touch-icon" href="icon-194.png">
@@ -567,7 +567,7 @@
       <img id="cyclone-image"
            src=""
            alt="Carte cyclonique MeteoRe"
-           onerror="this.src='https://i.imgur.com/mWO8hAe.png';">
+           onerror="this.src='https://via.placeholder.com/600x300/e0f7fa/006064?text=Image+cyclonique+à+venir';">
       <p style="font-size:13px; opacity:0.85; margin-top:12px;">
         Mise à jour quotidienne par MeteoRe
       </p>
@@ -664,7 +664,7 @@
       "13h": { label: "Éclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
       "14h": { label: "Orages", icon: "https://i.imgur.com/Qre2CV4.png" },
       "15h": { label: "Orages", icon: "https://i.imgur.com/Qre2CV4.png" },
-      "16h": { label: "Couvert", icon: "https://i.imgur.com/8EIg3fq.png" },
+      "16h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
       "17h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
       "18h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
       "19h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
@@ -730,6 +730,62 @@
 
     function getWeatherData(code) {
       return weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/8EIg3fq.png' };
+    }
+
+    // ✅ AJOUT : ORDRE DE PRIORITÉ
+    const intensiteOrdre = [
+      'Ensoleillé',
+      'Peu nuageux',
+      'Éclaircies',
+      'Très nuageux',
+      'Couvert',
+      'Pluie faible',
+      'Averses faibles',
+      'Pluie modérée',
+      'Averses',
+      'Orages',
+      'Averses orageuses'
+    ];
+
+    // ✅ AJOUT : ICÔNE À PARTIR DU LABEL
+    function getIconFromLabel(label) {
+      const map = {
+        'Ensoleillé': 'https://i.imgur.com/9mtLzHK.png',
+        'Peu nuageux': 'https://i.imgur.com/1gHBkKj.png',
+        'Éclaircies': 'https://i.imgur.com/1gHBkKj.png',
+        'Très nuageux': 'https://i.imgur.com/8EIg3fq.png',
+        'Couvert': 'https://i.imgur.com/8EIg3fq.png',
+        'Pluie faible': 'https://i.imgur.com/lBjVqLV.png',
+        'Averses faibles': 'https://i.imgur.com/lBjVqLV.png',
+        'Pluie modérée': 'https://i.imgur.com/UTtGtvk.png',
+        'Averses': 'https://i.imgur.com/UTtGtvk.png',
+        'Orages': 'https://i.imgur.com/Qre2CV4.png',
+        'Averses orageuses': 'https://i.imgur.com/GlPii5L.png',
+        'Nuit clair': 'https://i.imgur.com/9mtLzHK.png'
+      };
+      return map[label] || 'https://i.imgur.com/8EIg3fq.png';
+    }
+
+    // ✅ AJOUT : CONDITION MAX PAR JOUR
+    function getConditionMaxJour(jourCles) {
+      const conditions = [];
+      for (const cle of jourCles) {
+        if (previsionsManuelles_EtangSale[cle]) {
+          conditions.push(previsionsManuelles_EtangSale[cle].label);
+        }
+      }
+      if (conditions.length === 0) return 'Couvert';
+      
+      let maxIndex = -1;
+      let conditionMax = 'Ensoleillé';
+      for (const cond of conditions) {
+        const index = intensiteOrdre.indexOf(cond);
+        if (index > maxIndex) {
+          maxIndex = index;
+          conditionMax = cond;
+        }
+      }
+      return conditionMax;
     }
 
     function generateInsight(condition, temp, windSpeed, humidity) {
@@ -805,32 +861,70 @@
       }
     }
 
+    // ✅ MODIFIÉ : renderForecast7j
     function renderForecast7j(daily, times, villeNom, isEtangSale = false) {
       const container = document.getElementById('forecast-7j');
       container.innerHTML = '';
-      const days = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
-      const now = new Date();
+      
+      if (isEtangSale) {
+        // ✅ MODE MANUEL POUR L'ÉTANG-SALÉ (2 jours)
+        const jours = ["Aujourd'hui", "Demain"];
+        
+        // Jour 0 : 00h → 23h
+        const clesJ0 = [];
+        for (let h = 0; h < 24; h++) clesJ0.push(`${h}h`);
+        
+        // Jour 1 : 00h_j1 → 23h_j1
+        const clesJ1 = [];
+        for (let h = 0; h < 24; h++) clesJ1.push(`${h}h_j1`);
+        
+        const conditions = [
+          getConditionMaxJour(clesJ0),
+          getConditionMaxJour(clesJ1)
+        ];
+        
+        for (let i = 0; i < 2; i++) {
+          const label = conditions[i];
+          const icon = getIconFromLabel(label);
+          
+          const card = document.createElement('div');
+          card.className = 'day-card';
+          card.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;">
+              <img src="${icon}" alt="${label}" style="width:32px;height:32px;">
+              <div style="font-weight:600;">${jours[i]}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:800;">—° / —°</div>
+              <div style="font-size:12px; opacity:0.85;">${label}</div>
+            </div>
+          `;
+          container.appendChild(card);
+        }
+      } else {
+        // ➤ MODE API pour les autres villes (7 jours)
+        const days = ["Aujourd'hui", "Demain", "J+2", "J+3", "J+4", "J+5", "J+6"];
+        for (let i = 0; i < 7; i++) {
+          const date = new Date(times[i]);
+          const dayName = i === 0 ? "Aujourd'hui" : days[i];
+          let min = Math.round(daily.temperature_2m_min[i]);
+          let max = Math.round(daily.temperature_2m_max[i]);
+          let weatherData = getWeatherData(daily.weather_code[i]);
 
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(times[i]);
-        const dayName = i === 0 ? "Aujourd'hui" : days[date.getDay()];
-        let min = Math.round(daily.temperature_2m_min[i]);
-        let max = Math.round(daily.temperature_2m_max[i]);
-        let weatherData = getWeatherData(daily.weather_code[i]);
-
-        const card = document.createElement('div');
-        card.className = 'day-card';
-        card.innerHTML = `
-          <div style="display:flex;align-items:center;gap:12px;">
-            <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:32px;height:32px;">
-            <div style="font-weight:600;">${dayName}</div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-weight:800;">${min}° / ${max}°</div>
-            <div style="font-size:12px; opacity:0.85;">${weatherData.label}</div>
-          </div>
-        `;
-        container.appendChild(card);
+          const card = document.createElement('div');
+          card.className = 'day-card';
+          card.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;">
+              <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:32px;height:32px;">
+              <div style="font-weight:600;">${dayName}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:800;">${min}° / ${max}°</div>
+              <div style="font-size:12px; opacity:0.85;">${weatherData.label}</div>
+            </div>
+          `;
+          container.appendChild(card);
+        }
       }
     }
 
