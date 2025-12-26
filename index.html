@@ -580,48 +580,61 @@ card.innerHTML = `
 container.appendChild(card);
 }
 }
-async function fetchWeatherForEtangSale(lat, lon, nomVille) {
-try {
-// ✅ URL CORRIGÉE
-const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&timezone=Indian/Reunion`;
-const res = await fetch(url);
-const data = await res.json();
-const current = data.current;
-const temp = getDisplayedValue('temp', Math.round(current.temperature_2m));
-const humidity = getDisplayedValue('humidity', Math.round(current.relative_humidity_2m));
-const wind = getDisplayedValue('wind', Math.round(current.wind_speed_10m * 3.6));
-const uv = getDisplayedValue('uv', current.uv_index ? current.uv_index.toFixed(1) : "—");
-const pressure = getDisplayedValue('pressure', Math.round(current.pressure_msl));
-document.getElementById('ville-nom').textContent = nomVille;
-document.getElementById('current-temp').textContent = `${temp}°`;
-document.getElementById('humidity').textContent = `${humidity}%`;
-document.getElementById('wind').textContent = `${wind} km/h`;
-document.getElementById('uv').textContent = uv;
-document.getElementById('pressure').textContent = `${pressure} hPa`;
-const currentHour = new Date().getHours().toString().padStart(2, '0') + 'h';
-const currentData = previsionsManuelles_EtangSale[currentHour] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png" };
-document.getElementById('current-condition').textContent = currentData.label;
-generateInsight(currentData.label);
-updateWeatherAnimation(currentData.label);
-renderHourlyForEtangSale();
-renderForecast7jForEtangSale();
-// ✅ Badge simplifié
-document.getElementById('source-badge').textContent = "Donnée fiable";
-} catch (e) {
-console.error("API error:", e);
-const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
-document.getElementById('ville-nom').textContent = etangSale.nom;
-document.getElementById('current-temp').textContent = "25°";
-document.getElementById('current-condition').textContent = "Éclaircies";
-document.getElementById('humidity').textContent = "78%";
-document.getElementById('wind').textContent = "17 km/h";
-document.getElementById('uv').textContent = "7";
-document.getElementById('pressure').textContent = "1012 hPa";
-updateWeatherAnimation("Éclaircies");
-renderHourlyForEtangSale();
-renderForecast7jForEtangSale();
-document.getElementById('source-badge').textContent = "Donnée fiable";
-}
+vasync function fetchWeatherForEtangSale(lat, lon, nomVille) {
+  try {
+    // ✅ API UNIQUEMENT pour les données ACTUELLES
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&timezone=Indian/Reunion`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const current = data.current;
+
+    // Appliquer corrections manuelles si existantes
+    const temp = getDisplayedValue('temp', Math.round(current.temperature_2m));
+    const humidity = getDisplayedValue('humidity', Math.round(current.relative_humidity_2m));
+    const wind = getDisplayedValue('wind', Math.round(current.wind_speed_10m * 3.6));
+    const uv = getDisplayedValue('uv', current.uv_index ? current.uv_index.toFixed(1) : "—");
+    const pressure = getDisplayedValue('pressure', Math.round(current.pressure_msl));
+
+    document.getElementById('ville-nom').textContent = nomVille;
+    document.getElementById('current-temp').textContent = `${temp}°`;
+    document.getElementById('humidity').textContent = `${humidity}%`;
+    document.getElementById('wind').textContent = `${wind} km/h`;
+    document.getElementById('uv').textContent = uv;
+    document.getElementById('pressure').textContent = `${pressure} hPa`;
+
+    // ✅ Condition météo = TOUJOURS depuis tes prévisions manuelles (heure actuelle)
+    const currentHour = new Date().getHours().toString().padStart(2, '0') + 'h';
+    const currentData = previsionsManuelles_EtangSale[currentHour] || { 
+      label: "Couvert", 
+      icon: "https://i.imgur.com/QR2QKNA.png" 
+    };
+    document.getElementById('current-condition').textContent = currentData.label;
+    generateInsight(currentData.label);
+    updateWeatherAnimation(currentData.label);
+
+    // ✅ 48H = 100% MANUEL (pas d'API)
+    renderHourlyForEtangSale();
+    // ✅ 7J = 100% MANUEL (pas d'API)
+    renderForecast7jForEtangSale();
+
+    document.getElementById('source-badge').textContent = "Donnée fiable";
+
+  } catch (e) {
+    console.error("API error:", e);
+    // Fallback manuel complet
+    const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
+    document.getElementById('ville-nom').textContent = etangSale.nom;
+    document.getElementById('current-temp').textContent = "25°";
+    document.getElementById('current-condition').textContent = "Éclaircies";
+    document.getElementById('humidity').textContent = "78%";
+    document.getElementById('wind').textContent = "17 km/h";
+    document.getElementById('uv').textContent = "7";
+    document.getElementById('pressure').textContent = "1012 hPa";
+    updateWeatherAnimation("Éclaircies");
+    renderHourlyForEtangSale();
+    renderForecast7jForEtangSale();
+    document.getElementById('source-badge').textContent = "Donnée fiable";
+  }
 }
 async function fetchWeather(lat, lon, nomVille) {
 if (nomVille === "L'Étang-Salé") {
