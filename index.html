@@ -505,7 +505,7 @@
     <div id="intro-text">MeteoRe</div>
   </div>
 
-  <div id="vigilance-static">Vigilance – Pas de vigilance</div>
+  <div id="vigilance-static">Vigilance jaune / Fortes pluies et orages</div>
 
   <div class="top-bar">
     <div class="logo-with-version">
@@ -636,7 +636,7 @@
       { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
     ];
 
-    // ✅ PRÉVISIONS MANUELLES 48H - L'ÉTANG-SALÉ (inchangées)
+    // ✅ PRÉVISIONS MANUELLES 48H - L'ÉTANG-SALÉ
     const previsionsManuelles_EtangSale = {
       "00h": { label: "Nuit clair", icon: "https://i.imgur.com/9mtLzHK.png" },
       "01h": { label: "Nuit clair", icon: "https://i.imgur.com/9mtLzHK.png" },
@@ -741,15 +741,15 @@
       } else if (c.includes('pluie') || c.includes('averses')) {
         insight.textContent = "💧 Prévoyez un imperméable si vous sortez.";
       } else if (c.includes('ensoleillé') || c.includes('clair') || c.includes('éclaircies')) {
-        insight.textContent = "☀️ Parfait pour la plage — mais n’oubliez pas la crème solaire !";
+        insight.textContent = "☀️ Parfait pour la plage !";
       } else if (c.includes('nuageux') || c.includes('couvert') || c.includes('voilé')) {
-        insight.textContent = "☁️ Ambiance calme — bon moment pour découvrir les cirques.";
+        insight.textContent = "☁️ Ambiance calme";
       } else {
         insight.textContent = "🌦 Une journée typique à La Réunion.";
       }
     }
 
-    // ✅ NOUVELLE FONCTION : 48H MANUELLES FLUIDES
+    // ✅ FONCTION 48H MANUELLES (inchangée)
     function renderHourlyForEtangSale() {
       const container = document.getElementById('hourly');
       container.innerHTML = '';
@@ -766,7 +766,7 @@
         if (isNextDay && !isDayAfter) {
           key += '_j1';
         } else if (isDayAfter) {
-          key += '_j1'; // on réutilise j1 pour j2 (pas de données au-delà)
+          key += '_j1';
         }
 
         const data = previsionsManuelles_EtangSale[key] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png" };
@@ -785,6 +785,7 @@
       }
     }
 
+    // ✅ FONCTION 7J MANUELLES (inchangée)
     function renderForecast7jForEtangSale() {
       const container = document.getElementById('forecast-7j');
       container.innerHTML = '';
@@ -815,34 +816,61 @@
       }
     }
 
-    function renderManualEtangSale() {
-      const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
-      document.getElementById('ville-nom').textContent = etangSale.nom;
-      document.getElementById('source-badge').textContent = "Donnée fiable";
+    // ✅ NOUVELLE FONCTION : API POUR DONNÉES ACTUELLES + MANUEL POUR PRÉVISIONS
+    async function fetchWeatherForEtangSale(lat, lon, nomVille) {
+      try {
+        // Appel API pour les données actuelles
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&timezone=Indian/Reunion`;
+        const res = await fetch(url);
+        const data = await res.json();
 
-      const currentHour = new Date().getHours().toString().padStart(2, '0') + 'h';
-      const currentData = previsionsManuelles_EtangSale[currentHour] || previsionsManuelles_EtangSale["12h"];
-      
-      // Données fixes (tu les mets à jour toi-même)
-      document.getElementById('current-temp').textContent = "27°";
-      document.getElementById('current-condition').textContent = currentData.label;
-      document.getElementById('humidity').textContent = "78%";
-      document.getElementById('wind').textContent = "18 km/h";
-      document.getElementById('uv').textContent = "7";
-      document.getElementById('pressure').textContent = "1012 hPa";
+        const current = data.current;
+        document.getElementById('ville-nom').textContent = nomVille;
+        document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
+        document.getElementById('humidity').textContent = `${Math.round(current.relative_humidity_2m)}%`;
+        document.getElementById('wind').textContent = `${Math.round(current.wind_speed_10m * 3.6)} km/h`;
+        document.getElementById('uv').textContent = current.uv_index ? current.uv_index.toFixed(1) : "—";
+        document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
 
-      generateInsight(currentData.label);
-      updateWeatherAnimation(currentData.label);
-      renderHourlyForEtangSale();
-      renderForecast7jForEtangSale();
+        // Condition météo : on garde TON icône manuel pour l'heure actuelle
+        const currentHour = new Date().getHours().toString().padStart(2, '0') + 'h';
+        const currentData = previsionsManuelles_EtangSale[currentHour] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png" };
+        document.getElementById('current-condition').textContent = currentData.label;
+
+        generateInsight(currentData.label);
+        updateWeatherAnimation(currentData.label);
+
+        // Prévisions = TES données manuelles
+        renderHourlyForEtangSale();
+        renderForecast7jForEtangSale();
+
+        document.getElementById('source-badge').textContent = "Donnée fiable (API + manuel)";
+      } catch (e) {
+        console.error("API error:", e);
+        // En cas d'échec API, fallback total manuel
+        const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
+        document.getElementById('ville-nom').textContent = etangSale.nom;
+        document.getElementById('current-temp').textContent = "25°";
+        document.getElementById('current-condition').textContent = "Éclaircies";
+        document.getElementById('humidity').textContent = "78%";
+        document.getElementById('wind').textContent = "17 km/h";
+        document.getElementById('uv').textContent = "7";
+        document.getElementById('pressure').textContent = "1012 hPa";
+        document.getElementById('current-insight').textContent = "🌦 Une journée typique à La Réunion.";
+        updateWeatherAnimation("Éclaircies");
+        renderHourlyForEtangSale();
+        renderForecast7jForEtangSale();
+        document.getElementById('source-badge').textContent = "Donnée fiable (manuel)";
+      }
     }
 
     async function fetchWeather(lat, lon, nomVille) {
       if (nomVille === "L'Étang-Salé") {
-        renderManualEtangSale();
+        await fetchWeatherForEtangSale(lat, lon, nomVille);
         return;
       }
 
+      // Autres villes = Open-Meteo complet
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
         const res = await fetch(url);
@@ -860,9 +888,10 @@
         document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
 
         const windSpeedKmh = current.wind_speed_10m * 3.6;
-        generateInsight(currentW.label);
+        generateInsight(currentW.label, current.temperature_2m, windSpeedKmh, current.relative_humidity_2m);
         updateWeatherAnimation(currentW.label);
 
+        // Rendu horaire API
         const container = document.getElementById('hourly');
         container.innerHTML = '';
         const now = new Date();
@@ -891,13 +920,15 @@
           count++;
         }
 
+        // Rendu 7j API
         const dailyContainer = document.getElementById('forecast-7j');
         dailyContainer.innerHTML = '';
         const labelsJours = [];
+        const nowDate = new Date();
         for (let i = 0; i < 7; i++) {
           if (i === 0) labelsJours.push("Aujourd'hui");
           else if (i === 1) labelsJours.push("Demain");
-          else labelsJours.push(joursSemaine[(now.getDay() + i) % 7]);
+          else labelsJours.push(joursSemaine[(nowDate.getDay() + i) % 7]);
         }
         for (let i = 0; i < 7; i++) {
           let min = Math.round(data.daily.temperature_2m_min[i]);
