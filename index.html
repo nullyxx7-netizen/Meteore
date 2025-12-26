@@ -789,45 +789,50 @@
     }
 
     // ✅ FONCTION CORRIGÉE POUR 48H FLACIDE ET STABLE
-    function renderHourlyForEtangSale() {
-      const container = document.getElementById('hourly');
-      container.innerHTML = '';
-      const now = new Date();
-      const maxHours = 48;
+   function renderHourlyForEtangSale() {
+  const container = document.getElementById('hourly');
+  container.innerHTML = '';
+  const now = new Date();
+  const maxHours = 48;
 
-      const hourlySlots = [];
-      for (let i = 0; i < maxHours; i++) {
-        const slot = new Date(now.getTime() + i * 3600000);
-        hourlySlots.push(slot);
-      }
+  // Fonction pour comparer deux dates (ignorer l'heure)
+  function isSameDay(d1, d2) {
+    return d1.getFullYear() === d2.getFullYear() &&
+           d1.getMonth() === d2.getMonth() &&
+           d1.getDate() === d2.getDate();
+  }
 
-      hourlySlots.forEach((slot, index) => {
-        const hour = slot.getHours();
-        const isToday = slot.getDate() === now.getDate();
-        let key = `${hour.toString().padStart(2, '0')}h`;
-        if (!isToday) {
-          key += '_j1';
-        }
-
-        const data = previsionsManuelles_EtangSale[key] || { 
-          label: "Couvert", 
-          icon: "https://i.imgur.com/QR2QKNA.png" 
-        };
-
-        const hourStr = `${hour.toString().padStart(2, '0')}h`;
-        const showDate = index > 0 && slot.getDate() !== hourlySlots[index - 1].getDate();
-
-        const card = document.createElement('div');
-        card.className = 'hour-card';
-        card.innerHTML = `
-          <div style="font-size:13px; font-weight:600;">${hourStr}</div>
-          <img src="${data.icon}" alt="${data.label}" style="width:30px;height:30px;margin:6px 0;">
-          <div style="font-size:11px; opacity:0.85; margin-top:6px;">${data.label}</div>
-          ${showDate ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${formatDateForHourly(slot)}</div>` : ''}
-        `;
-        container.appendChild(card);
-      });
+  for (let i = 0; i < maxHours; i++) {
+    const slot = new Date(now.getTime() + i * 3600000);
+    const hour = slot.getHours();
+    
+    // Déterminer si c'est aujourd'hui ou demain
+    let key = `${hour.toString().padStart(2, '0')}h`;
+    if (!isSameDay(slot, now)) {
+      // Tout ce qui n'est pas aujourd'hui → _j1 (tu as seulement 2 jours)
+      key += '_j1';
     }
+
+    // Obtenir les données manuelles
+    const data = previsionsManuelles_EtangSale[key] || { 
+      label: "Couvert", 
+      icon: "https://i.imgur.com/QR2QKNA.png" 
+    };
+
+    const hourStr = `${hour.toString().padStart(2, '0')}h`;
+    const showDate = i > 0 && !isSameDay(slot, new Date(now.getTime() + (i - 1) * 3600000));
+
+    const card = document.createElement('div');
+    card.className = 'hour-card';
+    card.innerHTML = `
+      <div style="font-size:13px; font-weight:600;">${hourStr}</div>
+      <img src="${data.icon.trim()}" alt="${data.label}" style="width:30px;height:30px;margin:6px 0;">
+      <div style="font-size:11px; opacity:0.85; margin-top:6px;">${data.label}</div>
+      ${showDate ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${formatDateForHourly(slot)}</div>` : ''}
+    `;
+    container.appendChild(card);
+  }
+}
 
     function renderForecast7jForEtangSale() {
       const container = document.getElementById('forecast-7j');
