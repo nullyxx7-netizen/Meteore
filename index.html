@@ -47,7 +47,7 @@
     }
     body.stormy-dim {
       background: linear-gradient(135deg, #607d8b, #455a64);
-      filter: brightness(0.85); /* ✅ adouci */
+      filter: brightness(0.85);
       --text: #e0e0e0;
     }
 
@@ -613,12 +613,10 @@
       else if (c.includes('pluie') || c.includes('averses') || c.includes('faibles')) {
         document.body.classList.add('rainy-dim');
         document.getElementById('anim-cloud').style.display = 'block';
-        // ✅ PLUS DE createRain()
       } 
       else if (c.includes('orage') || c.includes('orages') || c.includes('violents') || c.includes('fortes')) {
         document.body.classList.add('stormy-dim');
         document.getElementById('anim-cloud').style.display = 'block';
-        // ✅ PLUS DE createRain()
         window.lightningInterval = setInterval(flashLightning, 2000 + Math.random() * 3000);
       }
     }
@@ -756,45 +754,103 @@
       }
     }
 
+    // ✅ NOUVELLE FONCTION RENDU POUR L'ÉTANG-SALÉ
     function renderHourly(hourly, times, villeNom, isEtangSale = false) {
       const container = document.getElementById('hourly');
       container.innerHTML = '';
       const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      let count = 0;
-      const maxHours = 48;
+      const reunionNow = new Date(now.getTime() + 4 * 3600000); // UTC+4
+      const currentHour = reunionNow.getHours();
+      const todayDate = new Date(reunionNow.getFullYear(), reunionNow.getMonth(), reunionNow.getDate());
 
-      for (let i = 0; i < times.length && count < maxHours; i++) {
-        const time = new Date(times[i]);
-        if (time < now) continue;
+      if (isEtangSale) {
+        // Générer les 48 clés manuelles
+        const orderedKeys = [];
+        for (let h = 0; h < 24; h++) orderedKeys.push(`${h}h`);
+        for (let h = 0; h < 24; h++) orderedKeys.push(`${h}h_j1`);
 
-        const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
-        const forecastDay = new Date(time.getFullYear(), time.getMonth(), time.getDate());
-        const diffDays = Math.floor((forecastDay - today) / (1000 * 60 * 60 * 24));
-        let key = hourStr;
-        if (diffDays === 1) key = hourStr + '_j1';
-
-        const temp = Math.round(hourly.temperature_2m[i]);
-        let weatherData = getWeatherData(hourly.weather_code[i]);
-
-        if (isEtangSale && previsionsManuelles_EtangSale[key]) {
-          const manuel = previsionsManuelles_EtangSale[key];
-          weatherData = { label: manuel.label, icon: manuel.icon };
+        // Trouver le point de départ
+        let startIndex = 0;
+        for (let i = 0; i < orderedKeys.length; i++) {
+          const key = orderedKeys[i];
+          const h = parseInt(key.replace('h', '').replace('_j1', ''));
+          const isJ1 = key.includes('_j1');
+          if (!isJ1 && h >= currentHour) {
+            startIndex = i;
+            break;
+          }
+          if (!isJ1 && h < currentHour) continue;
+          if (isJ1) {
+            startIndex = i;
+            break;
+          }
         }
 
-        const card = document.createElement('div');
-        card.className = 'hour-card';
-        let dateBottom = diffDays > 0 ? formatDateForHourly(time) : '';
+        // Prendre 48 heures à partir du point de départ
+        const slice = [];
+        for (let i = 0; i < 48; i++) {
+          const idx = (startIndex + i) % orderedKeys.length;
+          const key = orderedKeys[idx];
+          if (previsionsManuelles_EtangSale[key]) {
+            slice.push(key);
+          }
+          if (slice.length >= 48) break;
+        }
 
-        card.innerHTML = `
-          <div style="font-size:13px; font-weight:600;">${hourStr}</div>
-          <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:30px;height:30px;margin:6px 0;">
-          <div style="font-weight:800;">${temp}°</div>
-          <div style="font-size:11px; opacity:0.85; margin-top:6px;">${weatherData.label}</div>
-          ${dateBottom ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${dateBottom}</div>` : ''}
-        `;
-        container.appendChild(card);
-        count++;
+        // Affichage
+        slice.forEach(key => {
+          const entry = previsionsManuelles_EtangSale[key];
+          const isJ1 = key.includes('_j1');
+          const hourNum = parseInt(key.replace('h', '').replace('_j1', ''));
+          
+          const cardTime = new Date(todayDate);
+          if (isJ1) cardTime.setDate(cardTime.getDate() + 1);
+          cardTime.setHours(hourNum, 0, 0, 0);
+
+          const dayStr = formatDateForHourly(cardTime);
+          const showDate = isJ1 || dayStr !== formatDateForHourly(todayDate);
+
+          const card = document.createElement('div');
+          card.className = 'hour-card';
+          card.innerHTML = `
+            <div style="font-size:13px; font-weight:600;">${hourNum}h</div>
+            <img src="${entry.icon}" alt="${entry.label}" style="width:30px;height:30px;margin:6px 0;">
+            <div style="font-weight:800;margin-top:4px;">${entry.label}</div>
+            ${showDate ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${dayStr}</div>` : ''}
+          `;
+          container.appendChild(card);
+        });
+      } else {
+        // Mode API pour les autres villes
+        let count = 0;
+        const maxHours = 48;
+        for (let i = 0; i < times.length && count < maxHours; i++) {
+          const time = new Date(times[i]);
+          if (time < reunionNow) continue;
+
+          const hourStr = time.getHours().toString().padStart(2, '0') + 'h';
+          const forecastDay = new Date(time.getFullYear(), time.getMonth(), time.getDate());
+          const diffDays = Math.floor((forecastDay - todayDate) / (1000 * 60 * 60 * 24));
+          let key = hourStr;
+          if (diffDays === 1) key = hourStr + '_j1';
+
+          const temp = Math.round(hourly.temperature_2m[i]);
+          let weatherData = getWeatherData(hourly.weather_code[i]);
+
+          const card = document.createElement('div');
+          card.className = 'hour-card';
+          let dateBottom = diffDays > 0 ? formatDateForHourly(time) : '';
+
+          card.innerHTML = `
+            <div style="font-size:13px; font-weight:600;">${hourStr}</div>
+            <img src="${weatherData.icon}" alt="${weatherData.label}" style="width:30px;height:30px;margin:6px 0;">
+            <div style="font-weight:800;">${temp}°</div>
+            <div style="font-size:11px; opacity:0.85; margin-top:6px;">${weatherData.label}</div>
+            ${dateBottom ? `<div style="font-size:11px; margin-top:6px; color:#006064;">${dateBottom}</div>` : ''}
+          `;
+          container.appendChild(card);
+          count++;
+        }
       }
     }
 
@@ -830,6 +886,7 @@
     async function fetchWeather(lat, lon, nomVille) {
       const isEtangSale = (nomVille === "L'Étang-Salé");
       try {
+        // ✅ URL CORRIGÉE (suppression des espaces)
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
         const res = await fetch(url);
         const data = await res.json();
@@ -942,4 +999,4 @@
     });
   </script>
 </body>
-</html>
+</html>+0
