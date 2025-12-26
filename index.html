@@ -8,10 +8,10 @@
 <meta name="theme-color" content="#0d47a1">
 <link rel="apple-touch-icon" href="icon-194.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="preconnect" href="https://fonts.googleapis.com  ">
-<link rel="preconnect" href="https://fonts.gstatic.com  " crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter  :wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js  "></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 /* ===== WATERMARK DISCRET MAIS ÉLÉGANT ===== */
 body::after {
@@ -62,22 +62,44 @@ transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 #intro {
 position: fixed; top: 0; left: 0; width: 100%; height: 100%;
 background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
-display: flex; flex-direction: column; justify-content: center; align-items: center;
+display: flex; justify-content: center; align-items: center;
 z-index: 9999; opacity: 1; transition: opacity 0.7s ease-out;
 }
 #intro.hidden { opacity: 0; pointer-events: none; }
-#intro-logo {
-width: 120px; height: 120px; border-radius: 24px; margin-bottom: 20px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.15); animation: pulse 1.5s ease-in-out;
+#logo-container {
+position: relative; height: 120px; display: flex; align-items: center; justify-content: center;
 }
-@keyframes pulse {
-0% { transform: scale(0.9); opacity: 0; }
-70% { transform: scale(1.05); }
-100% { transform: scale(1); opacity: 1; }
-}
-#intro-text {
+.logo-letter {
+position: absolute;
 font-size: 34px; font-weight: 800; color: var(--accent);
 letter-spacing: 1.2px; text-shadow: 0 2px 6px rgba(0,0,0,0.08);
+opacity: 0;
+transform: translate(0, -100px) rotate(-10deg);
+animation: letterDrop 0.8s forwards;
+}
+.logo-letter:nth-child(1) { animation-delay: 0.1s; left: calc(50% - 100px); }
+.logo-letter:nth-child(2) { animation-delay: 0.2s; left: calc(50% - 70px); }
+.logo-letter:nth-child(3) { animation-delay: 0.3s; left: calc(50% - 40px); }
+.logo-letter:nth-child(4) { animation-delay: 0.4s; left: calc(50% - 10px); }
+.logo-letter:nth-child(5) { animation-delay: 0.5s; left: calc(50% + 20px); }
+.logo-letter:nth-child(6) { animation-delay: 0.6s; left: calc(50% + 50px); }
+.logo-letter:nth-child(7) { animation-delay: 0.7s; left: calc(50% + 80px); }
+@keyframes letterDrop {
+0% { opacity: 0; transform: translate(0, -100px) rotate(-10deg); }
+60% { opacity: 1; transform: translate(0, 10px) rotate(2deg); }
+80% { transform: translate(0, -5px) rotate(0); }
+100% { opacity: 1; transform: translate(0, 0) rotate(0); }
+}
+#intro-final {
+font-size: 34px; font-weight: 800; color: var(--accent);
+letter-spacing: 1.2px; text-shadow: 0 2px 6px rgba(0,0,0,0.08);
+opacity: 0;
+}
+#intro-final.appear {
+animation: fadeIn 0.8s forwards 1.6s;
+}
+@keyframes fadeIn {
+to { opacity: 1; }
 }
 #vigilance-static {
 display: inline-block; background: #4CAF50; color: #000;
@@ -252,14 +274,23 @@ margin-bottom: 10px; margin-right: 8px;
 <div class="weather-animation" id="anim-sun"></div>
 <div class="weather-animation" id="anim-cloud"></div>
 <div id="intro">
-<img id="intro-logo" src="https://i.imgur.com/KsA0dbG.jpeg  " alt="Logo MeteoRe">
-<div id="intro-text">MeteoRe</div>
+  <div id="logo-container">
+    <!-- Chaque lettre est positionnée individuellement -->
+    <div class="logo-letter">M</div>
+    <div class="logo-letter">e</div>
+    <div class="logo-letter">t</div>
+    <div class="logo-letter">e</div>
+    <div class="logo-letter">o</div>
+    <div class="logo-letter">R</div>
+    <div class="logo-letter">e</div>
+  </div>
+  <div id="intro-final">MeteoRe</div>
 </div>
 <div id="remarques">REMARQUES : MeteoRe est plus précis et fiable pour L'étang Salé.</div>
 <div class="top-bar">
 <div class="logo-with-version">
 <div class="logo">MeteoRe</div>
-<div class="version">V1.20.9</div>
+<div class="version">V1.20.10</div>
 </div>
 <button class="youtube-btn">▶️ Retrouve-moi sur YouTube</button>
 </div>
@@ -288,17 +319,14 @@ margin-bottom: 10px; margin-right: 8px;
 </div>
 </div>
 </div>
-<!-- ✅ Titre demandé -->
 <div class="section-title">
 <span>Prévision par heure sur 2 jours</span>
 <button id="share-btn" style="background:#0288d1;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 6px rgba(2,136,209,0.3);">
 📸 Partager
 </button>
 </div>
-<!-- ✅ Badge simplifié -->
 <div id="source-badge">Donnée fiable</div>
 <div class="hourly-cards" id="hourly"></div>
-<!-- ✅ Section 7 jours avec VENDREDI 26, etc. -->
 <div class="section-title">Prévision 7 jours</div>
 <div class="forecast-7j" id="forecast-7j"></div>
 <div class="section-title">Activité cyclonique en cours...!!! – Mise à jour à 18h03 le 26/12/2025</div>
@@ -306,7 +334,7 @@ margin-bottom: 10px; margin-right: 8px;
 <img id="cyclone-image"
 src=""
 alt="Carte cyclonique MeteoRe"
-onerror="this.src='https://i.imgur.com/mWO8hAe.png  ';">
+onerror="this.src='https://i.imgur.com/mWO8hAe.png';">
 <p style="font-size:13px; opacity:0.85; margin-top:12px;">
 Mise à jour quotidienne par MeteoRe
 </p>
@@ -314,7 +342,7 @@ Mise à jour quotidienne par MeteoRe
 <div class="footer">
 © 2025 MeteoRe • Météo précise pour La Réunion
 <br>
-<img src="https://i.imgur.com/KsA0dbG.jpeg  " alt="MeteoRe" style="width:22px; height:22px; opacity:0.7; margin-top:8px;">
+<img src="https://i.imgur.com/KsA0dbG.jpeg" alt="MeteoRe" style="width:22px; height:22px; opacity:0.7; margin-top:8px;">
 </div>
 </div>
 <div class="search-bottom">
@@ -411,85 +439,85 @@ const villesReunion = [
 ];
 // ✅ PRÉVISIONS MANUELLES 48H - L'ÉTANG-SALÉ
 const previsionsManuelles_EtangSale = {
-"00h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png  " },
-"01h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png  " },
-"02h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png  " },
-"03h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png  " },
-"04h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png  " },
-"05h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png  " },
-"06h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png  " },
-"07h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png  " },
-"08h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png  " },
-"09h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png  " },
-"10h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png  " },
-"11h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png  " },
-"12h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"13h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"14h": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png  " },
-"15h": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png  " },
-"16h": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png  " },
-"17h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png  " },
-"18h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"19h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"20h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"21h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"22h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png  " },
-"23h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png  " },
-"00h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png  " },
-"01h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png  " },
-"02h_j1": { label: "Couvert", icon: "https://i.imgur.com/8EIg3fq.png  " },
-"03h_j1": { label: "Couvert", icon: "https://i.imgur.com/8EIg3fq.png  " },
-"04h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"05h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"06h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"07h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"08h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"09h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"10h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"11h_j1": { label: "Peu nuageux", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"12h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"13h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"14h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png  " },
-"15h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png  " },
-"16h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png  " },
-"17h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png  " },
-"18h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"19h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"20h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"21h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"22h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " },
-"23h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png  " }
+"00h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png" },
+"01h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png" },
+"02h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png" },
+"03h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png" },
+"04h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png" },
+"05h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png" },
+"06h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png" },
+"07h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png" },
+"08h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png" },
+"09h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png" },
+"10h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png" },
+"11h": { label: "Peu nuageux", icon: "https://i.imgur.com/LrHBg6l.png" },
+"12h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"13h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"14h": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png" },
+"15h": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png" },
+"16h": { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png" },
+"17h": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+"18h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"19h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"20h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"21h": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"22h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+"23h": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+"00h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+"01h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+"02h_j1": { label: "Couvert", icon: "https://i.imgur.com/8EIg3fq.png" },
+"03h_j1": { label: "Couvert", icon: "https://i.imgur.com/8EIg3fq.png" },
+"04h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"05h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"06h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"07h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"08h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"09h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"10h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"11h_j1": { label: "Peu nuageux", icon: "https://i.imgur.com/1gHBkKj.png" },
+"12h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"13h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"14h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png" },
+"15h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+"16h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+"17h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png" },
+"18h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"19h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"20h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"21h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"22h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" },
+"23h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" }
 };
 const previsions7j_EtangSale = [
-{ label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png  ", min: "22°", max: "31°" },
-{ label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png  ", min: "19°", max: "26°" },
-{ label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png  ", min: "19°", max: "26°" },
-{ label: "Orages", icon: "https://i.imgur.com/Qre2CV4.png  ", min: "23°", max: "25°" },
-{ label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png  ", min: "22°", max: "26°" },
-{ label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png  ", min: "23°", max: "27°" },
-{ label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png  ", min: "22°", max: "29°" }
-};
+{ label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", min: "22°", max: "31°" },
+{ label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png", min: "19°", max: "26°" },
+{ label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", min: "19°", max: "26°" },
+{ label: "Orages", icon: "https://i.imgur.com/Qre2CV4.png", min: "23°", max: "25°" },
+{ label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png", min: "22°", max: "26°" },
+{ label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png", min: "23°", max: "27°" },
+{ label: "Très nuageux", icon: "https://i.imgur.com/8EIg3fq.png", min: "22°", max: "29°" }
+];
 const weatherCodeMap = {
-0:  { label: 'Ensoleillé', icon: 'https://i.imgur.com/9mtLzHK.png  ' },
-1:  { label: 'Éclaircies', icon: 'https://i.imgur.com/1gHBkKj.png  ' },
-2:  { label: 'Peu nuageux', icon: 'https://i.imgur.com/LrHBg6l.png  ' },
-3:  { label: 'Très nuageux', icon: 'https://i.imgur.com/8EIg3fq.png  ' },
-45: { label: 'Brouillard', icon: 'https://i.imgur.com/8EIg3fq.png  ' },
-48: { label: 'Brouillard givrant', icon: 'https://i.imgur.com/8EIg3fq.png  ' },
-53: { label: 'Pluie faible', icon: 'https://i.imgur.com/cyxhtHc.png  ' },
-55: { label: 'Pluie modérée', icon: 'https://i.imgur.com/UTtGtvk.png  ' },
-61: { label: 'Pluie faible', icon: 'https://i.imgur.com/cyxhtHc.png  ' },
-63: { label: 'Pluie modérée', icon: 'https://i.imgur.com/UTtGtvk.png  ' },
-65: { label: 'Pluie forte', icon: 'https://i.imgur.com/zFt161l.png  ' },
-80: { label: 'Averses faibles', icon: 'https://i.imgur.com/lBjVqLV.png  ' },
-81: { label: 'Averses', icon: 'https://i.imgur.com/UTtGtvk.png  ' },
-82: { label: 'Averses fortes', icon: 'https://i.imgur.com/zFt161l.png  ' },
-95: { label: 'Orages', icon: 'https://i.imgur.com/Qre2CV4.png  ' },
-96: { label: 'Averses orageuses', icon: 'https://i.imgur.com/GlPii5L.png  ' },
-99: { label: 'Orages violents', icon: 'https://i.imgur.com/GlPii5L.png  ' }
+0:  { label: 'Ensoleillé', icon: 'https://i.imgur.com/9mtLzHK.png' },
+1:  { label: 'Éclaircies', icon: 'https://i.imgur.com/1gHBkKj.png' },
+2:  { label: 'Peu nuageux', icon: 'https://i.imgur.com/LrHBg6l.png' },
+3:  { label: 'Très nuageux', icon: 'https://i.imgur.com/8EIg3fq.png' },
+45: { label: 'Brouillard', icon: 'https://i.imgur.com/8EIg3fq.png' },
+48: { label: 'Brouillard givrant', icon: 'https://i.imgur.com/8EIg3fq.png' },
+53: { label: 'Pluie faible', icon: 'https://i.imgur.com/cyxhtHc.png' },
+55: { label: 'Pluie modérée', icon: 'https://i.imgur.com/UTtGtvk.png' },
+61: { label: 'Pluie faible', icon: 'https://i.imgur.com/cyxhtHc.png' },
+63: { label: 'Pluie modérée', icon: 'https://i.imgur.com/UTtGtvk.png' },
+65: { label: 'Pluie forte', icon: 'https://i.imgur.com/zFt161l.png' },
+80: { label: 'Averses faibles', icon: 'https://i.imgur.com/lBjVqLV.png' },
+81: { label: 'Averses', icon: 'https://i.imgur.com/UTtGtvk.png' },
+82: { label: 'Averses fortes', icon: 'https://i.imgur.com/zFt161l.png' },
+95: { label: 'Orages', icon: 'https://i.imgur.com/Qre2CV4.png' },
+96: { label: 'Averses orageuses', icon: 'https://i.imgur.com/GlPii5L.png' },
+99: { label: 'Orages violents', icon: 'https://i.imgur.com/GlPii5L.png' }
 };
 const moisNoms = ["jan", "fév", "mar", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
-const joursSemaine = ["DIMANCHE", "LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI"]; // ✅ MAJUSCULES
+const joursSemaine = ["DIMANCHE", "LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI"];
 
 function formatDateForHourly(date) {
 const jour = date.getDate();
@@ -498,7 +526,7 @@ const mois = moisNoms[moisIndex];
 return `${jour} ${mois}`;
 }
 function getWeatherData(code) {
-return weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/QR2QKNA.png  ' };
+return weatherCodeMap[code] || { label: 'Couvert', icon: 'https://i.imgur.com/QR2QKNA.png' };
 }
 function generateInsight(condition) {
 const c = condition.toLowerCase();
@@ -516,41 +544,34 @@ insight.textContent = "🌦 Une journée typique à La Réunion.";
 }
 }
 
-// ✅ FONCTION 48H — CORRIGÉE POUR j0 → j1 (pas j0 j0)
+// ✅ FONCTION 48H — CORRIGÉE POUR j0 → j1
 function renderHourlyForEtangSale() {
   const container = document.getElementById('hourly');
   container.innerHTML = '';
   const now = new Date();
-  const todayDate = formatDateForHourly(now);
-  const tomorrowDate = formatDateForHourly(new Date(now.getTime() + 24 * 3600000));
+  const todayLabel = formatDateForHourly(now);
+  const tomorrowLabel = formatDateForHourly(new Date(now.getTime() + 24 * 3600000));
   const maxHours = 48;
-
-  let hasShownToday = false;
-  let hasShownTomorrow = false;
 
   for (let i = 0; i < maxHours; i++) {
     const future = new Date(now.getTime() + i * 3600000);
     const hour = future.getHours();
     const hourStr = `${hour.toString().padStart(2, '0')}h`;
 
-    // Clé pour les prévisions manuelles
     let key = i < 24 
-      ? `${hourStr}` 
+      ? hourStr 
       : `${hourStr}_j1`;
 
     const data = previsionsManuelles_EtangSale[key] || {
       label: "Couvert",
-      icon: "https://i.imgur.com/QR2QKNA.png  "
+      icon: "https://i.imgur.com/QR2QKNA.png"
     };
 
-    // Décider si on affiche la date
     let dateLabel = "";
-    if (i < 24 && !hasShownToday) {
-      dateLabel = todayDate;
-      hasShownToday = true;
-    } else if (i >= 24 && !hasShownTomorrow) {
-      dateLabel = tomorrowDate;
-      hasShownTomorrow = true;
+    if (i === 0) {
+      dateLabel = todayLabel;
+    } else if (i === 24) {
+      dateLabel = tomorrowLabel;
     }
 
     const card = document.createElement('div');
@@ -572,11 +593,11 @@ container.innerHTML = '';
 const now = new Date();
 for (let i = 0; i < 7; i++) {
 const date = new Date(now.getTime() + i * 24 * 3600000);
-const dayName = joursSemaine[date.getDay()]; // ✅ MAJUSCULES
+const dayName = joursSemaine[date.getDay()];
 const dayNum = date.getDate();
-const label = `${dayName} ${dayNum}`; // Ex: "VENDREDI 26"
+const label = `${dayName} ${dayNum}`;
 
-const data = previsions7j_EtangSale[i] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png  ", min: "—°", max: "—°" };
+const data = previsions7j_EtangSale[i] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png", min: "—°", max: "—°" };
 const card = document.createElement('div');
 card.className = 'day-card';
 card.innerHTML = `
@@ -594,7 +615,6 @@ container.appendChild(card);
 }
 async function fetchWeatherForEtangSale(lat, lon, nomVille) {
 try {
-// ✅ URL CORRIGÉE
 const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&timezone=Indian/Reunion`;
 const res = await fetch(url);
 const data = await res.json();
@@ -611,13 +631,12 @@ document.getElementById('wind').textContent = `${wind} km/h`;
 document.getElementById('uv').textContent = uv;
 document.getElementById('pressure').textContent = `${pressure} hPa`;
 const currentHour = new Date().getHours().toString().padStart(2, '0') + 'h';
-const currentData = previsionsManuelles_EtangSale[currentHour] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png  " };
+const currentData = previsionsManuelles_EtangSale[currentHour] || { label: "Couvert", icon: "https://i.imgur.com/QR2QKNA.png" };
 document.getElementById('current-condition').textContent = currentData.label;
 generateInsight(currentData.label);
 updateWeatherAnimation(currentData.label);
 renderHourlyForEtangSale();
 renderForecast7jForEtangSale();
-// ✅ Badge simplifié
 document.getElementById('source-badge').textContent = "Donnée fiable";
 } catch (e) {
 console.error("API error:", e);
@@ -641,7 +660,6 @@ await fetchWeatherForEtangSale(lat, lon, nomVille);
 return;
 }
 try {
-// ✅ URL CORRIGÉE
 const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=8&timezone=Indian/Reunion`;
 const res = await fetch(url);
 const data = await res.json();
@@ -744,7 +762,7 @@ suggestionsDropdown.style.display = 'none';
 }
 });
 document.querySelector('.youtube-btn').addEventListener('click', () => {
-window.open('https://youtube.com/@meteore974  ', '_blank');
+window.open('https://youtube.com/@meteore974', '_blank');
 });
 document.getElementById('share-btn').addEventListener('click', async () => {
 const element = document.querySelector('.container');
@@ -773,7 +791,7 @@ document.getElementById('intro').classList.add('hidden');
 const etangSale = villesReunion.find(v => v.nom === "L'Étang-Salé");
 searchInput.value = etangSale.nom;
 fetchWeather(etangSale.lat, etangSale.lon, etangSale.nom);
-}, 1500);
+}, 2200);
 });
 </script>
 </body>
