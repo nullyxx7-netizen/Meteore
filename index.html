@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>MeteoRe – La météo la plus précise pour L'Étang-Salé</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com  ">
+  <link rel="preconnect" href="https://fonts.gstatic.com  " crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter  :wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: linear-gradient(135deg, #e0f7fa, #b2ebf2);
@@ -58,6 +58,28 @@
     }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .vigilance-banner {
+      background: var(--glass);
+      backdrop-filter: blur(18px);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 24px 0;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      text-align: center;
+      animation: fadeIn 0.8s ease forwards;
+    }
+    .vigilance-title { font-size: 24px; font-weight: 800; margin-bottom: 16px; color: var(--accent); }
+    .vigilance-level { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .vig-level {
+      padding: 14px 28px; border-radius: 18px; font-weight: 700; font-size: 17px; min-width: 140px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .vert { background: #4caf50; color: white; }
+    .jaune { background: #ffeb3b; color: #212121; }
+    .orange { background: #ff9800; color: white; }
+    .rouge { background: #f44336; color: white; }
 
     .current-weather, .cyclone-widget, .day-card, .hour-card, .detail-card {
       background: var(--glass);
@@ -222,7 +244,7 @@
   <div id="loading"><div class="spinner"></div></div>
 
   <div id="intro">
-    <img id="intro-logo" src="https://i.imgur.com/KsA0dbG.jpeg" alt="Logo MeteoRe">
+    <img id="intro-logo" src="https://i.imgur.com/KsA0dbG.jpeg  " alt="Logo MeteoRe">
     <div id="intro-text">MeteoRe</div>
   </div>
 
@@ -231,7 +253,7 @@
   <div class="top-bar">
     <div>
       <div class="logo">MeteoRe</div>
-      <div class="version">V1.22.5</div>
+      <div class="version">V1.22.4</div>
     </div>
     <button class="youtube-btn">▶️ YouTube</button>
   </div>
@@ -241,7 +263,7 @@
     <div class="nav-tab" data-section="vigilance">⚠️ Vigilances Réunion</div>
   </div>
 
-  <div class "container">
+  <div class="container">
     
     <!-- SECTION 1 : MÉTÉO ÉTANG-SALÉ -->
     <div class="section-content active" id="section-meteo">
@@ -279,18 +301,29 @@
 
       <div class="cyclone-widget">
         <div class="section-title">Activité cyclonique en cours – Mise à jour à 18h10 le 28/12/2025 (ECMWF)</div>
-        <img id="cyclone-image" src="https://i.imgur.com/FQwfvyt.png" alt="Carte cyclonique MeteoRe">
+        <img id="cyclone-image" src="https://i.imgur.com/FQwfvyt.png  " alt="Carte cyclonique MeteoRe">
         <p style="font-size:13px; opacity:0.85; margin-top:12px;">Mise à jour quotidienne par MeteoRe</p>
       </div>
     </div>
 
-    <!-- SECTION 2 : VIGILANCES RÉUNION (SIMPLIFIÉE) -->
+    <!-- SECTION 2 : VIGILANCES RÉUNION -->
     <div class="section-content" id="section-vigilance">
-      <div class="section-title">🛟 Vigilance Météo-France – Réunion</div>
-      <div class="cyclone-widget">
-        <img src="https://i.imgur.com/BvT9vNN.png" alt="Vigilance Météo-France Réunion" style="width:100%; max-width:600px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,0.1);">
-        <p style="font-size:13px; opacity:0.85; margin-top:12px;">
-          Capture officielle de <strong>Météo-France</strong> • Mise à jour quotidienne
+      <!-- 🔴 MODIFIE CE BLOC MANUELLEMENT SELON LA VIGILANCE EN COURS -->
+      <div class="vigilance-banner active" id="vigilance-main-banner">
+        <div class="vigilance-title">⚠️ Vigilances Météo Réunion • 28/12/2025</div>
+        <div class="vigilance-level">
+          <div class="vig-level jaune">JAUNE ⚠️ Fortes pluies et orages</div>
+        </div>
+        <p style="margin-top:16px; opacity:0.9; font-size:14px;">Ouest et nord de l'île. • Source : Météo-France / MeteoRe</p>
+      </div>
+
+      <!-- Carte future -->
+      <div class="section-title">Carte des vigilances en temps réel</div>
+      <div class="cyclone-widget" style="min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <p style="font-size: 18px; font-weight: 600; margin-bottom: 20px;">📈 Carte interactive bientôt disponible</p>
+        <p style="opacity: 0.85; text-align: center; max-width: 500px;">
+          MeteoRe prépare une carte interactive avec les zones de vigilance en temps réel.<br>
+          Restez à l'écoute sur YouTube !
         </p>
       </div>
     </div>
@@ -319,65 +352,65 @@
 
     const CORRECTION_DURATION_MIN = 35;
     const previsionsManuelles_EtangSale = {
-      "00h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "01h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "02h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "03h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "04h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "05h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "06h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "07h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "08h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "09h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "10h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "11h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "12h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "13h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "14h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "15h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "16h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "17h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "18h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "19h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "20h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "21h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "22h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "23h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
+      "00h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png  " },
+      "01h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png  " },
+      "02h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png  " },
+      "03h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png  " },
+      "04h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png  " },
+      "05h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png  " },
+      "06h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "07h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "08h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "09h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "10h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "11h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "12h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "13h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "14h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png  " },
+      "15h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png  " },
+      "16h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png  " },
+      "17h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "18h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "19h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "20h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "21h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "22h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "23h": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
       
-      "00h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "01h_j1": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
-      "02h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "03h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "04h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png" },
-      "05h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png" },
-      "06h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png" },
-      "07h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png" },
-      "08h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png" },
-      "09h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png" },
-      "10h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png" },
-      "11h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png" },
-      "12h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "13h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "14h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "15h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "16h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png" },
-      "17h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png" },
-      "18h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png" },
-      "19h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png" },
-      "20h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png" },
-      "21h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png" },
-      "22h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png" },
-      "23h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png" }
+      "00h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "01h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "02h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "03h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "04h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png  " },
+      "05h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png  " },
+      "06h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png  " },
+      "07h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png  " },
+      "08h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png  " },
+      "09h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png  " },
+      "10h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png  " },
+      "11h_j1": { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png  " },
+      "12h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "13h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "14h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "15h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "16h_j1": { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  " },
+      "17h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png  " },
+      "18h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png  " },
+      "19h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png  " },
+      "20h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png  " },
+      "21h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png  " },
+      "22h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png  " },
+      "23h_j1": { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png  " }
     };
 
     const previsions7j_EtangSale = [
-      { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png", min: "25°", max: "32°" },
-      { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png", min: "19°", max: "27°" },
-      { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png", min: "25°", max: "31°" },
-      { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png", min: "25°", max: "31°" },
-      { label: "Eclaircies", icon: "https://i.imgur.com/6AwrSCx.png", min: "18°", max: "26°" },
-      { label: "Eclaircies", icon: "https://i.imgur.com/6AwrSCx.png", min: "18°", max: "26°" },
-      { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png", min: "17°", max: "27°" }
+      { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  ", min: "25°", max: "32°" },
+      { label: "Averses", icon: "https://i.imgur.com/6F2nRu0.png  ", min: "19°", max: "27°" },
+      { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  ", min: "25°", max: "31°" },
+      { label: "Averses faibles", icon: "https://i.imgur.com/yGsl83p.png  ", min: "25°", max: "31°" },
+      { label: "Eclaircies", icon: "https://i.imgur.com/6AwrSCx.png  ", min: "18°", max: "26°" },
+      { label: "Eclaircies", icon: "https://i.imgur.com/6AwrSCx.png  ", min: "18°", max: "26°" },
+      { label: "Très nuageux", icon: "https://i.imgur.com/wtCZHpd.png  ", min: "17°", max: "27°" }
     ];
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -418,7 +451,7 @@
       }, 1500);
 
       document.querySelector('.youtube-btn').addEventListener('click', () => {
-        window.open('https://youtube.com/@meteore974', '_blank');
+        window.open('https://youtube.com/@meteore974  ', '_blank');
       });
 
       document.getElementById('share-btn').addEventListener('click', () => {
@@ -428,36 +461,35 @@
       document.getElementById('override-btn').addEventListener('click', showOverrideModal);
     });
 
+    // ✅ FONCTION CORRIGÉE – Plus de "j1 j1", affichage propre des dates
     function renderHourlyForecast() {
       const container = document.getElementById('hourly');
       container.innerHTML = '';
       const now = new Date();
       const currentHour = now.getHours();
-      let lastDayOffset = -1;
 
       for (let i = 0; i < 48; i++) {
         const futureHour = (currentHour + i) % 24;
         const dayOffset = Math.floor((currentHour + i) / 24);
         const hourStr = futureHour.toString().padStart(2, '0') + 'h';
-        const dataKey = dayOffset === 0 ? hourStr : `${hourStr}_j${dayOffset}`;
+        // 🔁 On garde ta logique actuelle (j1 seulement pour demain)
+        const dataKey = dayOffset === 0 ? hourStr : `${hourStr}_j1`;
         const data = previsionsManuelles_EtangSale[dataKey] || { 
           label: "Conditions variables",
-          icon: "https://i.imgur.com/QR2QKNA.png"
+          icon: "https://i.imgur.com/QR2QKNA.png  "
         };
 
-        // ✅ Format complet de la date : Dim. 28 Déc. • 14h
+        // ✅ Affichage clair : Dim. 29 Déc. • 14h, Lun. 30 Déc. • 02h, etc.
         const futureDate = new Date(now);
         futureDate.setDate(now.getDate() + dayOffset);
         futureDate.setHours(futureHour, 0, 0, 0);
         const dayLabel = getFrenchDayName(futureDate);
         const dateNum = futureDate.getDate();
         const monthLabel = getFrenchMonthName(futureDate);
+        let timeLabel = `${dayLabel} ${dateNum} ${monthLabel} • ${hourStr}`;
 
-        let timeLabel;
         if (i === 0) {
           timeLabel = "MAINTENANT";
-        } else {
-          timeLabel = `${dayLabel} ${dateNum} ${monthLabel} • ${hourStr}`;
         }
 
         const isNow = i === 0;
