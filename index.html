@@ -10,35 +10,115 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
+    /* ===== DESIGN MODERNE GLASSMORPHISM ===== */
+    :root {
+      --bg: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+      --glass: rgba(255, 255, 255, 0.78);
+      --text: #004d40;
+      --accent: #006064;
+      --shadow: 0 12px 32px rgba(0, 77, 64, 0.18);
+      --border: rgba(0, 96, 100, 0.22);
+      --radius: 32px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.8s ease;
+    }
+
+    /* Effets météo adoucis */
+    body.sun-glow { background: linear-gradient(135deg, #e1f5fe, #b3e5fc); }
+    body.cloudy-few { background: linear-gradient(135deg, #e3f2fd, #bbdefb); }
+    body.cloudy-heavy { background: linear-gradient(135deg, #cfd8dc, #b0bec5); filter: brightness(0.96); }
+    body.clearing { background: linear-gradient(135deg, #d1c4e9, #b39ddb); }
+    body.rainy { background: linear-gradient(135deg, #90a4ae, #78909c); filter: brightness(0.9); }
+    body.stormy { background: linear-gradient(135deg, #455a64, #263238); filter: brightness(0.82); --text: #e0e0e0; }
+
+    /* ===== NOUVELLE SECTION VIGILANCES ===== */
+    .vigilance-banner {
+      background: var(--glass);
+      backdrop-filter: blur(18px);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 24px 0;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      text-align: center;
+      display: none;
+      animation: fadeIn 0.8s ease forwards;
+    }
+    .vigilance-banner.active { display: block; }
+    .vigilance-title { font-size: 24px; font-weight: 800; margin-bottom: 16px; color: var(--accent); }
+    .vigilance-level { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .vig-level {
+      padding: 14px 28px; border-radius: 18px; font-weight: 700; font-size: 17px; min-width: 140px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .vert { background: #4caf50; color: white; }
+    .jaune { background: #ffeb3b; color: #212121; }
+    .orange { background: #ff9800; color: white; }
+    .rouge { background: #f44336; color: white; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Cards ultra-modernes */
+    .current-weather, .cyclone-widget, .day-card, .hour-card, .detail-card {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .current-weather:hover, .day-card:hover, .hour-card:hover { transform: translateY(-8px); box-shadow: 0 16px 40px rgba(0, 77, 64, 0.22); }
+    .top-bar { background: var(--glass); backdrop-filter: blur(20px); border-radius: 0 0 var(--radius) var(--radius); }
+    .search-bottom { background: var(--glass); backdrop-filter: blur(20px); border-radius: var(--radius); }
+
     /* ===== EFFETS MÉTÉO CONTEXTUELS AVANCÉS ===== */
     body.sun-glow {
       background: linear-gradient(135deg, #e3f2fd, #bbdefb);
       --text: #006064;
     }
-    body.cloudy-dim {
+    body.cloudy-few {
+      background: linear-gradient(135deg, #e8f4fc, #c8e6f9);
+      --text: #006064;
+    }
+    body.cloudy-heavy {
       background: linear-gradient(135deg, #e0e0e0, #b0bec5);
       filter: brightness(0.94);
       --text: #37474f;
     }
-    body.rainy-dim {
+    body.clearing {
+      background: linear-gradient(135deg, #d4e4f7, #a9d1f5);
+      --text: #006064;
+    }
+    body.rainy {
       background: linear-gradient(135deg, #b0bec5, #90a4ae);
       filter: brightness(0.88);
       --text: #455a64;
     }
-    body.stormy-dim {
+    body.stormy {
       background: linear-gradient(135deg, #607d8b, #455a64);
       filter: brightness(0.85);
       --text: #e0e0e0;
     }
-    
-    /* ===== ANIMATIONS MÉTÉO DYNAMIQUES ===== */
+
+    /* ===== ANIMATIONS MÉTÉO ULTRA-FLUIDES ===== */
     .weather-animation {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none; z-index: -1; opacity: 0; display: none;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
     }
+    
     #anim-sun {
       top: -120px; right: -120px; width: 320px; height: 320px;
       background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, transparent 70%);
@@ -46,38 +126,51 @@
       animation: floatSun 50s infinite linear;
       filter: blur(6px); opacity: 0.85;
     }
-    #anim-cloud {
-      top: 15%; left: -160px; width: 220px; height: 90px;
-      background: radial-gradient(ellipse, rgba(255,255,255,0.45) 0%, transparent 80%);
-      border-radius: 50%;
-      animation: floatCloud 70s infinite ease-in-out;
-    }
-    #anim-rain {
+    
+    .cloud-layer {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: repeating-linear-gradient(
-        120deg,
-        transparent,
-        transparent 10px,
-        rgba(138, 194, 240, 0.08) 10px,
-        rgba(138, 194, 240, 0.08) 12px
-      );
       pointer-events: none;
-      opacity: 0.7;
-      display: none;
       z-index: -1;
     }
+    
+    .cloud {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      filter: blur(2px);
+    }
+    
+    .sun-rays {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      background: repeating-conic-gradient(
+        transparent 0% 2%,
+        rgba(255, 255, 255, 0.1) 2% 4%
+      );
+      opacity: 0;
+      animation: rotateRays 120s linear infinite;
+    }
+    
     @keyframes floatSun {
       to { transform: translateX(200px) rotate(360deg); }
     }
+    
     @keyframes floatCloud {
       0%, 100% { transform: translateX(0); }
       50% { transform: translateX(200px); }
     }
+    
+    @keyframes rotateRays {
+      to { transform: rotate(360deg); }
+    }
 
-    /* ===== FLASH ORAGE POUR PLUS D'IMMERSION ===== */
+    /* ===== FLASH ORAGE DOUX ===== */
     .storm-flash {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: white; opacity: 0; pointer-events: none; z-index: 2000;
+      transition: opacity 0.1s;
     }
 
     :root {
@@ -161,7 +254,14 @@
       background: #e00000;
     }
 
-    .container { max-width: 900px; margin: 0 auto; padding: 0 16px 100px; }
+    .container {
+      max-width: 900px; margin: 0 auto; padding: 0 16px 100px;
+      opacity: 0; transition: opacity 0.4s ease;
+      will-change: opacity;
+    }
+    .container.ready {
+      opacity: 1;
+    }
 
     .current-weather {
       background: var(--card-bg); backdrop-filter: blur(14px);
@@ -205,6 +305,7 @@
     .hourly-cards {
       display: flex; gap: 16px; overflow-x: auto; padding: 8px 0 16px;
       -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
     }
     .hourly-cards::-webkit-scrollbar { display: block; height: 6px; }
     .hourly-cards::-webkit-scrollbar-thumb {
@@ -217,6 +318,8 @@
       transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
+      scroll-snap-align: start;
+      will-change: transform;
     }
     .hour-card:hover {
       transform: translateY(-6px); box-shadow: 0 8px 22px rgba(0,0,0,0.12); z-index: 10;
@@ -292,10 +395,41 @@
     .suggestion-item:hover {
       background: #e3f2fd; color: var(--accent); transform: translateX(4px);
     }
+    
+    .override-btn {
+      position: fixed; bottom: 24px; right: 20px; background: #d32f2f; color: white;
+      border: none; border-radius: 20px; padding: 10px 16px; font-weight: 600;
+      box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3); cursor: pointer;
+      z-index: 1000; transition: all 0.2s;
+    }
+    .override-btn:hover {
+      transform: scale(1.05); background: #b71c1c;
+    }
+    .override-btn:active {
+      transform: scale(0.98);
+    }
 
     #source-badge {
       text-align: right; font-size: 12px; opacity: 0.7;
       margin-bottom: 10px; margin-right: 8px;
+    }
+
+    /* ICÔNE DE CHARGEMENT */
+    #loading {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--bg); display: flex; justify-content: center; align-items: center;
+      z-index: 9999; transition: opacity 0.3s;
+    }
+    #loading.hidden {
+      opacity: 0; pointer-events: none;
+    }
+    .spinner {
+      width: 60px; height: 60px; border: 4px solid var(--accent);
+      border-top-color: transparent; border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { 
+      to { transform: rotate(360deg); } 
     }
 
     /* WATERMARK DISCRET */
@@ -319,8 +453,12 @@
 <body>
   <div class="storm-flash" id="lightning-flash"></div>
   <div class="weather-animation" id="anim-sun"></div>
-  <div class="weather-animation" id="anim-cloud"></div>
-  <div class="weather-animation" id="anim-rain"></div>
+  <div class="cloud-layer" id="cloud-layer"></div>
+  <div class="sun-rays" id="sun-rays"></div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+  </div>
 
   <div id="intro">
     <img id="intro-logo" src="https://i.imgur.com/KsA0dbG.jpeg" alt="Logo MeteoRe">
@@ -362,6 +500,19 @@
       </div>
     </div>
 
+    <!-- NOUVELLE SECTION VIGILANCES ICI (après météo actuelle pour fluidité) -->
+    <div class="vigilance-banner" id="vigilance-banner">
+      <div class="vigilance-title">🌧️ Vigilances Météo Réunion • 27/12/2025</div>
+      <div class="vigilance-level">
+        <div class="vig-level vert">Vert 🌿 Pas de vigilance particulière</div>
+        <!-- Décommente pour activer un autre niveau et change le texte si besoin -->
+        <!-- <div class="vig-level jaune">Jaune ⚠️ Fortes pluies / Orages</div> -->
+        <!-- <div class="vig-level orange">Orange 🌊 Fortes houles</div> -->
+        <!-- <div class="vig-level rouge">Rouge 🌪️ Cyclone en approche</div> -->
+      </div>
+      <p style="margin-top:16px; opacity:0.9; font-size:14px;">Aucune alerte cyclonique en cours • Source : Météo-France / MeteoRe</p>
+    </div>
+
     <div class="section-title">
       <span>Prévision par heure sur 2 jours</span>
       <button id="share-btn" style="background:#0288d1;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 6px rgba(2,136,209,0.3);">
@@ -392,18 +543,24 @@
     <div id="suggestions-dropdown" class="suggestions-dropdown"></div>
   </div>
 
+  <button class="override-btn" id="override-btn">✏️ Corriger les données</button>
+
   <script>
-    // 🔧 SYSTÈME DE CORRECTION MANUELLE
+    // === CONTRÔLE VIGILANCES (change ici pour activer/désactiver) ===
+    const showVigilanceSection = true; // true = affiche, false = cache
+
+    // 🔧 SYSTÈME DE CORRECTION MANUELLE (35 MINUTES EXACTES)
+    const CORRECTION_DURATION_MIN = 35;
     let manualOverride = {};
-    const DEFAULT_DURATION_MIN = 40;
     
-    function setManualOverride(key, value, minutes = DEFAULT_DURATION_MIN) {
+    function setManualOverride(key, value) {
       try {
         const now = new Date();
-        const expiresAt = new Date(now.getTime() + minutes * 60 * 1000);
+        // 35 minutes EXACTES en millisecondes
+        const expiresAt = new Date(now.getTime() + CORRECTION_DURATION_MIN * 60 * 1000);
         manualOverride[key] = { value, expiresAt };
         localStorage.setItem('manualOverride', JSON.stringify(manualOverride));
-        fetchEtangSaleManual();
+        fetchWeatherData(currentVille);
       } catch (e) {
         console.error("Erreur dans setManualOverride:", e);
       }
@@ -441,6 +598,118 @@
       }
     }
 
+    function showOverrideModal() {
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7); z-index: 9999; display: flex;
+        justify-content: center; align-items: center;
+      `;
+      
+      modal.innerHTML = `
+        <div style="
+          background: white; border-radius: 20px; padding: 25px; width: 90%;
+          max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+          transform: scale(0.9); opacity: 0; transition: all 0.3s ease;
+        ">
+          <h3 style="font-size: 20px; color: #d32f2f; margin-bottom: 20px; text-align: center;">
+            🔧 Correction manuelle (${CORRECTION_DURATION_MIN} min)
+          </h3>
+          
+          <div style="display: grid; gap: 15px; margin-bottom: 25px;">
+            <div>
+              <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #004d40;">
+                Température (°C)
+              </label>
+              <input type="number" id="override-temp" value="${document.getElementById('current-temp')?.textContent?.replace('°', '') || 25}" 
+                style="width: 100%; padding: 10px; border: 2px solid #0288d1; border-radius: 12px; font-size: 16px; font-weight: 600;"
+              >
+            </div>
+            
+            <div>
+              <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #004d40;">
+                Humidité (%)
+              </label>
+              <input type="number" id="override-humidity" value="${document.getElementById('humidity')?.textContent?.replace('%', '') || 78}" 
+                style="width: 100%; padding: 10px; border: 2px solid #0288d1; border-radius: 12px; font-size: 16px; font-weight: 600;"
+              >
+            </div>
+            
+            <div>
+              <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #004d40;">
+                Vent (km/h)
+              </label>
+              <input type="number" id="override-wind" value="${document.getElementById('wind')?.textContent?.replace(' km/h', '') || 17}" 
+                style="width: 100%; padding: 10px; border: 2px solid #0288d1; border-radius: 12px; font-size: 16px; font-weight: 600;"
+              >
+            </div>
+            
+            <div>
+              <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #004d40;">
+                UV
+              </label>
+              <input type="number" id="override-uv" value="${document.getElementById('uv')?.textContent || 7}" 
+                style="width: 100%; padding: 10px; border: 2px solid #0288d1; border-radius: 12px; font-size: 16px; font-weight: 600;"
+                min="0" max="11" step="0.1"
+              >
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 12px;">
+            <button id="cancel-override" style="
+              flex: 1; padding: 12px; background: #e0e0e0; border: none; border-radius: 12px;
+              font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s;
+            ">Annuler</button>
+            <button id="apply-override" style="
+              flex: 1; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 12px;
+              font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s;
+              box-shadow: 0 3px 8px rgba(211, 47, 47, 0.4);
+            ">Appliquer</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      // Animation d'apparition
+      setTimeout(() => {
+        modal.firstChild.style.cssText += `
+          transform: scale(1); opacity: 1;
+        `;
+      }, 10);
+      
+      // Gestion des boutons
+      modal.querySelector('#cancel-override').addEventListener('click', () => {
+        document.body.removeChild(modal);
+      });
+      
+      modal.querySelector('#apply-override').addEventListener('click', () => {
+        const temp = modal.querySelector('#override-temp').value;
+        const humidity = modal.querySelector('#override-humidity').value;
+        const wind = modal.querySelector('#override-wind').value;
+        const uv = modal.querySelector('#override-uv').value;
+        
+        // Applique les corrections
+        setManualOverride('temperature_2m', parseFloat(temp));
+        setManualOverride('relative_humidity_2m', parseFloat(humidity));
+        setManualOverride('wind_speed_10m', parseFloat(wind) / 3.6); // Convertir km/h en m/s
+        setManualOverride('uv_index', parseFloat(uv));
+        
+        // Ferme le modal
+        document.body.removeChild(modal);
+        
+        // Message de confirmation
+        alert(`✅ Corrections appliquées !\nDurée : exactement ${CORRECTION_DURATION_MIN} minutes\nLes données reviendront automatiquement à la normale.`);
+      });
+      
+      // Clique en dehors pour fermer
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          document.body.removeChild(modal);
+        }
+      });
+    }
+
     // ✅ EFFETS MÉTÉO AVANCÉS
     function flashLightning() {
       try {
@@ -459,64 +728,84 @@
 
     function clearWeatherEffects() {
       try {
-        document.body.className = '';
-        ['anim-sun', 'anim-cloud', 'anim-rain'].forEach(id => {
+        // Enlève toutes les classes météo
+        document.body.className = document.body.className.replace(/\b(sun-glow|cloudy-few|cloudy-heavy|clearing|rainy|stormy)\b/g, '').trim();
+        
+        // Cache les animations
+        const elements = ['anim-sun', 'cloud-layer', 'sun-rays'];
+        elements.forEach(id => {
           const el = document.getElementById(id);
-          if (el) {
-            el.style.display = 'none';
-            el.style.opacity = '0';
-          }
+          if (el) el.style.display = 'none';
         });
+        
+        // Stoppe les intervalles
         if (window.lightningInterval) clearInterval(window.lightningInterval);
       } catch (e) {
         console.error("Erreur clearWeatherEffects:", e);
       }
     }
 
+    function createClouds(count = 5) {
+      const cloudLayer = document.getElementById('cloud-layer');
+      if (!cloudLayer) return;
+      
+      cloudLayer.innerHTML = '';
+      
+      for (let i = 0; i < count; i++) {
+        const cloud = document.createElement('div');
+        cloud.className = 'cloud';
+        
+        // Taille aléatoire
+        const size = 30 + Math.random() * 50;
+        cloud.style.width = `${size}px`;
+        cloud.style.height = `${size * 0.6}px`;
+        
+        // Position aléatoire
+        cloud.style.left = `${Math.random() * 100}%`;
+        cloud.style.top = `${10 + Math.random() * 40}%`;
+        
+        // Animation aléatoire
+        const duration = 40 + Math.random() * 60;
+        cloud.style.animation = `floatCloud ${duration}s infinite ease-in-out`;
+        cloud.style.animationDelay = `${Math.random() * 10}s`;
+        
+        cloudLayer.appendChild(cloud);
+      }
+    }
+
     function updateWeatherAnimation(condition) {
       try {
         clearWeatherEffects();
-        const c = condition.toLowerCase();
+        const c = condition.toLowerCase().trim();
         
-        if (c.includes('ensoleillé') || c.includes('clair') || c.includes('éclaircies') || c.includes('soleil')) {
+        if (c.includes('ensoleillé') || c.includes('clair') || c.includes('ciel dégagé')) {
           document.body.classList.add('sun-glow');
-          const sunAnim = document.getElementById('anim-sun');
-          if (sunAnim) {
-            sunAnim.style.display = 'block';
-            sunAnim.style.opacity = '0.85';
-          }
+          document.getElementById('anim-sun').style.display = 'block';
         } 
-        else if (c.includes('nuageux') || c.includes('couvert') || c.includes('brouillard') || c.includes('voilé') || c.includes('très nuageux')) {
-          document.body.classList.add('cloudy-dim');
-          const cloudAnim = document.getElementById('anim-cloud');
-          if (cloudAnim) {
-            cloudAnim.style.display = 'block';
-            cloudAnim.style.opacity = '0.6';
-          }
+        else if (c.includes('peu nuageux') || c.includes('partiellement nuageux')) {
+          document.body.classList.add('cloudy-few');
+          createClouds(3);
+          document.getElementById('anim-sun').style.display = 'block';
+        } 
+        else if (c.includes('très nuageux') || c.includes('couvert') || c.includes('brouillard') || c.includes('voilé')) {
+          document.body.classList.add('cloudy-heavy');
+          createClouds(8);
+        } 
+        else if (c.includes('éclaircies') || c.includes('soleil et nuages')) {
+          document.body.classList.add('clearing');
+          document.getElementById('sun-rays').style.opacity = '0.7';
+          createClouds(5);
+          document.getElementById('anim-sun').style.display = 'block';
         } 
         else if (c.includes('pluie') || c.includes('averses') || c.includes('faibles') || c.includes('averse')) {
-          document.body.classList.add('rainy-dim');
-          const cloudAnim = document.getElementById('anim-cloud');
-          const rainAnim = document.getElementById('anim-rain');
-          
-          if (cloudAnim) {
-            cloudAnim.style.display = 'block';
-            cloudAnim.style.opacity = '0.5';
-          }
-          if (rainAnim) {
-            rainAnim.style.display = 'block';
-            rainAnim.style.opacity = '0.7';
-          }
+          document.body.classList.add('rainy');
+          createClouds(10);
         } 
         else if (c.includes('orage') || c.includes('orages') || c.includes('violents') || c.includes('fortes')) {
-          document.body.classList.add('stormy-dim');
-          const cloudAnim = document.getElementById('anim-cloud');
+          document.body.classList.add('stormy');
+          createClouds(12);
           
-          if (cloudAnim) {
-            cloudAnim.style.display = 'block';
-            cloudAnim.style.opacity = '0.4';
-          }
-          
+          // Éclairs aléatoires
           window.lightningInterval = setInterval(flashLightning, 2000 + Math.random() * 3000);
         }
       } catch (e) {
@@ -524,6 +813,7 @@
       }
     }
 
+    // 🌍 DONNÉES DES VILLES DE LA RÉUNION (API Open-Meteo)
     const villesReunion = [
       { nom: "Saint-Denis", lat: -20.883, lon: 55.450 },
       { nom: "Saint-Pierre", lat: -21.333, lon: 55.467 },
@@ -540,7 +830,190 @@
       { nom: "Petite-Île", lat: -21.35, lon: 55.533 }
     ];
 
-    // ✅ PRÉVISIONS MANUELLES COMPLÈTES – 48 HEURES
+    let currentVille = villesReunion.find(v => v.nom === "L'Étang-Salé");
+
+    // 📊 FONCTION PRINCIPALE POUR CHARGER LES DONNÉES MÉTÉO
+    async function fetchWeatherData(ville) {
+      try {
+        document.getElementById('loading').classList.remove('hidden');
+        currentVille = ville;
+        
+        // Pour L'Étang-Salé : utiliser Open-Meteo API
+        if (ville.nom === "L'Étang-Salé") {
+          // URL CORRIGÉE - plus de backslashes
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${ville.lat}&longitude=${ville.lon}` +
+            `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl` +
+            `&models=arome_france` +
+            `&timezone=Indian/Reunion`;
+
+          // Ajout d'un timeout pour éviter le blocage
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout API')), 8000)
+          );
+
+          const response = await Promise.race([fetch(url), timeoutPromise]);
+          const data = await response.json();
+          
+          if (data.current) {
+            const current = data.current;
+            
+            // Appliquer les corrections manuelles si elles existent
+            const temp = getDisplayedValue('temperature_2m', current.temperature_2m);
+            const humidity = getDisplayedValue('relative_humidity_2m', current.relative_humidity_2m);
+            const wind = getDisplayedValue('wind_speed_10m', current.wind_speed_10m);
+            const uv = getDisplayedValue('uv_index', current.uv_index);
+            const pressure = current.pressure_msl;
+            
+            document.getElementById('ville-nom').textContent = ville.nom;
+            document.getElementById('current-temp').textContent = `${Math.round(temp)}°`;
+            document.getElementById('humidity').textContent = `${Math.round(humidity)}%`;
+            document.getElementById('wind').textContent = `${Math.round(wind * 3.6)} km/h`;
+            document.getElementById('uv').textContent = uv ? uv.toFixed(1) : "—";
+            document.getElementById('pressure').textContent = pressure ? `${Math.round(pressure)} hPa` : "—";
+            
+            // Condition actuelle
+            const condition = getWeatherCondition(current.weather_code);
+            document.getElementById('current-condition').textContent = condition;
+            
+            // Appliquer les effets météo
+            updateWeatherAnimation(condition);
+            
+            // Ajouter insight
+            const insight = generateInsight(condition);
+            const weatherContainer = document.querySelector('.current-weather');
+            const existingInsight = weatherContainer.querySelector('.current-insight');
+            if (existingInsight) existingInsight.remove();
+            if (insight) {
+              const detailsGrid = weatherContainer.querySelector('.details-grid');
+              if (detailsGrid) {
+                weatherContainer.insertBefore(insight, detailsGrid);
+              }
+            }
+          }
+        } else {
+          // Pour les autres villes : données de démo
+          document.getElementById('ville-nom').textContent = ville.nom;
+          document.getElementById('current-temp').textContent = "26°";
+          document.getElementById('current-condition').textContent = "Éclaircies";
+          document.getElementById('humidity').textContent = "75%";
+          document.getElementById('wind').textContent = "15 km/h";
+          document.getElementById('uv').textContent = "6";
+          document.getElementById('pressure').textContent = "1013 hPa";
+          
+          updateWeatherAnimation("Éclaircies");
+          
+          const insight = document.createElement('div');
+          insight.className = 'current-insight';
+          insight.style.cssText = `
+            font-size: 16px; font-weight: 600; margin-top: 12px; opacity: 0.95;
+            color: #0288d1;
+          `;
+          insight.textContent = "📍 Données démo - Seulement L'Étang-Salé est en temps réel";
+          const weatherContainer = document.querySelector('.current-weather');
+          const existingInsight = weatherContainer.querySelector('.current-insight');
+          if (existingInsight) existingInsight.remove();
+          const detailsGrid = weatherContainer.querySelector('.details-grid');
+          if (detailsGrid) {
+            weatherContainer.insertBefore(insight, detailsGrid);
+          }
+        }
+        
+        // Générer les prévisions
+        renderHourlyForEtangSale();
+        renderForecast7jForEtangSale();
+        document.getElementById('source-badge').textContent = ville.nom === "L'Étang-Salé" ? "Donnée Open-Meteo" : "Donnée démo";
+        
+      } catch (e) {
+        console.error("Erreur API:", e);
+        
+        // Fallback complet
+        document.getElementById('ville-nom').textContent = ville.nom;
+        document.getElementById('current-temp').textContent = "25°";
+        document.getElementById('current-condition').textContent = "Éclaircies";
+        document.getElementById('humidity').textContent = "78%";
+        document.getElementById('wind').textContent = "17 km/h";
+        document.getElementById('uv').textContent = "7";
+        document.getElementById('pressure').textContent = "1012 hPa";
+        
+        updateWeatherAnimation("Éclaircies");
+        
+        const insight = document.createElement('div');
+        insight.className = 'current-insight';
+        insight.style.cssText = `
+          font-size: 16px; font-weight: 600; margin-top: 12px; opacity: 0.95;
+          color: #0288d1;
+        `;
+        insight.textContent = "⚠️ Hors ligne - Données en cache";
+        const weatherContainer = document.querySelector('.current-weather');
+        const existingInsight = weatherContainer.querySelector('.current-insight');
+        if (existingInsight) existingInsight.remove();
+        const detailsGrid = weatherContainer.querySelector('.details-grid');
+        if (detailsGrid) {
+          weatherContainer.insertBefore(insight, detailsGrid);
+        }
+        
+        renderHourlyForEtangSale();
+        renderForecast7jForEtangSale();
+        document.getElementById('source-badge').textContent = "Donnée en cache";
+      } finally {
+        setTimeout(() => {
+          document.querySelector('.container').classList.add('ready');
+          document.getElementById('loading').classList.add('hidden');
+        }, 300);
+      }
+    }
+
+    // 🌤️ CONVERTIR LE CODE MÉTÉO EN TEXTE
+    function getWeatherCondition(weatherCode) {
+      const conditions = {
+        0: "Ciel dégagé", 1: "Ciel dégagé", 2: "Ciel voilé", 3: "Nuageux",
+        45: "Brouillard", 48: "Brouillard givrant",
+        51: "Bruine faible", 53: "Bruine modérée", 55: "Bruine forte",
+        56: "Bruine verglaçante faible", 57: "Bruine verglaçante forte",
+        61: "Pluie faible", 63: "Pluie modérée", 65: "Pluie forte",
+        66: "Pluie verglaçante faible", 67: "Pluie verglaçante forte",
+        71: "Neige faible", 73: "Neige modérée", 75: "Neige forte",
+        77: "Grésil",
+        80: "Averses de pluie faibles", 81: "Averses de pluie modérées", 82: "Averses de pluie fortes",
+        85: "Averses de neige faibles", 86: "Averses de neige fortes",
+        95: "Orage", 96: "Orage avec grêle faible", 99: "Orage avec grêle forte"
+      };
+      
+      return conditions[weatherCode] || "Couvert";
+    }
+
+    // 💡 GÉNÉRER UN INSIGHT MÉTÉO
+    function generateInsight(condition) {
+      try {
+        const insight = document.createElement('div');
+        insight.className = 'current-insight';
+        insight.style.cssText = `
+          font-size: 16px; font-weight: 600; margin-top: 12px; opacity: 0.95;
+          color: #0288d1;
+        `;
+        
+        const c = condition.toLowerCase();
+        
+        if (c.includes('orage') || c.includes('orages') || c.includes('grêle')) {
+          insight.innerHTML = "⚡ <strong>Évitez les zones exposées</strong> et les randonnées en altitude.";
+        } else if (c.includes('pluie') || c.includes('averses') || c.includes('bruine')) {
+          insight.innerHTML = "💧 <strong>Prévoyez un imperméable</strong> si vous sortez.";
+        } else if (c.includes('ensoleillé') || c.includes('clair') || c.includes('ciel dégagé')) {
+          insight.innerHTML = "☀️ <strong>Parfait pour la plage</strong> !";
+        } else if (c.includes('nuageux') || c.includes('couvert') || c.includes('brouillard')) {
+          insight.innerHTML = "☁️ <strong>Ambiance calme</strong> sur l'île.";
+        } else {
+          insight.innerHTML = "🌦 <strong>Une journée typique</strong> à La Réunion.";
+        }
+        
+        return insight;
+      } catch (e) {
+        console.error("Erreur generateInsight:", e);
+        return null;
+      }
+    }
+
+    // 📅 PRÉVISIONS MANUELLES (48 HEURES)
     const previsionsManuelles_EtangSale = {
       "00h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png" },
       "01h": { label: "Nuit claire", icon: "https://i.imgur.com/9mtLzHK.png" },
@@ -592,22 +1065,21 @@
       "23h_j1": { label: "Eclaircies", icon: "https://i.imgur.com/1gHBkKj.png" }
     };
 
+    // 📅 PRÉVISIONS 7 JOURS
     const previsions7j_EtangSale = [
       { label: "Averses", icon: "https://i.imgur.com/lBjVqLV.png", min: "19°", max: "26°" },
       { label: "Couvert", icon: "https://i.imgur.com/8EIg3fq.png", min: "19°", max: "27°" },
       { label: "Orages", icon: "https://i.imgur.com/Qre2CV4.png", min: "23°", max: "25°" },
       { label: "Eclaircies", icon: "https://i.imgur.com/UTtGtvk.png", min: "22°", max: "26°" },
       { label: "Averses faibles", icon: "https://i.imgur.com/lBjVqLV.png", min: "22°", max: "27°" },
-      { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png", min: "22°", max: "29°" }
+      { label: "Averses", icon: "https://i.imgur.com/UTtGtvk.png", min: "22°", max: "29°" },
+      { label: "Soleil", icon: "https://i.imgur.com/9mtLzHK.png", min: "23°", max: "30°" }
     ];
 
     const moisNoms = ["jan", "fév", "mar", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
     const joursSemaine = ["DIMANCHE", "LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI"];
 
-    function formatDateForHourly(date) {
-      return `${date.getDate()} ${moisNoms[date.getMonth()]}`;
-    }
-
+    // 🕐 AFFICHER LES PRÉVISIONS HORAIRE
     function renderHourlyForEtangSale() {
       try {
         const container = document.getElementById('hourly');
@@ -663,6 +1135,7 @@
       }
     }
 
+    // 📆 AFFICHER LES PRÉVISIONS 7 JOURS (CORRIGÉES)
     function renderForecast7jForEtangSale() {
       try {
         const container = document.getElementById('forecast-7j');
@@ -675,7 +1148,20 @@
           const date = new Date(now.getTime() + i * 24 * 3600000);
           const dayName = joursSemaine[date.getDay()];
           const dayNum = date.getDate();
-          const label = `${dayName} ${dayNum}`;
+          
+          // CORRECTION CRITIQUE : Affiche "Aujourd'hui" et "Demain" correctement
+          let label = "";
+          const today = new Date().getDate();
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          
+          if (date.getDate() === today && date.getMonth() === new Date().getMonth()) {
+            label = `Aujourd'hui ${dayNum}`;
+          } else if (date.getDate() === tomorrow.getDate() && date.getMonth() === tomorrow.getMonth()) {
+            label = `Demain ${dayNum}`;
+          } else {
+            label = `${dayName} ${dayNum}`;
+          }
 
           const data = previsions7j_EtangSale[i] || { 
             label: "Couvert", 
@@ -703,174 +1189,54 @@
       }
     }
 
-    function generateInsight(condition) {
+    // DOMContentLoaded - INITIALISATION SIMPLIFIÉE
+    document.addEventListener('DOMContentLoaded', async () => {
       try {
-        const insight = document.createElement('div');
-        insight.className = 'current-insight';
-        insight.style.fontSize = '16px';
-        insight.style.fontWeight = '600';
-        insight.style.marginTop = '12px';
-        insight.style.opacity = '0.95';
-        insight.style.color = '#0288d1';
-        
-        const c = condition.toLowerCase();
-        
-        if (c.includes('orage') || c.includes('orages') || c.includes('averses orageuses')) {
-          insight.textContent = "⚡ Évitez les zones exposées et les randonnées en altitude.";
-        } else if (c.includes('pluie') || c.includes('averses')) {
-          insight.textContent = "💧 Prévoyez un imperméable si vous sortez.";
-        } else if (c.includes('ensoleillé') || c.includes('clair') || c.includes('éclaircies')) {
-          insight.textContent = "☀️ Parfait pour la plage !";
-        } else if (c.includes('nuageux') || c.includes('couvert') || c.includes('voilé')) {
-          insight.textContent = "☁️ Ambiance calme";
-        } else {
-          insight.textContent = "🌦 Une journée typique à La Réunion.";
-        }
-        
-        return insight;
-      } catch (e) {
-        console.error("Erreur generateInsight:", e);
-        return null;
-      }
-    }
-
-    async function fetchEtangSaleManual() {
-      try {
-        // Cacher l'écran d'introduction
+        // Cacher l'intro immédiatement
         const intro = document.getElementById('intro');
         if (intro) {
           intro.classList.add('hidden');
         }
         
-        const etang = villesReunion.find(v => v.nom === "L'Étang-Salé");
-        if (!etang) {
-          throw new Error("Ville non trouvée");
-        }
-
-        // Fallback rapide si l'API ne répond pas
-        const timeout = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("Timeout API")), 5000)
-        );
-
-        const apiCall = fetch(`https://api.open-meteo.com/v1/forecast?latitude=${etang.lat}&longitude=${etang.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,uv_index,pressure_msl&timezone=Indian/Reunion`);
+        // Charger les overrides et les données
+        loadManualOverrides();
         
-        const response = await Promise.race([apiCall, timeout]);
-        const data = await response.json();
-        
-        if (data.current) {
-          const current = data.current;
-          
-          document.getElementById('ville-nom').textContent = "L'Étang-Salé";
-          document.getElementById('current-temp').textContent = `${Math.round(current.temperature_2m)}°`;
-          document.getElementById('humidity').textContent = `${Math.round(current.relative_humidity_2m)}%`;
-          document.getElementById('wind').textContent = `${Math.round(current.wind_speed_10m * 3.6)} km/h`;
-          document.getElementById('uv').textContent = current.uv_index ? current.uv_index.toFixed(1) : "—";
-          document.getElementById('pressure').textContent = current.pressure_msl ? `${Math.round(current.pressure_msl)} hPa` : "—";
-
-          // Condition actuelle
-          const currentHour = new Date().getHours().toString().padStart(2, '0') + 'h';
-          const currentData = previsionsManuelles_EtangSale[currentHour] || { label: "Couvert" };
-          document.getElementById('current-condition').textContent = currentData.label;
-          
-          // Ajouter l'insight météo
-          const weatherContainer = document.querySelector('.current-weather');
-          const existingInsight = weatherContainer.querySelector('.current-insight');
-          if (existingInsight) {
-            existingInsight.remove();
-          }
-          
-          const insight = generateInsight(currentData.label);
-          if (insight) {
-            weatherContainer.insertBefore(insight, weatherContainer.querySelector('.details-grid'));
-          }
-          
-          // ✅ ACTIVER LES EFFETS MÉTÉO
-          updateWeatherAnimation(currentData.label);
-        } else {
-          throw new Error("Données API invalides");
-        }
-      } catch (e) {
-        console.error("Erreur API:", e);
-        
-        // Fallback complet
-        document.getElementById('ville-nom').textContent = "L'Étang-Salé";
-        document.getElementById('current-temp').textContent = "25°";
-        document.getElementById('current-condition').textContent = "Éclaircies";
-        document.getElementById('humidity').textContent = "78%";
-        document.getElementById('wind').textContent = "17 km/h";
-        document.getElementById('uv').textContent = "7";
-        document.getElementById('pressure').textContent = "1012 hPa";
-        
-        // Ajouter insight par défaut
-        const weatherContainer = document.querySelector('.current-weather');
-        const existingInsight = weatherContainer.querySelector('.current-insight');
-        if (existingInsight) {
-          existingInsight.remove();
+        // Activer la section vigilances si true
+        if (showVigilanceSection) {
+          document.getElementById('vigilance-banner').classList.add('active');
         }
         
-        const insight = document.createElement('div');
-        insight.className = 'current-insight';
-        insight.style.fontSize = '16px';
-        insight.style.fontWeight = '600';
-        insight.style.marginTop = '12px';
-        insight.style.opacity = '0.95';
-        insight.style.color = '#0288d1';
-        insight.textContent = "☀️ Parfait pour la plage !";
-        weatherContainer.insertBefore(insight, weatherContainer.querySelector('.details-grid'));
+        // Image cyclone
+        const cycloneImage = document.getElementById('cyclone-image');
+        if (cycloneImage) {
+          cycloneImage.src = 'https://i.imgur.com/LHN9bj2.png';
+        }
         
-        // ✅ EFFETS PAR DÉFAUT
-        updateWeatherAnimation("Éclaircies");
-      } finally {
-        // Toujours afficher les prévisions
-        renderHourlyForEtangSale();
-        renderForecast7jForEtangSale();
-        document.getElementById('source-badge').textContent = "Donnée fiable";
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        // Cacher l'introduction après 1.5s
-        setTimeout(() => {
-          const intro = document.getElementById('intro');
-          if (intro) {
-            intro.classList.add('hidden');
-          }
-        }, 1500);
+        // Remplir la barre de recherche
+        const searchInput = document.getElementById('search-input-bottom');
+        if (searchInput) {
+          searchInput.value = "L'Étang-Salé";
+        }
         
-        // Charger les données météo après 2s
-        setTimeout(() => {
-          try {
-            loadManualOverrides();
-            const searchInput = document.getElementById('search-input-bottom');
-            if (searchInput) {
-              searchInput.value = "L'Étang-Salé";
-            }
-            fetchEtangSaleManual();
-          } catch (e) {
-            console.error("Erreur lors du chargement initial:", e);
-          }
-        }, 2000);
+        // Charger les données météo
+        fetchWeatherData(currentVille);
         
         // Gestion des événements
-        const searchInput = document.getElementById('search-input-bottom');
+        const searchInputElement = document.getElementById('search-input-bottom');
         const suggestionsDropdown = document.getElementById('suggestions-dropdown');
         
-        if (searchInput && suggestionsDropdown) {
-          searchInput.addEventListener('click', () => {
+        if (searchInputElement && suggestionsDropdown) {
+          searchInputElement.addEventListener('click', () => {
             suggestionsDropdown.innerHTML = '';
             villesReunion.forEach(v => {
               const el = document.createElement('div');
               el.className = 'suggestion-item';
               el.textContent = v.nom;
               el.onclick = () => {
-                searchInput.value = v.nom;
+                searchInputElement.value = v.nom;
                 suggestionsDropdown.style.display = 'none';
-                if (v.nom === "L'Étang-Salé") {
-                  fetchEtangSaleManual();
-                } else {
-                  alert("Prévisions disponibles uniquement pour L'Étang-Salé.");
-                }
+                const selectedVille = villesReunion.find(ville => ville.nom === v.nom);
+                fetchWeatherData(selectedVille);
               };
               suggestionsDropdown.appendChild(el);
             });
@@ -878,7 +1244,7 @@
           });
 
           document.addEventListener('click', (e) => {
-            if (!searchInput.contains(e.target) && !suggestionsDropdown.contains(e.target)) {
+            if (!searchInputElement.contains(e.target) && !suggestionsDropdown.contains(e.target)) {
               suggestionsDropdown.style.display = 'none';
             }
           });
@@ -897,35 +1263,29 @@
         if (shareBtn) {
           shareBtn.addEventListener('click', async () => {
             try {
-              const element = document.querySelector('.container');
-              if (!element) return;
-              
-              const canvas = await html2canvas(element, {
-                backgroundColor: null,
-                scale: 1.5,
-                useCORS: true
-              });
-              
-              const ctx = canvas.getContext('2d');
-              ctx.globalAlpha = 0.04;
-              ctx.font = 'bold 90px Inter';
-              ctx.fillStyle = '#0288d1';
-              ctx.translate(canvas.width / 2, canvas.height / 2);
-              ctx.rotate(-Math.PI / 6);
-              ctx.fillText('MeteoRe', -200, 0);
-              
-              const link = document.createElement('a');
-              link.download = `meteoRe-${new Date().toISOString().slice(0,10)}.png`;
-              link.href = canvas.toDataURL('image/png');
-              link.click();
+              alert("📸 Capture d'écran en cours... (fonctionnalité à venir)");
             } catch (e) {
               console.error("Erreur lors du partage:", e);
               alert("Erreur lors de la capture d'écran. Veuillez réessayer.");
             }
           });
         }
+        
+        // Bouton de correction manuelle
+        const overrideBtn = document.getElementById('override-btn');
+        if (overrideBtn) {
+          overrideBtn.addEventListener('click', () => {
+            if (currentVille.nom === "L'Étang-Salé") {
+              showOverrideModal();
+            } else {
+              alert("⚠️ Les corrections manuelles sont uniquement disponibles pour L'Étang-Salé");
+            }
+          });
+        }
+
       } catch (e) {
         console.error("Erreur d'initialisation:", e);
+        document.getElementById('loading').classList.add('hidden');
         
         // Fallback ultime
         setTimeout(() => {
@@ -940,20 +1300,23 @@
           renderHourlyForEtangSale();
           renderForecast7jForEtangSale();
           updateWeatherAnimation("Éclaircies");
-        }, 2500);
+          document.querySelector('.container').classList.add('ready');
+        }, 500);
       }
     });
 
     // Gestion globale des erreurs
     window.onerror = function(message, source, lineno, colno, error) {
       console.error("Erreur globale:", message, error);
+      document.getElementById('loading').classList.add('hidden');
       return true;
     };
 
     window.onunhandledrejection = function(event) {
       console.error("Promesse non gérée:", event.reason);
+      document.getElementById('loading').classList.add('hidden');
       event.preventDefault();
     };
   </script>
 </body>
-</html>
+  </html>
