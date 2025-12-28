@@ -59,28 +59,6 @@
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    .vigilance-banner {
-      background: var(--glass);
-      backdrop-filter: blur(18px);
-      border-radius: var(--radius);
-      padding: 24px;
-      margin: 24px 0;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      text-align: center;
-      animation: fadeIn 0.8s ease forwards;
-    }
-    .vigilance-title { font-size: 24px; font-weight: 800; margin-bottom: 16px; color: var(--accent); }
-    .vigilance-level { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; }
-    .vig-level {
-      padding: 14px 28px; border-radius: 18px; font-weight: 700; font-size: 17px; min-width: 140px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .vert { background: #4caf50; color: white; }
-    .jaune { background: #ffeb3b; color: #212121; }
-    .orange { background: #ff9800; color: white; }
-    .rouge { background: #f44336; color: white; }
-
     .current-weather, .cyclone-widget, .day-card, .hour-card, .detail-card {
       background: var(--glass);
       backdrop-filter: blur(20px);
@@ -253,7 +231,7 @@
   <div class="top-bar">
     <div>
       <div class="logo">MeteoRe</div>
-      <div class="version">V1.22.4</div>
+      <div class="version">V1.22.5</div>
     </div>
     <button class="youtube-btn">▶️ YouTube</button>
   </div>
@@ -263,7 +241,7 @@
     <div class="nav-tab" data-section="vigilance">⚠️ Vigilances Réunion</div>
   </div>
 
-  <div class="container">
+  <div class "container">
     
     <!-- SECTION 1 : MÉTÉO ÉTANG-SALÉ -->
     <div class="section-content active" id="section-meteo">
@@ -306,23 +284,13 @@
       </div>
     </div>
 
-    <!-- SECTION 2 : VIGILANCES RÉUNION -->
+    <!-- SECTION 2 : VIGILANCES RÉUNION (SIMPLIFIÉE) -->
     <div class="section-content" id="section-vigilance">
-      <!-- 🔴 MODIFIE CE BLOC MANUELLEMENT SELON LA VIGILANCE EN COURS -->
-      <div class="vigilance-banner active" id="vigilance-main-banner">
-        <div class="vigilance-title">⚠️ Vigilances Météo Réunion • 28/12/2025</div>
-        <div class="vigilance-level">
-          <div class="vig-level jaune">JAUNE ⚠️ Fortes pluies et orages</div>
-        </div>
-        <p style="margin-top:16px; opacity:0.9; font-size:14px;">Ouest et nord de l'île. • Source : Météo-France / MeteoRe</p>
-      </div>
-
-      <!-- Carte future -->
-      <div class="section-title">Carte des vigilances</div>
-      <div class="cyclone-widget" style="min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-        <p style="font-size: 18px; font-weight: 600; margin-bottom: 20px;">https://i.imgur.com/BvT9vNN.png</p>
-        <p style="opacity: 0.85; text-align: center; max-width: 500px;">
-          Vigilance
+      <div class="section-title">🛟 Vigilance Météo-France – Réunion</div>
+      <div class="cyclone-widget">
+        <img src="https://i.imgur.com/BvT9vNN.png" alt="Vigilance Météo-France Réunion" style="width:100%; max-width:600px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,0.1);">
+        <p style="font-size:13px; opacity:0.85; margin-top:12px;">
+          Capture officielle de <strong>Météo-France</strong> • Mise à jour quotidienne
         </p>
       </div>
     </div>
@@ -471,22 +439,25 @@
         const futureHour = (currentHour + i) % 24;
         const dayOffset = Math.floor((currentHour + i) / 24);
         const hourStr = futureHour.toString().padStart(2, '0') + 'h';
-        const dataKey = dayOffset === 0 ? hourStr : `${hourStr}_j1`;
+        const dataKey = dayOffset === 0 ? hourStr : `${hourStr}_j${dayOffset}`;
         const data = previsionsManuelles_EtangSale[dataKey] || { 
           label: "Conditions variables",
           icon: "https://i.imgur.com/QR2QKNA.png"
         };
 
+        // ✅ Format complet de la date : Dim. 28 Déc. • 14h
         const futureDate = new Date(now);
         futureDate.setDate(now.getDate() + dayOffset);
         futureDate.setHours(futureHour, 0, 0, 0);
         const dayLabel = getFrenchDayName(futureDate);
         const dateNum = futureDate.getDate();
         const monthLabel = getFrenchMonthName(futureDate);
-        let timeLabel = `${dayLabel} ${dateNum} ${monthLabel} • ${hourStr}`;
 
+        let timeLabel;
         if (i === 0) {
           timeLabel = "MAINTENANT";
+        } else {
+          timeLabel = `${dayLabel} ${dateNum} ${monthLabel} • ${hourStr}`;
         }
 
         const isNow = i === 0;
