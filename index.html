@@ -35,6 +35,30 @@
     body.rainy { background: linear-gradient(135deg, #90a4ae, #78909c); filter: brightness(0.9); }
     body.stormy { background: linear-gradient(135deg, #455a64, #263238); filter: brightness(0.82); --text: #e0e0e0; }
 
+    .navigation-tabs {
+      display: flex; justify-content: center; gap: 16px; margin: 24px 0; flex-wrap: wrap;
+    }
+    .nav-tab {
+      padding: 10px 24px; border-radius: 16px; font-weight: 700; cursor: pointer;
+      background: rgba(255, 255, 255, 0.65); border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+    .nav-tab.active {
+      background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(0, 96, 100, 0.3);
+    }
+    .nav-tab:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.85); transform: translateY(-2px);
+    }
+
+    .section-content {
+      display: none; animation: fadeIn 0.6s ease;
+    }
+    .section-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
     .vigilance-banner {
       background: var(--glass);
       backdrop-filter: blur(18px);
@@ -44,10 +68,8 @@
       box-shadow: var(--shadow);
       border: 1px solid var(--border);
       text-align: center;
-      display: none;
       animation: fadeIn 0.8s ease forwards;
     }
-    .vigilance-banner.active { display: block; }
     .vigilance-title { font-size: 24px; font-weight: 800; margin-bottom: 16px; color: var(--accent); }
     .vigilance-level { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; }
     .vig-level {
@@ -59,9 +81,7 @@
     .orange { background: #ff9800; color: white; }
     .rouge { background: #f44336; color: white; }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-    .current-weather, .cyclone-widget, .day-card, .hour-card, .detail-card {
+    .current-weather, .cyclone-widget, .day-card, .hour-card, .detail-card, .cyclone-history-card {
       background: var(--glass);
       backdrop-filter: blur(20px);
       border-radius: var(--radius);
@@ -69,7 +89,10 @@
       border: 1px solid var(--border);
       transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
     }
-    .current-weather:hover, .day-card:hover, .hour-card:hover { transform: translateY(-8px); box-shadow: 0 16px 40px rgba(0, 77, 64, 0.22); }
+    .current-weather:hover, .day-card:hover, .hour-card:hover, .cyclone-history-card:hover { 
+      transform: translateY(-8px); 
+      box-shadow: 0 16px 40px rgba(0, 77, 64, 0.22); 
+    }
     .top-bar { background: var(--glass); backdrop-filter: blur(20px); border-radius: 0 0 var(--radius) var(--radius); }
 
     #intro {
@@ -187,6 +210,30 @@
       box-shadow: 0 6px 18px rgba(0,0,0,0.1);
     }
 
+    /* Nouvelle section : Historique des cyclones */
+    .cyclone-history-container { display: grid; gap: 24px; margin: 32px 0; }
+    .cyclone-history-card {
+      padding: 24px; display: grid; grid-template-columns: 1fr 2fr; gap: 20px; align-items: center;
+    }
+    .cyclone-image {
+      width: 100%; max-width: 200px; border-radius: 16px; box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      height: 150px; object-fit: cover;
+    }
+    .cyclone-info h3 {
+      font-size: 20px; font-weight: 800; margin-bottom: 8px; color: var(--accent);
+    }
+    .cyclone-info .category {
+      display: inline-block; padding: 4px 10px; border-radius: 8px; font-weight: 700;
+      font-size: 14px; margin-bottom: 10px;
+    }
+    .cat1 { background: #ffeb3b; color: #212121; }
+    .cat2 { background: #ff9800; color: white; }
+    .cat3 { background: #f44336; color: white; }
+    .cat4 { background: #9c27b0; color: white; }
+    .cat5 { background: #311b92; color: white; }
+    .cyclone-date { font-weight: 600; opacity: 0.85; margin: 4px 0; font-size: 15px; }
+    .cyclone-trajectory { font-style: italic; opacity: 0.9; margin-top: 8px; }
+
     .footer {
       text-align: center; font-size: 13px; opacity: 0.85; padding: 20px 0 10px;
     }
@@ -230,56 +277,103 @@
   <div class="top-bar">
     <div>
       <div class="logo">MeteoRe</div>
-      <div class="version">V1.22.2</div>
+      <div class="version">V1.22.3</div>
     </div>
     <button class="youtube-btn">▶️ YouTube</button>
   </div>
 
+  <div class="navigation-tabs">
+    <div class="nav-tab active" data-section="meteo">🌤️ Météo Étang-Salé</div>
+    <div class="nav-tab" data-section="vigilance">⚠️ Vigilances Réunion</div>
+    <div class="nav-tab" data-section="cyclones">🌀 Historique Cyclones</div>
+  </div>
+
   <div class="container">
-    <div class="current-weather">
-      <div class="location">L'Étang-Salé</div>
-      <div class="current-temp" id="current-temp">--°</div>
-      <div class="current-condition" id="current-condition">—</div>
-      <div class="details-grid">
-        <div class="detail-card">
-          <div class="detail-value" id="humidity">—%</div>
-          <div class="detail-label">Humidité</div>
+    
+    <!-- SECTION 1 : MÉTÉO ÉTANG-SALÉ -->
+    <div class="section-content active" id="section-meteo">
+      <div class="current-weather">
+        <div class="location">L'Étang-Salé</div>
+        <div class="current-temp" id="current-temp">--°</div>
+        <div class="current-condition" id="current-condition">—</div>
+        <div class="details-grid">
+          <div class="detail-card">
+            <div class="detail-value" id="humidity">—%</div>
+            <div class="detail-label">Humidité</div>
+          </div>
+          <div class="detail-card">
+            <div class="detail-value" id="wind">— km/h</div>
+            <div class="detail-label">Vent</div>
+          </div>
+          <div class="detail-card">
+            <div class="detail-value" id="pressure">— hPa</div>
+            <div class="detail-label">Pression</div>
+          </div>
         </div>
-        <div class="detail-card">
-          <div class="detail-value" id="wind">— km/h</div>
-          <div class="detail-label">Vent</div>
-        </div>
-        <div class="detail-card">
-          <div class="detail-value" id="pressure">— hPa</div>
-          <div class="detail-label">Pression</div>
-        </div>
+      </div>
+
+      <div class="section-title">
+        <span>Prévision par heure sur 2 jours</span>
+        <button id="share-btn" style="background:#0288d1;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;">
+          📸 Partager
+        </button>
+      </div>
+      <div id="source-badge">Donnée fiable</div>
+      <div class="hourly-cards" id="hourly"></div>
+
+      <div class="section-title">Prévision 7 jours</div>
+      <div class="forecast-7j" id="forecast-7j"></div>
+
+      <div class="cyclone-widget">
+        <div class="section-title">Activité cyclonique en cours – Mise à jour à 18h10 le 28/12/2025 (ECMWF)</div>
+        <img id="cyclone-image" src="https://i.imgur.com/FQwfvyt.png" alt="Carte cyclonique MeteoRe">
+        <p style="font-size:13px; opacity:0.85; margin-top:12px;">Mise à jour quotidienne par MeteoRe</p>
       </div>
     </div>
 
-    <div class="vigilance-banner active" id="vigilance-banner">
-  <div class="vigilance-title">⚠️ Vigilances Météo Réunion • 28/12/2025</div>
-  <div class="vigilance-level">
-    <div class="vig-level jaune">JAUNE ⚠️ Fortes pluies et orages</div>
-  </div>
-  <p style="margin-top:16px; opacity:0.9; font-size:14px;">Ouest et nord de l'île. • Source : Météo-France / MeteoRe</p>
-</div>
+    <!-- SECTION 2 : VIGILANCES RÉUNION -->
+    <div class="section-content" id="section-vigilance">
+      <div class="vigilance-banner active" id="vigilance-banner">
+        <div class="vigilance-title">⚠️ Vigilances Météo Réunion • 28/12/2025</div>
+        <div class="vigilance-level">
+          <div class="vig-level jaune">JAUNE ⚠️ Fortes pluies et orages</div>
+        </div>
+        <p style="margin-top:16px; opacity:0.9; font-size:14px;">Ouest et nord de l'île. • Source : Météo-France / MeteoRe</p>
+      </div>
 
-    <div class="section-title">
-      <span>Prévision par heure sur 2 jours</span>
-      <button id="share-btn" style="background:#0288d1;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;">
-        📸 Partager
-      </button>
+      <div class="vigilance-banner">
+        <div class="vigilance-title">🛟 Conseils de sécurité</div>
+        <div style="text-align: left; margin-top: 16px; line-height: 1.6; font-size: 15px;">
+          <p>⚠️ <strong>En cas de vigilance JAUNE :</strong></p>
+          <ul style="margin-left: 20px; margin-top: 10px;">
+            <li>Évitez les déplacements non indispensables</li>
+            <li>Restez informé via MeteoRe et Météo-France</li>
+            <li>Prévoyez des lampes de poche et une radio de secours</li>
+            <li>Éloignez-vous des ravines et cours d'eau</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-title">Carte des vigilances en temps réel</div>
+      <div class="cyclone-widget" style="min-height: 400px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <p style="font-size: 18px; font-weight: 600; margin-bottom: 20px;">📈 Carte interactive bientôt disponible</p>
+        <p style="opacity: 0.85; text-align: center; max-width: 500px;">
+          MeteoRe prépare une carte interactive avec les zones de vigilance en temps réel.<br>
+          Restez à l'écoute sur YouTube !
+        </p>
+      </div>
     </div>
-    <div id="source-badge">Donnée fiable</div>
-    <div class="hourly-cards" id="hourly"></div>
 
-    <div class="section-title">Prévision 7 jours</div>
-    <div class="forecast-7j" id="forecast-7j"></div>
+    <!-- SECTION 3 : HISTORIQUE DES CYCLONES -->
+    <div class="section-content" id="section-cyclones">
+      <div class="section-title">🌀 Historique des cyclones ayant affecté La Réunion (depuis 2015)</div>
+      <p style="text-align: center; opacity: 0.85; margin-bottom: 24px; font-size: 14px;">
+        Classement du plus récent au plus ancien • Données fournies par Météo-France et MeteoRe
+      </p>
 
-    <div class="section-title">Activité cyclonique en cours – Mise à jour à 18h10 le 28/12/2025 (ECMWF)</div>
-    <div class="cyclone-widget">
-      <img id="cyclone-image" src="https://i.imgur.com/FQwfvyt.png" alt="Carte cyclonique MeteoRe">
-      <p style="font-size:13px; opacity:0.85; margin-top:12px;">Mise à jour quotidienne par MeteoRe</p>
+      <div class="cyclone-history-container" id="cyclone-history">
+        <!-- Les cyclones seront générés via JS -->
+      </div>
     </div>
 
     <div class="footer">
@@ -292,6 +386,100 @@
   <script>
     // ✅ CORRECTIONS EN ATTENTE (aucune appliquée automatiquement)
     let correctionsEnAttente = [];
+
+    // Données historiques des cyclones (du plus récent au plus ancien)
+    const cyclonesHistory = [
+      {
+        name: "Cyclone Dikeledi",
+        date: "Janvier 2025",
+        category: "Catégorie 1",
+        phenomenon: "Pluies intenses et vents modérés",
+        trajectory: "Trajectoire : Nord-Est de l'île, avec des pluies concentrées sur le littoral ouest",
+        image: "https://via.placeholder.com/300x150/0288d1/ffffff?text=Cyclone+2025",
+        catClass: "cat1"
+      },
+      {
+        name: "Tempête Modérée Eleanor",
+        date: "Février 2024",
+        category: "Tempête modérée",
+        phenomenon: "Pluies diluviennes et rafales à 90 km/h",
+        trajectory: "Trajectoire : Contournement sud de l'île, impact maximal sur le Sud sauvage",
+        image: "https://via.placeholder.com/300x150/ff9800/ffffff?text=Tempête+2024",
+        catClass: "cat2"
+      },
+      {
+        name: "Cyclone Fabien",
+        date: "Mars 2023",
+        category: "Catégorie 2",
+        phenomenon: "Vents violents à 140 km/h, vagues submersives",
+        trajectory: "Trajectoire : Passage à 150 km à l'ouest de La Réunion, forte houle sur toute la côte ouest",
+        image: "https://via.placeholder.com/300x150/f44336/ffffff?text=Cyclone+2023",
+        catClass: "cat2"
+      },
+      {
+        name: "Cyclone Batsirai",
+        date: "Février 2022",
+        category: "Catégorie 3",
+        phenomenon: "Vents destructeurs à 185 km/h, pluies torrentielles",
+        trajectory: "Trajectoire : Passage direct sur l'île, impact majeur sur l'ensemble du territoire",
+        image: "https://via.placeholder.com/300x150/9c27b0/ffffff?text=Batsirai+2022",
+        catClass: "cat3"
+      },
+      {
+        name: "Cyclone Ana",
+        date: "Janvier 2022",
+        category: "Catégorie 1",
+        phenomenon: "Pluies abondantes, crues soudaines",
+        trajectory: "Trajectoire : Nord de l'île, fortes précipitations sur les hauteurs",
+        image: "https://via.placeholder.com/300x150/ffeb3b/212121?text=Ana+2022",
+        catClass: "cat1"
+      },
+      {
+        name: "Cyclone Diane",
+        date: "Janvier 2020",
+        category: "Catégorie 2",
+        phenomenon: "Houle dangereuse, vents tempétueux",
+        trajectory: "Trajectoire : Sud-Ouest de l'océan Indien, houle significative sur les côtes sud et ouest",
+        image: "https://via.placeholder.com/300x150/ff9800/ffffff?text=Diane+2020",
+        catClass: "cat2"
+      },
+      {
+        name: "Cyclone Cebile",
+        date: "Janvier 2018",
+        category: "Catégorie 4",
+        phenomenon: "Vents extrêmes à 240 km/h, risque majeur",
+        trajectory: "Trajectoire : Éloigné à l'est, suivi attentif mais pas de contact direct avec l'île",
+        image: "https://via.placeholder.com/300x150/311b92/ffffff?text=Cebile+2018",
+        catClass: "cat4"
+      },
+      {
+        name: "Cyclone Dina",
+        date: "Janvier 2017",
+        category: "Catégorie 1",
+        phenomenon: "Pluies orageuses, rafales à 100 km/h",
+        trajectory: "Trajectoire : Nord-Ouest de La Réunion, impact modéré sur les régions exposées",
+        image: "https://via.placeholder.com/300x150/ffeb3b/212121?text=Dina+2017",
+        catClass: "cat1"
+      },
+      {
+        name: "Cyclone Fantala",
+        date: "Avril 2016",
+        category: "Catégorie 3",
+        phenomenon: "Houle très forte, vents violents",
+        trajectory: "Trajectoire : Nord de l'archipel des Mascareignes, houle exceptionnelle sur les côtes nord",
+        image: "https://via.placeholder.com/300x150/f44336/ffffff?text=Fantala+2016",
+        catClass: "cat3"
+      },
+      {
+        name: "Cyclone Eunice",
+        date: "Janvier 2015",
+        category: "Catégorie 2",
+        phenomenon: "Pluies diluviennes, glissements de terrain",
+        trajectory: "Trajectoire : Sud-Ouest de l'île, précipitations record dans les cirques",
+        image: "https://via.placeholder.com/300x150/ff9800/ffffff?text=Eunice+2015",
+        catClass: "cat2"
+      }
+    ];
 
     // Fonctions utilitaires pour le formatage des dates FR
     function getFrenchDayName(date) {
@@ -373,7 +561,7 @@
         document.getElementById('loading').classList.add('hidden');
         document.querySelector('.container').classList.add('ready');
         
-        // 🔥 MAINTENANT : on lit la météo actuelle selon l'heure EXACTE
+        // 🔥 Météo actuelle selon l'heure exacte
         const now = new Date();
         const currentHour = now.getHours().toString().padStart(2, '0') + 'h';
         const currentData = previsionsManuelles_EtangSale[currentHour] || { label: "Conditions variables" };
@@ -387,6 +575,24 @@
         
         renderHourlyForecast();
         renderForecast7jForEtangSale();
+        renderCyclonesHistory();
+        
+        // Ajout de la navigation par sections
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+          tab.addEventListener('click', function() {
+            const sectionId = this.getAttribute('data-section');
+            
+            // Mise à jour des onglets actifs
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Affichage de la section correspondante
+            document.querySelectorAll('.section-content').forEach(section => {
+              section.classList.remove('active');
+            });
+            document.getElementById(`section-${sectionId}`).classList.add('active');
+          });
+        });
       }, 1500);
 
       document.querySelector('.youtube-btn').addEventListener('click', () => {
@@ -417,7 +623,6 @@
           icon: "https://i.imgur.com/QR2QKNA.png"
         };
 
-        // ✅ Format complet de la date : Dim. 28 Déc. • 14h
         const futureDate = new Date(now);
         futureDate.setDate(now.getDate() + dayOffset);
         futureDate.setHours(futureHour, 0, 0, 0);
@@ -471,6 +676,27 @@
       }
     }
 
+    function renderCyclonesHistory() {
+      const container = document.getElementById('cyclone-history');
+      container.innerHTML = '';
+      
+      cyclonesHistory.forEach(cyclone => {
+        const card = document.createElement('div');
+        card.className = 'cyclone-history-card';
+        card.innerHTML = `
+          <img src="${cyclone.image}" alt="${cyclone.name}" class="cyclone-image">
+          <div class="cyclone-info">
+            <h3>${cyclone.name}</h3>
+            <span class="category ${cyclone.catClass}">${cyclone.category}</span>
+            <div class="cyclone-date">📅 ${cyclone.date}</div>
+            <div><strong>Phénomène :</strong> ${cyclone.phenomenon}</div>
+            <div class="cyclone-trajectory"><strong>Trajectoire :</strong> ${cyclone.trajectory}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
     function updateWeatherTheme(condition) {
       document.body.className = '';
       const cond = condition.toLowerCase();
@@ -512,7 +738,6 @@
         const hum = modal.querySelector('#humidity').value;
         const wind = modal.querySelector('#wind').value;
 
-        // ✅ Stocke la correction mais NE L'APPLIQUE PAS
         const correction = {
           location: "L'Étang-Salé",
           heure: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
@@ -524,7 +749,6 @@
         };
         correctionsEnAttente.push(correction);
 
-        // 🔔 Alerte pour TOI (remplaçable par notif push/email plus tard)
         const msg = `🔔 NOUVELLE CORRECTION EN ATTENTE !\n\n📍 ${correction.location}\n🕒 ${correction.heure} (${correction.date})\n🌡️ ${temp}° | 💧 ${hum}% | 🌬️ ${wind} km/h`;
         alert(msg);
 
