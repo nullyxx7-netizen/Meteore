@@ -230,7 +230,7 @@
   <div class="top-bar">
     <div>
       <div class="logo">MeteoRe</div>
-      <div class="version">V1.22.1</div>
+      <div class="version">V1.22.2</div>
     </div>
     <button class="youtube-btn">▶️ YouTube</button>
   </div>
@@ -290,6 +290,20 @@
   <button class="override-btn" id="override-btn">✏️ Corriger (35 min)</button>
 
   <script>
+    // ✅ CORRECTIONS EN ATTENTE (aucune appliquée automatiquement)
+    let correctionsEnAttente = [];
+
+    // Fonctions utilitaires pour le formatage des dates FR
+    function getFrenchDayName(date) {
+      const jours = ["Dim.", "Lun.", "Mar.", "Mer.", "Jeu.", "Ven.", "Sam."];
+      return jours[date.getDay()];
+    }
+
+    function getFrenchMonthName(date) {
+      const mois = ["Jan.", "Fév.", "Mars", "Avr.", "Mai", "Juin", "Juil.", "Août", "Sep.", "Oct.", "Nov.", "Déc."];
+      return mois[date.getMonth()];
+    }
+
     const CORRECTION_DURATION_MIN = 35;
     const previsionsManuelles_EtangSale = {
       "00h": { label: "Éclaircies", icon: "https://i.imgur.com/6AwrSCx.png" },
@@ -359,13 +373,17 @@
         document.getElementById('loading').classList.add('hidden');
         document.querySelector('.container').classList.add('ready');
         
-        // Simuler les données actuelles (car plus d’API multi-villes)
+        // 🔥 MAINTENANT : on lit la météo actuelle selon l'heure EXACTE
+        const now = new Date();
+        const currentHour = now.getHours().toString().padStart(2, '0') + 'h';
+        const currentData = previsionsManuelles_EtangSale[currentHour] || { label: "Conditions variables" };
+
         document.getElementById('current-temp').textContent = "25°";
         document.getElementById('humidity').textContent = "78%";
         document.getElementById('wind').textContent = "38 km/h";
         document.getElementById('pressure').textContent = "1013 hPa";
-        document.getElementById('current-condition').textContent = "Éclaircies";
-        updateWeatherTheme("Éclaircies");
+        document.getElementById('current-condition').textContent = currentData.label;
+        updateWeatherTheme(currentData.label);
         
         renderHourlyForecast();
         renderForecast7jForEtangSale();
@@ -399,12 +417,17 @@
           icon: "https://i.imgur.com/QR2QKNA.png"
         };
 
-        let timeLabel = hourStr;
+        // ✅ Format complet de la date : Dim. 28 Déc. • 14h
+        const futureDate = new Date(now);
+        futureDate.setDate(now.getDate() + dayOffset);
+        futureDate.setHours(futureHour, 0, 0, 0);
+        const dayLabel = getFrenchDayName(futureDate);
+        const dateNum = futureDate.getDate();
+        const monthLabel = getFrenchMonthName(futureDate);
+        let timeLabel = `${dayLabel} ${dateNum} ${monthLabel} • ${hourStr}`;
+
         if (i === 0) {
           timeLabel = "MAINTENANT";
-        } else if (dayOffset !== lastDayOffset) {
-          timeLabel = `j${dayOffset} ${hourStr}`;
-          lastDayOffset = dayOffset;
         }
 
         const isNow = i === 0;
@@ -477,7 +500,7 @@
           </div>
           <div style="display:flex;gap:12px;">
             <button id="cancel" style="flex:1;background:#e0e0e0;border:none;border-radius:10px;padding:10px;font-weight:600;">Annuler</button>
-            <button id="apply" style="flex:1;background:#d32f2f;color:white;border:none;border-radius:10px;padding:10px;font-weight:600;">Appliquer</button>
+            <button id="apply" style="flex:1;background:#d32f2f;color:white;border:none;border-radius:10px;padding:10px;font-weight:600;">Soumettre</button>
           </div>
         </div>
       `;
@@ -488,11 +511,25 @@
         const temp = modal.querySelector('#temp').value;
         const hum = modal.querySelector('#humidity').value;
         const wind = modal.querySelector('#wind').value;
-        document.getElementById('current-temp').textContent = `${temp}°`;
-        document.getElementById('humidity').textContent = `${hum}%`;
-        document.getElementById('wind').textContent = `${wind} km/h`;
+
+        // ✅ Stocke la correction mais NE L'APPLIQUE PAS
+        const correction = {
+          location: "L'Étang-Salé",
+          heure: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+          date: new Date().toLocaleDateString('fr-FR'),
+          temp,
+          hum,
+          wind,
+          timestamp: Date.now()
+        };
+        correctionsEnAttente.push(correction);
+
+        // 🔔 Alerte pour TOI (remplaçable par notif push/email plus tard)
+        const msg = `🔔 NOUVELLE CORRECTION EN ATTENTE !\n\n📍 ${correction.location}\n🕒 ${correction.heure} (${correction.date})\n🌡️ ${temp}° | 💧 ${hum}% | 🌬️ ${wind} km/h`;
+        alert(msg);
+
         document.body.removeChild(modal);
-        alert("✅ Corrections appliquées pour L'Étang-Salé !");
+        alert("✅ Correction soumise à validation par Jérémy.");
       };
     }
   </script>
