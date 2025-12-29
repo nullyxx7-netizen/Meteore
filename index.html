@@ -2,10 +2,10 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta n   ame="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>MeteoRe – La météo la plus précise pour L'Étang-Salé</title>
   <link rel="preconnect" href="https://fonts.googleapis.com  ">
-  <link rel  ="preconnect" href="https://fonts.gstatic.com  " crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com  " crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter  :wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -59,17 +59,17 @@
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    .vigilance-banner {3
+    .vigilance-banner {
       background: var(--glass);
       backdrop-filter: blur(18px);
       border-radius: var(--radius);
       padding: 24px;
       margin: 24px 0;
-      box-shadow: var(--s  hadow);
+      box-shadow: var(--shadow);
       border: 1px solid var(--border);
       text-align: center;
       animation: fadeIn 0.8s ease forwards;
-    }   
+    }
     .vigilance-title { font-size: 24px; font-weight: 800; margin-bottom: 16px; color: var(--accent); }
     .vigilance-level { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; }
     .vig-level {
@@ -248,12 +248,12 @@
     <div id="intro-text">MeteoRe</div>
   </div>
 
-  <div id="remarques">📍 Application météo spécialement conçue pour <strong>L'Étang-Salé</strong> – La plus précise sur place !</div>
+  <div id="remarques">📍 Application météo</strong> – La plus précise à L'Etang-Salé. !</div>
 
   <div class="top-bar">
     <div>
       <div class="logo">MeteoRe</div>
-      <div class="version">V1.22.4</div>
+      <div class="version">V1.22.5</div>
     </div>
     <button class="youtube-btn">▶️ YouTube</button>
   </div>
@@ -297,12 +297,14 @@
       <div class="hourly-cards" id="hourly"></div>
 
       <div class="section-title">Prévision 7 jours</div>
-      <div class="forecast-7j" id="forecast-7j"></div>
+      <div class="forecast-7j-scroll">
+  <div class="forecast-7j" id="forecast-7j"></div>
+</div>
 
       <div class="cyclone-widget">
-        <div class="section-title">Activité cyclonique en cours – Mise à jour à 18h10 le 28/12/2025 (ECMWF)</div>
-        <img id="cyclone-image" src="https://i.imgur.com/FQwfvyt.png  " alt="Carte cyclonique MeteoRe">
-        <p style="font-size:13px; opacity:0.85; margin-top:12px;">Mise à jour quotidienne par MeteoRe</p>
+        <div class="section-title">Activité cyclonique en cours – Mise à jour à 19h46 le 29/12/2025 (Modèle : UKM)</div>
+        <img id="cyclone-image" src="https://i.imgur.com/pJxsYiv.png" alt="Carte cyclonique MeteoRe">
+        <p style="font-size:13px; opacity:0.85; margin-top:12px;">Mise à jour 2 fois/jour par MeteoRe</p>
       </div>
     </div>
 
@@ -310,9 +312,9 @@
     <div class="section-content" id="section-vigilance">
       <!-- 🔴 MODIFIE CE BLOC MANUELLEMENT SELON LA VIGILANCE EN COURS -->
       <div class="vigilance-banner active" id="vigilance-main-banner">
-        <div class="vigilance-title">⚠️ Vigilances Météo Réunion • 28/12/2025</div>
+        <div class="vigilance-title">Vigilances Météo Réunion • </div>
         <div class="vigilance-level">
-          <div class="vig-level jaune">JAUNE ⚠️ Fortes pluies et orages</div>
+          <div class="vig-level vert">Vert. Pas de vigilance.</div>
         </div>
         <p style="margin-top:16px; opacity:0.9; font-size:14px;">Ouest et nord de l'île. • Source : Météo-France / MeteoRe</p>
       </div>
@@ -329,7 +331,7 @@
     </div>
 
     <div class="footer">
-      © 2025 MeteoRe • Spécialiste de L'Étang-Salé
+      •  © 2025 MeteoRe • 
     </div>
   </div>
 
