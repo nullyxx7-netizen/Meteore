@@ -10,102 +10,7 @@
   <style>
     :root {
       --bg: linear-gradient(135deg, #e0f7fa, #b2ebf2);
-      --glass: rgba(255, 255, 255, 0.78);
-      --text: #004d40;
-      --accent: #006064;
-      --shadow: 0 12px 32px rgba(0, 77, 64, 0.18);
-      --border: rgba(0, 96, 100, 0.22);
-      --radius: 32px;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-      transition: background 0.8s ease;
-    }
-
-    body.sun-glow { background: linear-gradient(135deg, #e1f5fe, #b3e5fc); }
-    body.cloudy-few { background: linear-gradient(135deg, #e3f2fd, #bbdefb); }
-    body.cloudy-heavy { background: linear-gradient(135deg, #cfd8dc, #b0bec5); filter: brightness(0.96); }
-    body.clearing { background: linear-gradient(135deg, #d1c4e9, #b39ddb); }
-    body.rainy { background: linear-gradient(135deg, #90a4ae, #78909c); filter: brightness(0.9); }
-    body.stormy { background: linear-gradient(135deg, #455a64, #263238); filter: brightness(0.82); --text: #e0e0e0; }
-
-    .navigation-tabs {
-      display: flex; justify-content: center; gap: 16px; margin: 24px 0; flex-wrap: wrap;
-    }
-    .nav-tab {
-      padding: 10px 24px; border-radius: 16px; font-weight: 700; cursor: pointer;
-      background: rgba(255, 255, 255, 0.65); border: 1px solid var(--border);
-      transition: all 0.3s ease;
-    }
-    .nav-tab.active {
-      background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(0, 96, 100, 0.3);
-    }
-    .nav-tab:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.85); transform: translateY(-2px);
-    }
-
-    .section-content {
-      display: none; animation: fadeIn 0.6s ease;
-    }
-    .section-content.active {
-      display: block;
-    }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    .vigilance-banner {
-      background: var(--glass);
-      backdrop-filter: blur(18px);
-      border-radius: var(--radius);
-      padding: 24px;
-      margin: 24px 0;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      text-align: center;
-      animation: fadeIn 0.8s ease forwards;
-    }
-    .vigilance-title { font-size: 24px; font-weight: 800; margin-bottom: 16px; color: var(--accent); }
-    .vigilance-level { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; }
-    .vig-level {
-      padding: 14px 28px; border-radius: 18px; font-weight: 700; font-size: 17px; min-width: 140px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .vert { background: #4caf50; color: white; }
-    .jaune { background: #ffeb3b; color: #212121; }
-    .orange { background: #ff9800; color: white; }
-    .rouge { background: #f44336; color: white; }
-
-    .current-weather, .cyclone-widget, .day-card, .hour-card, .detail-card {
-      background: var(--glass);
-      backdrop-filter: blur(20px);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-    .current-weather:hover, .day-card:hover, .hour-card:hover { 
-      transform: translateY(-8px); 
-      box-shadow: 0 16px 40px rgba(0, 77, 64, 0.22); 
-    }
-    .top-bar { background: var(--glass); backdrop-filter: blur(20px); border-radius: 0 0 var(--radius) var(--radius); }
-
-    #intro {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      z-index: 9999; opacity: 1; transition: opacity 0.7s ease-out;
-    }
-    #intro.hidden {
-      opacity: 0;
-      pointer-events: none;
-      z-index: -1;
-    }
+      --gl
     #intro-logo {
       width: 120px; height: 120px; border-radius: 24px; margin-bottom: 20px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.15); animation: pulse 1.5s ease-in-out;
@@ -113,44 +18,9 @@
     @keyframes pulse {
       0% { transform: scale(0.9); opacity: 0; }
       70% { transform: scale(1.05); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    #intro-text {
-      font-size: 34px; font-weight: 800; color: var(--accent);
-      letter-spacing: 1.2px; text-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-
-    #remarques {
-      text-align: center; font-size: 14px; font-weight: 700;
-      color: #d32f2f; margin: 12px auto;
-      background: rgba(255, 235, 235, 0.95); padding: 10px; border-radius: 10px;
-      max-width: 600px;
-    }
-
-    .top-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 18px 20px;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border); z-index: 100;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-    }
-    .logo { font-weight: 800; font-size: 24px; color: var(--accent); }
-    .version { font-size: 11px; opacity: 0.85; margin-top: -2px; font-weight: 600; }
-
-    .youtube-btn {
-      background: #ff0000; color: white; padding: 7px 16px; border: none;
-      border-radius: 12px; font-weight: 600; font-size: 13px; cursor: pointer;
-      box-shadow: 0 4px 10px rgba(255,0,0,0.25);
-    }
-    .youtube-btn:hover {
-      background: #cc0000;
-      transform: translateY(-2px);
-    }
-
+      100% { transform: scale
     .container {
-      max-width: 900px; margin: 0 auto; padding: 0 16px 100px;
-      opacity: 0; transition: opacity 0.5s ease;
+      max-width: 900px; margin: 0 auto; padding: acity 0.5s ease;
     }
     .container.ready { opacity: 1; }
 
